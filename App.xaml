@@ -2,7 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:helpers="clr-namespace:ControlTalleresMVP.Helpers"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:ControlTalleresMVP">
+             xmlns:local="clr-namespace:ControlTalleresMVP"
+             xmlns:vmmenu="clr-namespace:ControlTalleresMVP.ViewModel.Menu"
+             xmlns:usercontrols="clr-namespace:ControlTalleresMVP.UI.Component"
+
+             >
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -15,7 +19,12 @@
                 <ResourceDictionary Source="Resources/Styles/ComboBoxs.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/DataGridDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            
+
+            <DataTemplate DataType="{x:Type vmmenu:MenuAlumnosViewModel}">
+                <usercontrols:AlumnoUserControl/>
+            </DataTemplate>
+
+
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>

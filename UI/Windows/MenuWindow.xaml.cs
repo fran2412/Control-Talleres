@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ControlTalleresMVP.ViewModel.Navigation;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +24,7 @@ namespace ControlTalleresMVP.UI.Windows
         public MenuWindow()
         {
             InitializeComponent();
+            DataContext = App.ServiceProvider!.GetRequiredService<ShellViewModel>();
         }
     }
 }

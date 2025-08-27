@@ -1,4 +1,8 @@
-﻿using ControlTalleresMVP.UI.Windows;
+﻿using ControlTalleresMVP.Abstractions;
+using ControlTalleresMVP.Services.Navigation;
+using ControlTalleresMVP.UI.Windows;
+using ControlTalleresMVP.ViewModel.Menu;
+using ControlTalleresMVP.ViewModel.Navigation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
 using System.Data;
@@ -27,8 +31,19 @@ namespace ControlTalleresMVP
         }
         private void ConfigureServices(IServiceCollection services)
         {
+            //Ventanas
             services.AddSingleton<MainWindow>();
             services.AddSingleton<MenuWindow>();
+
+            //ViewModels
+            services.AddTransient<MenuInicioViewModel>();
+            services.AddTransient<MenuAlumnosViewModel>();
+            services.AddTransient<MenuTalleresViewModel>();
+            services.AddTransient<MenuInscripcionesViewModel>();
+            services.AddTransient<MenuPagosViewModel>();
+            services.AddTransient<ShellViewModel>();
+            services.AddTransient<INavigatorService, NavigatorService>();
+
         }
     }
 }

@@ -24,32 +24,34 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Background="#FF222222" Focusable="False">
-                <TextBlock Text="Sistema talleres" VerticalAlignment="Center" 
-                           HorizontalAlignment="Center" FontSize="20" FontFamily="Inter_28pt-ExtraBold" 
-                           Width="178" FontWeight="Bold" Foreground="White" Focusable="False"/>
+                <Button Style="{StaticResource BotonTransparente}" Command="{Binding GoInicio}">
+                    <TextBlock Text="Sistema talleres" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" FontSize="20" FontFamily="Inter_28pt-ExtraBold" 
+                               Width="178" FontWeight="Bold" Foreground="White" Focusable="False"/>
+                </Button>
             </Grid>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Background="#FF333333">
                 <StackPanel Grid.Row="1">
-                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding ComandoBoton}" Height="40">
+                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoAlumnos}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\AlumnoIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Alumnos" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
-                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding ComandoBoton}" Height="40">
+                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoInscripciones}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\InscripcionIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Inscripciones" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
-                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding ComandoBoton}" Height="40">
+                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoTalleres}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\TallerIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Talleres" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
-                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding ComandoBoton}" Height="40">
+                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoPagos}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\PagoIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Pagos" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
@@ -62,10 +64,10 @@
         </Grid>
 
 
-        <ContentControl Grid.Column="1" Content="{Binding MainContent}" Margin="0,60,0,0" Focusable="False"/>
+        <ContentControl Grid.Column="1" Content="{Binding Navigator.CurrentViewModel}" Margin="0,60,0,0" Focusable="False"/>
 
         <Grid Grid.Column="1" Height="60" VerticalAlignment="Top" Focusable="False">
-            <Label Content="{Binding MainContent.TituloEncabezado}" HorizontalAlignment="Left" Margin="25,0,0,0" VerticalAlignment="Center"
+            <Label Content="{Binding Navigator.CurrentViewModel.TituloEncabezado}" HorizontalAlignment="Left" Margin="25,0,0,0" VerticalAlignment="Center"
                    FontSize="25" FontFamily="Inter 28pt 28pt SemiBold" FlowDirection="LeftToRight"/>
         </Grid>
     </Grid>
