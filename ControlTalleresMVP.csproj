@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Fonts\Inter_24pt-Medium.ttf" />
+    <Resource Include="Resources\Fonts\Inter_28pt-ExtraBold.ttf" />
+    <Resource Include="Resources\Fonts\Inter_28pt-SemiBold.ttf" />
+    <Resource Include="Resources\Icons\AlumnoIcono.svg" />
+    <Resource Include="Resources\Icons\CandadoIcono.svg" />
+    <Resource Include="Resources\Icons\EditarRegistro.svg" />
+    <Resource Include="Resources\Icons\EliminarRegistro.svg" />
+    <Resource Include="Resources\Icons\ErrorIcono.svg" />
+    <Resource Include="Resources\Icons\LupaBusqueda.svg" />
+    <Resource Include="Resources\Icons\MaestroIcono.svg" />
+    <Resource Include="Resources\Icons\PagoIcono.svg" />
+    <Resource Include="Resources\Icons\TallerIcono.svg" />
+    <Resource Include="Resources\Icons\UsuarioIcono.svg" />
+    <Resource Include="Resources\Images\AlumnoMenuItem.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SharpVectors.Wpf" Version="1.8.5" />
+  </ItemGroup>
+
+</Project>
