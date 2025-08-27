@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\App.xaml
-10-1765629914
+10-1265025298
 
-6449776129
-205-1233916704
-Resources\Styles\Borders.xaml;Resources\Styles\Buttons.xaml;Resources\Styles\Colors.xaml;Resources\Styles\ComboBoxs.xaml;Resources\Styles\DataGridDictionary.xaml;Resources\Styles\Labels.xaml;Resources\Styles\PasswordBox.xaml;Resources\Styles\TextBox.xaml;Windows\MainWindow.xaml;Windows\MenuWindow.xaml;
+6790471949
+207-1878103990
+Resources\Styles\Borders.xaml;Resources\Styles\Buttons.xaml;Resources\Styles\Colors.xaml;Resources\Styles\ComboBoxs.xaml;Resources\Styles\DataGridDictionary.xaml;Resources\Styles\Labels.xaml;Resources\Styles\PasswordBox.xaml;Resources\Styles\TextBox.xaml;UI\Windows\MainWindow.xaml;UI\Windows\MenuWindow.xaml;
 
 False
 

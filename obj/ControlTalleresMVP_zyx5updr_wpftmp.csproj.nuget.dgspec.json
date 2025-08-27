@@ -51,10 +51,6 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "dependencies": {
-            "Microsoft.Extensions.DependencyInjection": {
-              "target": "Package",
-              "version": "[9.0.8, )"
-            },
             "SharpVectors.Wpf": {
               "target": "Package",
               "version": "[1.8.5, )"
