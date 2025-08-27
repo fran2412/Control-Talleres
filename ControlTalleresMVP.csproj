@@ -9,6 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Icons\InscripcionIcono.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Icons\InscripcionIcono.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\Fonts\Inter_24pt-Medium.ttf" />
     <Resource Include="Resources\Fonts\Inter_28pt-ExtraBold.ttf" />
     <Resource Include="Resources\Fonts\Inter_28pt-SemiBold.ttf" />

@@ -26,7 +26,8 @@ namespace ControlTalleresMVP.Windows
             if (txtPassword.Password == "admin" && txtUsuario.Text == "admin")
             {
                 MessageBox.Show("¡Inicio de sesión exitoso!", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                // Open the main application window here
+
+                new MenuWindow().Show();
                 this.Close();
             }
             else
