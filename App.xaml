@@ -1,5 +1,6 @@
 ﻿<Application x:Class="ControlTalleresMVP.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:helpers="clr-namespace:ControlTalleresMVP.Helpers"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:ControlTalleresMVP">
     <Application.Resources>
@@ -14,6 +15,8 @@
                 <ResourceDictionary Source="Resources/Styles/ComboBoxs.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/DataGridDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

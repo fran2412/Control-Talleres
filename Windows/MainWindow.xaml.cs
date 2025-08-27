@@ -34,5 +34,15 @@ namespace ControlTalleresMVP.Windows
                 MessageBox.Show("Usuario o contraseña inválidos.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (sender is PasswordBox pb)
+            {
+                var placeholder = (TextBlock)pb.Template.FindName("Placeholder", pb);
+                if (placeholder != null)
+                    placeholder.Visibility = string.IsNullOrEmpty(pb.Password) ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
     }
 }
