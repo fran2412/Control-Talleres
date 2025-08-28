@@ -51,3 +51,5 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Inscripcion\InscripcionUserControl.baml
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Pago\PagoUserControl.baml
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Taller\TallerUserControl.baml
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Alumno\FormularioAlumnoUserControl.g.cs
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Alumno\FormularioAlumnoUserControl.baml

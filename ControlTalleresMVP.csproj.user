@@ -5,6 +5,9 @@
     <Compile Update="UI\Component\Alumno\AlumnoUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UI\Component\Alumno\FormularioAlumnoUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\Component\Inicio\InicioUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

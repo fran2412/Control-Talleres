@@ -10,7 +10,7 @@
         WindowState="Maximized"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
 
-    <Grid OpacityMask="Gray" Background="#f7f7f7">
+    <Grid OpacityMask="Gray" Background="White">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
