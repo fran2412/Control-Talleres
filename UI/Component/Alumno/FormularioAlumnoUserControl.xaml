@@ -44,7 +44,8 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                         </WrapPanel>
 
                         <Expander Grid.Row="1" Margin="0,20,0,0" Header="Inscribir en taller"
-                                  IsExpanded="{Binding InscribirEnTaller, Mode=TwoWay}">
+                                  IsExpanded="{Binding InscribirEnTaller, Mode=TwoWay}"
+                                  FontSize="15">
                             <Grid>
                                 <WrapPanel Grid.Row="0">
                                     <StackPanel Margin="0,20,20,0">

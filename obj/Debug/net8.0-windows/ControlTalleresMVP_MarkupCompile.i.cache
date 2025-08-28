@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\App.xaml
-17-704470034
+182109934538
 
-26-493506088
+27-1149488072
 207-1878103990
-Resources\Styles\Borders.xaml;Resources\Styles\Buttons.xaml;Resources\Styles\Colors.xaml;Resources\Styles\ComboBoxs.xaml;Resources\Styles\DataGridDictionary.xaml;Resources\Styles\Labels.xaml;Resources\Styles\PasswordBox.xaml;Resources\Styles\TextBox.xaml;UI\Component\Alumno\AlumnoUserControl.xaml;UI\Component\Alumno\FormularioAlumnoUserControl.xaml;UI\Component\Inicio\InicioUserControl.xaml;UI\Component\Inscripcion\InscripcionUserControl.xaml;UI\Component\Pago\PagoUserControl.xaml;UI\Component\Taller\FormularioTallerUserControl.xaml;UI\Component\Taller\TallerUserControl.xaml;UI\Windows\MainWindow.xaml;UI\Windows\MenuWindow.xaml;
+Resources\Styles\Borders.xaml;Resources\Styles\Buttons.xaml;Resources\Styles\Colors.xaml;Resources\Styles\ComboBoxs.xaml;Resources\Styles\DataGridDictionary.xaml;Resources\Styles\Labels.xaml;Resources\Styles\PasswordBox.xaml;Resources\Styles\TextBox.xaml;UI\Component\Alumno\AlumnoUserControl.xaml;UI\Component\Alumno\FormularioAlumnoUserControl.xaml;UI\Component\Inicio\InicioUserControl.xaml;UI\Component\Inscripcion\InscripcionTallerUserControl.xaml;UI\Component\Inscripcion\InscripcionUserControl.xaml;UI\Component\Pago\PagoUserControl.xaml;UI\Component\Taller\FormularioTallerUserControl.xaml;UI\Component\Taller\TallerUserControl.xaml;UI\Windows\MainWindow.xaml;UI\Windows\MenuWindow.xaml;
 
 False
 
