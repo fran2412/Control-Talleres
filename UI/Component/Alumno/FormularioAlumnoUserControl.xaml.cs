@@ -1,5 +1,8 @@
-﻿using System;
+﻿using ControlTalleresMVP.ViewModel.Menu;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,62 +22,63 @@ namespace ControlTalleresMVP.UI.Component.Alumno
     /// <summary>
     /// Lógica de interacción para FormularioAlumnoUserControl.xaml
     /// </summary>
-    public partial class FormularioAlumnoUserControl : UserControl
+    public partial class FormularioAlumnoUserControl : UserControl, INotifyPropertyChanged
     {
-        private const int MinimoACuenta = 50;
-
-        private const int LongitudTelefono = 10;
-        private const int CostoInscripcion = 1200; //traer de configuración
-
+        public bool InscribirEnTaller { get; set; } = false;
+        public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; set; }
 
         public FormularioAlumnoUserControl()
         {
             InitializeComponent();
-            SaldoPendienteTextBox.Text = "$"+CostoInscripcion.ToString(); // inicia mostrando el total
+
+            // Cargar datos de prueba
+            TalleresDisponibles = new ObservableCollection<TallerInscripcion>
+            {
+                new TallerInscripcion
+                {
+                    Nombre = "Uñas",
+                    Costo = 1200,
+                },
+                new TallerInscripcion
+                {
+                    Nombre = "Repostería",
+                    Costo = 1500,
+                }
+            };
+
+            DataContext = this;
+
+            foreach (var taller in TalleresDisponibles)
+            {
+                taller.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(TallerInscripcion.Abono) ||
+                        e.PropertyName == nameof(TallerInscripcion.SaldoPendiente) ||
+                        e.PropertyName == nameof(TallerInscripcion.EstaSeleccionado))
+                    {
+                        OnPropertyChanged(nameof(TotalCostos));
+                        OnPropertyChanged(nameof(TotalAbonado));
+                        OnPropertyChanged(nameof(SaldoPendienteTotal));
+                    }
+                };
+            }
         }
 
+        // 👇 Total: solo de talleres seleccionados
+        public decimal TotalCostos =>
+            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.Costo);
+
+        public decimal TotalAbonado =>
+            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.Abono);
+
+        public decimal SaldoPendienteTotal =>
+            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.SaldoPendiente);
+
+        // Validar que Abono sea numérico
         private void AbonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+"); // cualquier cosa que no sea dígito
+            Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
-        }
-
-        private void AbonoTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (int.TryParse(AbonoTextBox.Text, out int valor))
-            {
-                if (valor < MinimoACuenta || valor > CostoInscripcion)
-                {
-                    MessageBox.Show($"El valor debe estar entre {MinimoACuenta} y {CostoInscripcion} (El costo de la inscripción).",
-                                    "Valor fuera de rango",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Warning);
-                    AbonoTextBox.Text = string.Empty;
-                }
-            }
-        }
-
-        private void AbonoTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (int.TryParse(AbonoTextBox.Text, out int abono))
-            {
-                int resta = CostoInscripcion - abono;
-                if (resta < 0)
-                {
-                    MessageBox.Show("El abono no puede ser mayor al costo de inscripción.",
-                                    "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    AbonoTextBox.Text = string.Empty;
-                    SaldoPendienteTextBox.Text = CostoInscripcion.ToString();
-                }
-                else
-                {
-                    SaldoPendienteTextBox.Text = "$" + resta.ToString();
-                }
-            }
-            else
-            {
-                SaldoPendienteTextBox.Text = "$" + CostoInscripcion.ToString();
-            }
         }
 
         private void TelefonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -120,7 +124,11 @@ namespace ControlTalleresMVP.UI.Component.Alumno
 
             // Mostrar ya formateado en el textbox
             TelefonoTextBox.Text = formato;
-
         }
+
+        // 👉 implementación de INotifyPropertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

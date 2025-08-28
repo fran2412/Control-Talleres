@@ -47,7 +47,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
 
                     <!-- Botón Cancelar -->
                     <Button Content="CANCELAR" HorizontalAlignment="Right" VerticalAlignment="Center"
-                    Width="auto" Height="50" Style="{StaticResource BotonNormal}" Command="{Binding CancelarRegistrarAlumnoCommand}"/>
+                    Width="auto" Height="50" Style="{StaticResource BotonNormal}"/>
 
                     <!-- Botón Principal (Agregar o Guardar) -->
                     <Button x:Name="RegistrarTallerButton" Content="Registrar taller" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"

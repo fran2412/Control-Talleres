@@ -29,7 +29,7 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type vmmenu:MenuInscripcionesViewModel}">
-                <inscripcioncomponent:InscripcionUserControl/>
+                <inscripcioncomponent:InscripcionTallerUserControl/>
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type vmmenu:MenuPagosViewModel}">

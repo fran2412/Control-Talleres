@@ -14,9 +14,6 @@
     <Compile Update="UI\Component\Inscripcion\InscripcionTallerUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\Component\Inscripcion\InscripcionUserControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="UI\Component\Pago\PagoUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

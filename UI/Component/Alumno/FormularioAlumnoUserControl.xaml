@@ -7,7 +7,7 @@
              xmlns:sys="clr-namespace:System;assembly=netstandard"
              mc:Ignorable="d" d:DesignWidth="900" Height="600">
     <Grid>
-        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="400" Height="auto"
+        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="auto"
         BorderThickness="1,1,1,1">
             <Grid>
                 <Grid.RowDefinitions>
@@ -18,7 +18,7 @@
                 
                 <Label Content="Registrar alumno" FontSize="20" FontFamily="Inter 28pt 28pt ExtraBold"
 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground="#FF3E3E3E" Grid.Row="0"/>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" MaxHeight="200" Margin="15,0,15,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" MaxHeight="400" Margin="15,0,15,0">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
@@ -41,62 +41,86 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                        Height="30" HorizontalAlignment="Left" Width="260"
                        Tag="Ej. 1234567890"/>
                             </StackPanel>
+
+                            <!-- Sede -->
+                            <StackPanel Margin="0,20,20,0">
+                                <TextBlock Text="Sede" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding OpcionesSede}"
+                                            SelectedItem="{Binding SedeSeleccionada, Mode=TwoWay}"
+                                            Width="200" Height="30"
+                                            Style="{StaticResource MinimalComboBoxStyle}"/>
+                            </StackPanel>
+
+                            <!-- Promotor -->
+                            <StackPanel Margin="0,20,20,0">
+                                <TextBlock Text="Promotor" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding OpcionesPromotor}"
+                                            SelectedItem="{Binding PromotorSeleccionado, Mode=TwoWay}"
+                                            Width="200" Height="30"
+                                            Style="{StaticResource MinimalComboBoxStyle}"/>
+                            </StackPanel>
                         </WrapPanel>
 
-                        <Expander Grid.Row="1" Margin="0,20,0,0" Header="Inscribir en taller"
+                        <Expander Grid.Row="1" Margin="0,20,0,0" Header="Inscribir en talleres"
                                   IsExpanded="{Binding InscribirEnTaller, Mode=TwoWay}"
                                   FontSize="15">
                             <Grid>
-                                <WrapPanel Grid.Row="0">
-                                    <StackPanel Margin="0,20,20,0">
-                                        <TextBlock Text="*Taller inscrito" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="3,0,0,3"/>
-                                        <ComboBox ItemsSource="{Binding Opciones, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-SelectedItem="{Binding TallerInscritoSeleccionadoItem, 
-              Mode=TwoWay,
-              UpdateSourceTrigger=PropertyChanged}" 
-              SelectedIndex="{Binding TallerInscritoSeleccionadoIndex,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-              Height="30" Width="260" FontSize="16" Style="{StaticResource MinimalComboBoxStyle}"/>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <ItemsControl ItemsSource="{Binding TalleresDisponibles}" Focusable="False" Grid.Row="0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderThickness="0,0,0,1" BorderBrush="#DDD" Padding="10">
+                                                <WrapPanel>
+                                                    <!-- CheckBox para activar inscripción -->
+                                                    <CheckBox Content="{Binding Nombre}"
+                                      IsChecked="{Binding EstaSeleccionado, Mode=TwoWay}"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,15,0"/>
+                                                    
+                                                    <!-- Abono -->
+                                                    <StackPanel Margin="0,0,15,0">
+                                                        <TextBlock Text="Abono" FontFamily="Inter 24pt 24pt Medium" FontSize="14"/>
+                                                        <TextBox Text="{Binding Abono, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="100" Height="30"
+                                         PreviewTextInput="AbonoTextBox_PreviewTextInput"/>
+                                                    </StackPanel>
+
+                                                    <!-- Saldo pendiente -->
+                                                    <StackPanel>
+                                                        <TextBlock Text="Saldo pendiente" FontFamily="Inter 24pt 24pt Medium" FontSize="14"/>
+                                                        <TextBox Text="{Binding SaldoPendiente, StringFormat=C, Mode=OneWay}" 
+                                                                 IsReadOnly="True"
+                                                                 Focusable="False"
+                                                                 Width="120" Height="30"/>
+                                                    </StackPanel>
+                                                </WrapPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <StackPanel Orientation="Vertical" Margin="10" Grid.Row="1">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Total de costos: " FontSize="16" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding TotalCostos, StringFormat=C}" FontSize="16" FontWeight="Bold"/>
                                     </StackPanel>
 
-                                    <StackPanel Margin="0,20,20,0">
-                                        <TextBlock Text="Sede" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="3,0,0,3"/>
-                                        <ComboBox ItemsSource="{Binding Opciones, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                        SelectedItem="{Binding SedeSeleccionadaItem, 
-                                    Mode=TwoWay,
-                                    UpdateSourceTrigger=PropertyChanged}" 
-                        SelectedIndex="{Binding SedeSeleccionadaIndex,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Height="30" Width="260" FontSize="16" Style="{StaticResource MinimalComboBoxStyle}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Total abonado: " FontSize="16" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding TotalAbonado, StringFormat=C}" FontSize="16" FontWeight="Bold" Foreground="Green"/>
                                     </StackPanel>
 
-                                    <StackPanel Margin="0,20,20,0">
-                                        <TextBlock Text="Promotor" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="3,0,0,3"/>
-                                        <ComboBox ItemsSource="{Binding Opciones, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                              SelectedItem="{Binding SedeSeleccionadaItem, 
-                                                        Mode=TwoWay,
-                                                        UpdateSourceTrigger=PropertyChanged}" 
-                                              SelectedIndex="{Binding SedeSeleccionadaIndex,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Height="30" Width="260" FontSize="16" Style="{StaticResource MinimalComboBoxStyle}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Saldo pendiente total: " FontSize="16" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding SaldoPendienteTotal, StringFormat=C}" FontSize="16" FontWeight="Bold" Foreground="DarkRed"/>
                                     </StackPanel>
-
-                                    <StackPanel Margin="0,20,20,0">
-                                        <TextBlock Text="Abono" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
-                                        <TextBox x:Name="AbonoTextBox" Text="{Binding CampoACuenta, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Style="{StaticResource TextBoxCampo}" 
-                       Height="30" HorizontalAlignment="Left" ToolTip="Ingrese solo números" Width="260"
-                       Tag="Ej. 600" PreviewTextInput="AbonoTextBox_PreviewTextInput" TextChanged="AbonoTextBox_TextChanged" LostFocus="AbonoTextBox_LostFocus"/>
-                                    </StackPanel>
-
-                                    <StackPanel Margin="0,20,20,0">
-                                        <TextBlock Text="Saldo pendiente" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
-                                        <TextBox x:Name="SaldoPendienteTextBox" Style="{StaticResource TextBoxCampo}" 
-                                                Height="30" HorizontalAlignment="Left" ToolTip="Ingrese solo números" Width="260"
-                                                IsReadOnly="True"/>
-                                    </StackPanel>
-                                </WrapPanel>
+                                </StackPanel>
                             </Grid>
                         </Expander>
                     </Grid>
                 </ScrollViewer>
-
                 <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center">
 
                     <!-- Botón Cancelar -->
