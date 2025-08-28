@@ -53,7 +53,7 @@ namespace ControlTalleresMVP.UI.Component {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleresMVP;component/ui/component/alumnousercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleresMVP;V1.0.0.0;component/ui/component/alumnousercontrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\UI\Component\AlumnoUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

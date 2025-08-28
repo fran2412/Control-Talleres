@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ControlTalleresMVP.UI.Component
+namespace ControlTalleresMVP.UI.Component.Taller
 {
     /// <summary>
-    /// Lógica de interacción para InscripcionUserControl.xaml
+    /// Lógica de interacción para TallerUserControl.xaml
     /// </summary>
-    public partial class InscripcionUserControl : UserControl
+    public partial class TallerUserControl : UserControl
     {
-        public InscripcionUserControl()
+        public TallerUserControl()
         {
             InitializeComponent();
         }

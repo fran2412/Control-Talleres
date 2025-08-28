@@ -2,19 +2,19 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Compile Update="UI\Component\AlumnoUserControl.xaml.cs">
+    <Compile Update="UI\Component\Alumno\AlumnoUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\Component\InicioUserControl.xaml.cs">
+    <Compile Update="UI\Component\Inicio\InicioUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\Component\InscripcionUserControl.xaml.cs">
+    <Compile Update="UI\Component\Inscripcion\InscripcionUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\Component\PagoUserControl.xaml.cs">
+    <Compile Update="UI\Component\Pago\PagoUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\Component\TallerUserControl.xaml.cs">
+    <Compile Update="UI\Component\Taller\TallerUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UI\Windows\MenuWindow.xaml.cs">

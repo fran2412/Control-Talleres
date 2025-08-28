@@ -4,8 +4,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:ControlTalleresMVP"
              xmlns:vmmenu="clr-namespace:ControlTalleresMVP.ViewModel.Menu"
-             xmlns:usercontrols="clr-namespace:ControlTalleresMVP.UI.Component"
-
+             xmlns:alumnocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Alumno"
+             xmlns:inscripcioncomponent="clr-namespace:ControlTalleresMVP.UI.Component.Inscripcion"
+             xmlns:pagocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Pago"
+             xmlns:tallercomponent="clr-namespace:ControlTalleresMVP.UI.Component.Taller"
+             xmlns:iniciocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Inicio"
+             
              >
     <Application.Resources>
         <ResourceDictionary>
@@ -21,23 +25,23 @@
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate DataType="{x:Type vmmenu:MenuAlumnosViewModel}">
-                <usercontrols:AlumnoUserControl/>
+                <alumnocomponent:AlumnoUserControl/>
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type vmmenu:MenuInscripcionesViewModel}">
-                <usercontrols:InscripcionUserControl/>
+                <inscripcioncomponent:InscripcionUserControl/>
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type vmmenu:MenuPagosViewModel}">
-                <usercontrols:PagoUserControl/>
+                <pagocomponent:PagoUserControl/>
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type vmmenu:MenuTalleresViewModel}">
-                <usercontrols:TallerUserControl/>
+                <tallercomponent:TallerUserControl/>
             </DataTemplate>
             
             <DataTemplate DataType="{x:Type vmmenu:MenuInicioViewModel}">
-                <usercontrols:InicioUserControl/>
+                <iniciocomponent:InicioUserControl/>
             </DataTemplate>
             
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
