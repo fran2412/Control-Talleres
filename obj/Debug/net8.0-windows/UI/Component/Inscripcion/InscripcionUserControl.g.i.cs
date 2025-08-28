@@ -53,8 +53,8 @@ namespace ControlTalleresMVP.UI.Component.Inscripcion {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleresMVP;component/ui/component/inscripcion/inscripcionusercontrol.xam" +
-                    "l", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleresMVP;V1.0.0.0;component/ui/component/inscripcion/inscripcionuserco" +
+                    "ntrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Inscripcion\InscripcionUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
