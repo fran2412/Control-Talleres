@@ -23,9 +23,13 @@ namespace ControlTalleresMVP.UI.Windows
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
+            if (txtPassword.Password == string.Empty || txtUsuario.Text == string.Empty)
+            {
+                MessageBox.Show("Llene ambos campos antes de continuar.", "Advertencia", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (txtPassword.Password == "admin" && txtUsuario.Text == "admin")
             {
-                MessageBox.Show("¡Inicio de sesión exitoso!", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 new MenuWindow().Show();
                 this.Close();

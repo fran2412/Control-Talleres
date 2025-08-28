@@ -24,7 +24,22 @@
                 <usercontrols:AlumnoUserControl/>
             </DataTemplate>
 
+            <DataTemplate DataType="{x:Type vmmenu:MenuInscripcionesViewModel}">
+                <usercontrols:InscripcionUserControl/>
+            </DataTemplate>
 
+            <DataTemplate DataType="{x:Type vmmenu:MenuPagosViewModel}">
+                <usercontrols:PagoUserControl/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vmmenu:MenuTalleresViewModel}">
+                <usercontrols:TallerUserControl/>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type vmmenu:MenuInicioViewModel}">
+                <usercontrols:InicioUserControl/>
+            </DataTemplate>
+            
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
