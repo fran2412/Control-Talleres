@@ -45,6 +45,11 @@
             </DataTemplate>
             
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+        
+        
+            
         </ResourceDictionary>
+        
+        
     </Application.Resources>
 </Application>
