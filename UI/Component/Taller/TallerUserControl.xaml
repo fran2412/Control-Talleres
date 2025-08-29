@@ -6,7 +6,11 @@
              xmlns:local="clr-namespace:ControlTalleresMVP.UI.Component.Taller"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <local:FormularioTallerUserControl Grid.Row="0" Margin="40,0,40,0"/>
     </Grid>
 </UserControl>
