@@ -8,5 +8,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
 {
     public class MenuInscripcionesViewModel
     {
+        public string TituloEncabezado { get; set; } = "Gestión de Inscripciones";
+
     }
 }

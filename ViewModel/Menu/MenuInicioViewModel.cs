@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    internal class MenuInicioViewModel
+    public class MenuInicioViewModel
     {
+
     }
 }
