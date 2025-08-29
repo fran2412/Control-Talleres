@@ -1,8 +1,11 @@
 ﻿using ControlTalleresMVP.Abstractions;
+using ControlTalleresMVP.Configuraciones;
+using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.UI.Windows;
 using ControlTalleresMVP.ViewModel.Menu;
 using ControlTalleresMVP.ViewModel.Navigation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
 using System.Data;
@@ -19,6 +22,8 @@ namespace ControlTalleresMVP
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            AppPaths.EnsureAppFolder();
+
             var services = new ServiceCollection();
             ConfigureServices(services);
 
@@ -26,11 +31,26 @@ namespace ControlTalleresMVP
 
             base.OnStartup(e);
 
+            var _escuelaContext = ServiceProvider.GetRequiredService<EscuelaContext>();
+
+            using (var scope = ServiceProvider.CreateScope())
+            {
+                var serviceProviderScope = scope.ServiceProvider;
+                var escuelaContext = serviceProviderScope.GetRequiredService<EscuelaContext>();
+
+                escuelaContext.Database.Migrate();
+            }
+
+
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
         }
         private void ConfigureServices(IServiceCollection services)
         {
+            //DbContext
+            services.AddDbContext<EscuelaContext>(opt =>
+                opt.UseSqlite($"Data Source={AppPaths.DbPath}"));
+
             //Ventanas
             services.AddSingleton<MainWindow>();
             services.AddSingleton<MenuWindow>();
