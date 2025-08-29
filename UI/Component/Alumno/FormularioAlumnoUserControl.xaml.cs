@@ -25,54 +25,11 @@ namespace ControlTalleresMVP.UI.Component.Alumno
     public partial class FormularioAlumnoUserControl : UserControl, INotifyPropertyChanged
     {
         public bool InscribirEnTaller { get; set; } = false;
-        public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; set; }
 
         public FormularioAlumnoUserControl()
         {
             InitializeComponent();
-
-            // Cargar datos de prueba
-            TalleresDisponibles = new ObservableCollection<TallerInscripcion>
-            {
-                new TallerInscripcion
-                {
-                    Nombre = "Uñas",
-                    Costo = 1200,
-                },
-                new TallerInscripcion
-                {
-                    Nombre = "Repostería",
-                    Costo = 1500,
-                }
-            };
-
-            DataContext = this;
-
-            foreach (var taller in TalleresDisponibles)
-            {
-                taller.PropertyChanged += (s, e) =>
-                {
-                    if (e.PropertyName == nameof(TallerInscripcion.Abono) ||
-                        e.PropertyName == nameof(TallerInscripcion.SaldoPendiente) ||
-                        e.PropertyName == nameof(TallerInscripcion.EstaSeleccionado))
-                    {
-                        OnPropertyChanged(nameof(TotalCostos));
-                        OnPropertyChanged(nameof(TotalAbonado));
-                        OnPropertyChanged(nameof(SaldoPendienteTotal));
-                    }
-                };
-            }
         }
-
-        // 👇 Total: solo de talleres seleccionados
-        public decimal TotalCostos =>
-            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.Costo);
-
-        public decimal TotalAbonado =>
-            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.Abono);
-
-        public decimal SaldoPendienteTotal =>
-            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.SaldoPendiente);
 
         // Validar que Abono sea numérico
         private void AbonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
