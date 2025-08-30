@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlTalleresMVP.Persistence.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,8 +16,14 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Nombre completo")]
         public string Nombre { get; set; } = "";
 
+        [Display(Name = "Sede")]
+        public Sede? Sede { get; set; }
+
+        [Display(Name = "Promotor")]
+        public Promotor? Promotor { get; set; }
+
         [Display(Name = "Teléfono")]
-        public string Telefono { get; set; } = "";
+        public string? Telefono { get; set; } = "";
 
         [Display(Name = "Fecha de alta")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]

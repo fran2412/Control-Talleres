@@ -1,4 +1,5 @@
 ﻿using ControlTalleresMVP.Helpers.Commands;
+using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
     public class MenuAlumnosViewModel : INotifyPropertyChanged
     {
         public string TituloEncabezado { get; set; } = "Gestión de Alumnos";
+        public ObservableCollection<AlumnoDTO> RegistrosView => _alumnoService.RegistrosAlumnos;
         public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; set; }
         public ICommand RegistrarAlumnoCommand { get; }
 
@@ -34,6 +36,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             };
 
             _alumnoService = alumnoService;
+            _alumnoService.InicializarRegistros();
+
             RegistrarAlumnoCommand = new RelayCommand(RegistrarAlumno);
 
             foreach (var taller in TalleresDisponibles)
@@ -144,18 +148,32 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
             try
             {
-                _alumnoService.AgregarAlumno(new Alumno
+                _alumnoService.GuardarAsync(new Alumno
                 {
                     Nombre = CampoTextoNombre,
                     Telefono = CampoTextTelefono,
                     IdSede = SedeSeleccionadaId,
                     IdPromotor = PromotorSeleccionadoId,
                 });
+                LimpiarCampos();
                 MessageBox.Show("Alumno registrado exitosamente.");
             }
             catch (Exception ex) 
             {
                 MessageBox.Show("Error al registrar el alumno.\n" + ex.Message);
+            }
+        }
+
+        private void LimpiarCampos()
+        {
+            CampoTextoNombre = "";
+            CampoTextTelefono = "";
+            SedeSeleccionadaId = null;
+            PromotorSeleccionadoId = null;
+            foreach (var taller in TalleresDisponibles)
+            {
+                taller.EstaSeleccionado = false;
+                taller.Abono = 0;
             }
         }
 

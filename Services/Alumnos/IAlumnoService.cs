@@ -2,6 +2,7 @@
 using ControlTalleresMVP.Persistence.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,8 +11,13 @@ namespace ControlTalleresMVP.Services.Alumnos
 {
     public interface IAlumnoService
     {
-        void AgregarAlumno(Alumno alumno);
-        void EditarAlumno(Alumno alumno);
-        void EliminarAlumno(int id);
+        public ObservableCollection<AlumnoDTO> RegistrosAlumnos { get; set; }
+        public Task GuardarAsync(Alumno alumno, CancellationToken ct = default);
+        public void EditarAlumno(Alumno alumno);
+        public Task EliminarAsync(int id, CancellationToken ct = default);
+        public Task ActualizarAsync(Alumno alumno, CancellationToken ct = default);
+        public Task<List<AlumnoDTO>> ObtenerAlumnosParaGridAsync(CancellationToken ct = default);
+        public Task InicializarRegistros(CancellationToken ct = default);
+
     }
 }
