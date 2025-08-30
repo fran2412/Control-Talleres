@@ -15,12 +15,12 @@ namespace ControlTalleresMVP.Persistence.Models
         public string? Telefono { get; set; }
 
         // Clave foránea a Sede
-        public int IdSede { get; set; }
-        public Sede Sede { get; set; } = null!;
+        public int? IdSede { get; set; }
+        public Sede? Sede { get; set; }
 
         // Clave foránea a Promotor
-        public int IdPromotor { get; set; }
-        public Promotor Promotor { get; set; } = null!;
+        public int? IdPromotor { get; set; }
+        public Promotor? Promotor { get; set; }
 
         public DateTimeOffset CreadoEn { get; set; }
         public DateTimeOffset ActualizadoEn { get; set; }

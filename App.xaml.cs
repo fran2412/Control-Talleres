@@ -1,6 +1,7 @@
 ﻿using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Configuraciones;
 using ControlTalleresMVP.Persistence.DataContext;
+using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.UI.Windows;
 using ControlTalleresMVP.ViewModel.Menu;
@@ -63,6 +64,10 @@ namespace ControlTalleresMVP
             services.AddTransient<MenuPagosViewModel>();
             services.AddTransient<ShellViewModel>();
             services.AddTransient<INavigatorService, NavigatorService>();
+
+            //Services
+            services.AddTransient<IAlumnoService, AlumnoService>();
+
 
         }
     }

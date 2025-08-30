@@ -34,13 +34,13 @@ namespace ControlTalleresMVP.UI.Component.Alumno
         // Validar que Abono sea numérico
         private void AbonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+");
+            Regex regex = new ("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }
 
         private void TelefonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex(@"^[0-9+]+$");
+            Regex regex = new (@"^[0-9+]+$");
             e.Handled = !regex.IsMatch(e.Text);
         }
 

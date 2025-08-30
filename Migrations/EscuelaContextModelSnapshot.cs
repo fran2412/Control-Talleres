@@ -46,11 +46,11 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
-                    b.Property<int>("IdPromotor")
+                    b.Property<int?>("IdPromotor")
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_promotor");
 
-                    b.Property<int>("IdSede")
+                    b.Property<int?>("IdSede")
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_sede");
 
@@ -113,14 +113,12 @@ namespace ControlTalleresMVP.Migrations
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Promotor", "Promotor")
                         .WithMany("Alumnos")
                         .HasForeignKey("IdPromotor")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Sede", "Sede")
                         .WithMany("Alumnos")
                         .HasForeignKey("IdSede")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Promotor");
 

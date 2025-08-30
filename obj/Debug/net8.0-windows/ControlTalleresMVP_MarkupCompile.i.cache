@@ -12,9 +12,9 @@ TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\App.xaml
 19-1396755009
 
-41414132549
+431424221359
 223-565629896
 Resources\Styles\Borders.xaml;Resources\Styles\Buttons.xaml;Resources\Styles\Colors.xaml;Resources\Styles\ComboBoxs.xaml;Resources\Styles\DataGridDictionary.xaml;Resources\Styles\Labels.xaml;Resources\Styles\PasswordBox.xaml;Resources\Styles\TextBox.xaml;UI\Component\Alumno\AlumnoUserControl.xaml;UI\Component\Alumno\FormularioAlumnoUserControl.xaml;UI\Component\Alumno\RegistrosUsuarioUserControl.xaml;UI\Component\Inicio\InicioUserControl.xaml;UI\Component\Inscripcion\InscripcionTallerUserControl.xaml;UI\Component\Pago\FormularioPagoUserControl.xaml;UI\Component\Pago\PagoUserControl.xaml;UI\Component\Taller\FormularioTallerUserControl.xaml;UI\Component\Taller\TallerUserControl.xaml;UI\Windows\MainWindow.xaml;UI\Windows\MenuWindow.xaml;
 
-False
+True
 
