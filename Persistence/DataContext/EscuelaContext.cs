@@ -22,6 +22,8 @@ namespace ControlTalleresMVP.Persistence.DataContext
         }
 
         public virtual DbSet<Alumno> Alumnos { get; set; }
+        public virtual DbSet<Sede> Sedes { get; set; }
+        public virtual DbSet<Promotor> Promotores { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -32,6 +34,9 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ====================
+            // Entidad Alumno
+            // ====================
             modelBuilder.Entity<Alumno>(entity =>
             {
                 entity.HasKey(e => e.IdAlumno);
@@ -62,6 +67,38 @@ namespace ControlTalleresMVP.Persistence.DataContext
                 entity.Property(e => e.Nombre).HasColumnName("nombre");
 
                 entity.Property(e => e.Telefono).HasColumnName("telefono");
+
+                // 🔹 FK a Sede
+                entity.Property(e => e.IdSede).HasColumnName("id_sede");
+                entity.HasOne(e => e.Sede)
+                    .WithMany(s => s.Alumnos)
+                    .HasForeignKey(e => e.IdSede)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // 🔹 FK a Promotor
+                entity.Property(e => e.IdPromotor).HasColumnName("id_promotor");
+                entity.HasOne(e => e.Promotor)
+                    .WithMany(p => p.Alumnos)
+                    .HasForeignKey(e => e.IdPromotor)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Sede>(entity =>
+            {
+                entity.HasKey(e => e.IdSede);
+                entity.ToTable("sedes");
+
+                entity.Property(e => e.IdSede).HasColumnName("id_sede");
+                entity.Property(e => e.Nombre).HasColumnName("nombre");
+            });
+
+            modelBuilder.Entity<Promotor>(entity =>
+            {
+                entity.HasKey(e => e.IdPromotor);
+                entity.ToTable("promotores");
+
+                entity.Property(e => e.IdPromotor).HasColumnName("id_promotor");
+                entity.Property(e => e.Nombre).HasColumnName("nombre");
             });
 
             OnModelCreatingPartial(modelBuilder);
