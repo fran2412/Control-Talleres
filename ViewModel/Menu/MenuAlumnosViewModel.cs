@@ -4,7 +4,10 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
+using System.Text;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace ControlTalleresMVP.ViewModel.Menu
@@ -12,7 +15,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
     public class MenuAlumnosViewModel : INotifyPropertyChanged
     {
         public string TituloEncabezado { get; set; } = "Gestión de Alumnos";
-        public ObservableCollection<AlumnoDTO> RegistrosView => _alumnoService.RegistrosAlumnos;
+        public ObservableCollection<AlumnoDTO> Registros => _alumnoService.RegistrosAlumnos;
+        public ICollectionView? RegistrosView { get; private set; }
         public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; set; }
         public ICommand RegistrarAlumnoCommand { get; }
 
@@ -37,6 +41,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             _alumnoService = alumnoService;
             _alumnoService.InicializarRegistros();
+            InitializeView(Registros, Filtro);
 
             RegistrarAlumnoCommand = new RelayCommand(RegistrarAlumno);
 
@@ -75,6 +80,21 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     _campoTextoNombre = value;
                     OnPropertyChanged(nameof(CampoTextoNombre));
+                }
+            }
+        }
+
+        private string _filtroRegistros = "";
+        public string FiltroRegistros
+        {
+            get => _filtroRegistros;
+            set
+            {
+                if (value != _filtroRegistros)
+                {
+                    _filtroRegistros = value; 
+                    OnPropertyChanged(nameof(FiltroRegistros));
+                    RegistrosView?.Refresh();
                 }
             }
         }
@@ -164,6 +184,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
+        protected void InitializeView(ObservableCollection<AlumnoDTO> registros, Predicate<object> filtro)
+        {
+            RegistrosView = CollectionViewSource.GetDefaultView(registros);
+            RegistrosView.Filter = filtro;
+        }
+
         private void LimpiarCampos()
         {
             CampoTextoNombre = "";
@@ -175,6 +201,49 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 taller.EstaSeleccionado = false;
                 taller.Abono = 0;
             }
+        }
+
+        public bool Filtro(object o)
+        {
+            if (o is not AlumnoDTO a) return false;
+            if (string.IsNullOrWhiteSpace(FiltroRegistros)) return true;
+
+            // Nombre completo y teléfono del DTO
+            var nombreCompleto = a.Nombre ?? "";
+            var telefono = a.Telefono ?? "";
+            var telSoloDigitos = new string(telefono.Where(char.IsDigit).ToArray());
+
+            // Texto donde buscar (nombre + teléfono en crudo + teléfono solo dígitos)
+            var haystack = Normalizar($"{nombreCompleto} {telefono} {telSoloDigitos}");
+
+            // Cada palabra (separada por espacios) debe estar contenida (AND)
+            var tokens = FiltroRegistros
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(Normalizar);
+
+            foreach (var token in tokens)
+            {
+                if (!haystack.Contains(token))
+                    return false;
+            }
+
+            return true;
+        }
+
+        // Quita acentos y pasa a minúsculas (deja los dígitos tal cual)
+        private static string Normalizar(string s)
+        {
+            var formD = s.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder(formD.Length);
+
+            foreach (var ch in formD)
+            {
+                var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (uc != UnicodeCategory.NonSpacingMark)
+                    sb.Append(char.ToLowerInvariant(ch));
+            }
+
+            return sb.ToString().Normalize(NormalizationForm.FormC);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

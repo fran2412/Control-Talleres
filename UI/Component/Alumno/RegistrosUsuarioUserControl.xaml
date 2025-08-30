@@ -17,7 +17,7 @@
             <!--TextBox de búsqueda-->
             <TextBox Grid.Row="0" Margin="20,20,190,0"
                  HorizontalAlignment="Stretch" Style="{StaticResource TextBoxCampo}"
-                 Text="{Binding RegistrosViewModel.FiltroRegistros, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                 Text="{Binding FiltroRegistros, UpdateSourceTrigger=PropertyChanged, Delay=300}"
                  Tag="Buscar"
                  FontSize="18"/>
             <!--Botón de búsqueda-->
