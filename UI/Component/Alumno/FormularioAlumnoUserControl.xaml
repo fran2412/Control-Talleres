@@ -31,6 +31,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                 <TextBlock Text="* Nombre completo" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
                                 <TextBox Text="{Binding CampoTextoNombre, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
                          Style="{StaticResource TextBoxCampo}" 
+                                         ToolTip="Ingrese el nombre del alumno"
                          Height="30" Width="260"
                          Tag="Ej. Juan Rodolfo Fernández López"/>
                             </StackPanel>
@@ -52,6 +53,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                 <ComboBox ItemsSource="{Binding OpcionesSede}"
                                           DisplayMemberPath="Nombre"
                                           SelectedValuePath="IdSede"
+                                          ToolTip="Seleccione una sede"
                                           SelectedValue="{Binding SedeSeleccionadaId, Mode=TwoWay}"
                                           Width="200" Height="30"
                                           Style="{StaticResource MinimalComboBoxStyle}" />
@@ -63,6 +65,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                 <ComboBox ItemsSource="{Binding OpcionesPromotor}"
                                           DisplayMemberPath="Nombre"
                                           SelectedValuePath="IdPromotor"
+                                            ToolTip="Seleccione un promotor"
                                           SelectedValue="{Binding PromotorSeleccionadoId, Mode=TwoWay}"
                                           Width="200" Height="30"
                                           Style="{StaticResource MinimalComboBoxStyle}"/>
@@ -71,6 +74,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
 
                         <!-- Expander de talleres -->
                         <Expander Grid.Row="1" Margin="0,20,0,0" Header="Inscribir en talleres"
+                                  ToolTip="Seleccione para inscribir al usuario a talleres"
                   IsExpanded="{Binding InscribirEnTaller, Mode=TwoWay}"
                   FontSize="15">
                             <Grid>
@@ -101,6 +105,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                                 <WrapPanel>
                                                     <!-- CheckBox para activar inscripción -->
                                                     <CheckBox Content="{Binding Nombre}"
+                                                              ToolTip="Seleccione la casilla para inscribirlo a este taller"
                                               IsChecked="{Binding EstaSeleccionado, Mode=TwoWay}"
                                               VerticalAlignment="Center"
                                               Margin="0,0,15,0"/>
@@ -108,7 +113,8 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                                     <!-- Abono -->
                                                     <StackPanel Margin="0,0,15,0">
                                                         <TextBlock Text="Abono" FontFamily="Inter 24pt 24pt Medium" FontSize="14"/>
-                                                        <TextBox Text="{Binding Abono, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                        <TextBox Text="{Binding Abono, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                 ToolTip="Cantidad que el alumno abona para este taller"
                                                  IsEnabled="{Binding EstaSeleccionado}"
                                                  Width="100" Height="30"
                                                  PreviewTextInput="AbonoTextBox_PreviewTextInput"/>
@@ -118,6 +124,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                                     <StackPanel>
                                                         <TextBlock Text="Saldo pendiente" FontFamily="Inter 24pt 24pt Medium" FontSize="14"/>
                                                         <TextBox Text="{Binding SaldoPendiente, StringFormat=C, Mode=OneWay}" 
+                                                                 ToolTip="Cantidad que el alumno deberá pagar después"
                                                  IsReadOnly="True"
                                                  Focusable="False"
                                                  Width="120" Height="30"/>
@@ -131,19 +138,20 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                 <!-- Totales -->
                                 <StackPanel Orientation="Vertical" Margin="10" Grid.Row="1">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Total de costos: " FontSize="16" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding TotalCostos, StringFormat=C}" FontSize="16" FontWeight="Bold"/>
+                                        <TextBlock Text="Total de costos: " FontSize="16" FontWeight="Bold" ToolTip="Total a pagar"/>
+                                        <TextBlock Text="{Binding TotalCostos, StringFormat=C}" FontSize="16" FontWeight="Bold" 
+                                                   ToolTip="Costo de todos los cursos inscritos"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Total abonado: " FontSize="16" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding TotalAbonado, StringFormat=C}" 
+                                        <TextBlock Text="{Binding TotalAbonado, StringFormat=C}" ToolTip="Cantidad abonada por el alumno" 
                                    FontSize="16" FontWeight="Bold" Foreground="Green"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Saldo pendiente total: " FontSize="16" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding SaldoPendienteTotal, StringFormat=C}" 
+                                        <TextBlock Text="{Binding SaldoPendienteTotal, StringFormat=C}" ToolTip="Total pendiente por pagar" 
                                    FontSize="16" FontWeight="Bold" Foreground="DarkRed"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -156,12 +164,14 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
 
                     <!-- Botón Cancelar -->
                     <Button Content="CANCELAR" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            ToolTip="Cancelar la inscripción"
                     Width="auto" Height="50" Style="{StaticResource BotonNormal}" Command="{Binding CancelarRegistrarAlumnoCommand}"/>
 
                     <!-- Botón Principal (Agregar o Guardar) -->
                     <Button x:Name="RegistrarAlumnoButton" Content="Registrar alumno" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Command="{Binding RegistrarAlumnoCommand}"
                             Width="auto" Height="50" Margin="15,0,20,0" 
+                            ToolTip="Registrar al usuario"
                             Style="{StaticResource FeaturedButton}"/>
                 </StackPanel>
             </Grid>

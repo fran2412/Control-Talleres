@@ -27,15 +27,16 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                         <WrapPanel Grid.Row="0">
                             <StackPanel Margin="0,20,20,0">
                                 <TextBlock Text="* Nombre del taller" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
-                                <TextBox Style="{StaticResource TextBoxCampo}" 
+                                <TextBox Text="{Binding CampoTextoNombre}" Style="{StaticResource TextBoxCampo}" 
                        Height="30" HorizontalAlignment="Left" Width="260"
+                                         ToolTip="Ingrese el nombre del taller"
                        Tag="Ej. Maquillaje 9 - 12"/>
                             </StackPanel>
 
                             <StackPanel Margin="0,20,20,0">
                                 <TextBlock Text="Horario" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
-                                <TextBox x:Name="TelefonoTextBox" Style="{StaticResource TextBoxCampo}"
-                                         ToolTip="Ingrese un número de teléfono de 10 dígitos"
+                                <TextBox Text="{Binding CampoTextoHorario}" Style="{StaticResource TextBoxCampo}"
+                                         ToolTip="Ingrese un horario"
                        Height="30" HorizontalAlignment="Left" Width="260"
                        Tag="Ej. Sábados de 9:00 a 12:00"/>
                             </StackPanel>
