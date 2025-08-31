@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using ControlTalleresMVP.Helpers.Dialogs;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,16 +17,18 @@ namespace ControlTalleresMVP.UI.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly IDialogService _dialogService;
+        public MainWindow(IDialogService dialogService)
         {
             InitializeComponent();
+            _dialogService = dialogService;
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             if (txtPassword.Password == string.Empty || txtUsuario.Text == string.Empty)
             {
-                MessageBox.Show("Llene ambos campos antes de continuar.", "Advertencia", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _dialogService.Alerta("Llene ambos campos antes de continuar.");
                 return;
             }
             if (txtPassword.Password == "admin" && txtUsuario.Text == "admin")
@@ -36,7 +39,7 @@ namespace ControlTalleresMVP.UI.Windows
             }
             else
             {
-                MessageBox.Show("Usuario o contraseña inválidos.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _dialogService.Error("Usuario o contraseña inválidos.");
             }
         }
 

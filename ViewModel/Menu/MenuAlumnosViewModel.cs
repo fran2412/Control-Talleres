@@ -199,19 +199,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             RegistrosView.Filter = filtro;
         }
 
-        private void LimpiarCampos()
-        {
-            CampoTextoNombre = "";
-            CampoTextTelefono = "";
-            SedeSeleccionadaId = null;
-            PromotorSeleccionadoId = null;
-            foreach (var taller in TalleresDisponibles)
-            {
-                taller.EstaSeleccionado = false;
-                taller.Abono = 0;
-            }
-        }
-
         public bool Filtro(object o)
         {
             if (o is not AlumnoDTO a) return false;
@@ -254,6 +241,20 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             return sb.ToString().Normalize(NormalizationForm.FormC);
         }
+
+        private void LimpiarCampos()
+        {
+            CampoTextoNombre = "";
+            CampoTextTelefono = "";
+            SedeSeleccionadaId = null;
+            PromotorSeleccionadoId = null;
+            foreach (var taller in TalleresDisponibles)
+            {
+                taller.EstaSeleccionado = false;
+                taller.Abono = 0;
+            }
+        }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>

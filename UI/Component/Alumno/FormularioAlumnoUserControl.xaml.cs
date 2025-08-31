@@ -1,4 +1,5 @@
-﻿using ControlTalleresMVP.ViewModel.Menu;
+﻿using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.ViewModel.Menu;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,8 +25,10 @@ namespace ControlTalleresMVP.UI.Component.Alumno
     /// </summary>
     public partial class FormularioAlumnoUserControl : UserControl, INotifyPropertyChanged
     {
-        public bool InscribirEnTaller { get; set; } = false;
+        private static readonly Regex regexCaracteres = new(@"^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s']+$");
+        private static readonly Regex regexNombreCompleto = new(@"^(?=(?:[^ ]* ){2,3}[^ ]*$)[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s']+$");
 
+        public bool InscribirEnTaller { get; set; } = false;
         public FormularioAlumnoUserControl()
         {
             InitializeComponent();
@@ -34,58 +37,91 @@ namespace ControlTalleresMVP.UI.Component.Alumno
         // Validar que Abono sea numérico
         private void AbonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new ("[^0-9]+");
+            Regex regex = new("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }
 
         private void TelefonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new (@"^[0-9+]+$");
+            Regex regex = new(@"^[0-9+]+$");
             e.Handled = !regex.IsMatch(e.Text);
         }
 
+        private string _telefonoSoloDigitos = "";
+
         private void TelefonoTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            string telefono = TelefonoTextBox.Text;
+            // Quitar todo excepto dígitos
+            var soloDigitos = new string(TelefonoTextBox.Text.Where(char.IsDigit).ToArray());
 
-            // Elimina espacios y guiones
-            telefono = telefono.Replace(" ", "").Replace("-", "");
-
-            // 👉 Si está vacío, no se valida (opcional)
-            if (string.IsNullOrEmpty(telefono))
+            if (string.IsNullOrEmpty(soloDigitos))
                 return;
 
-            // Validar que tenga 10 dígitos
-            if (telefono.Length != 10 || !Regex.IsMatch(telefono, @"^\d{10}$"))
+            if (soloDigitos.Length != 10)
             {
-                MessageBox.Show("El teléfono debe tener exactamente 10 dígitos.",
-                                "Teléfono inválido",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
+                MessageBox.Show("El teléfono debe tener exactamente 10 dígitos.", "Teléfono inválido");
                 TelefonoTextBox.Text = string.Empty;
+                _telefonoSoloDigitos = "";
                 return;
             }
 
-            // Formatear según lada (2 o 3 dígitos)
-            string formato;
-            if (telefono.StartsWith("55") || telefono.StartsWith("56")) // CDMX tiene lada de 2 dígitos
-            {
-                // Ej: 5512345678 → (55) 1234-5678
-                formato = $"({telefono.Substring(0, 2)}) {telefono.Substring(2, 4)}-{telefono.Substring(6, 4)}";
-            }
-            else
-            {
-                // Ej: 4525187855 → (452) 518-7855
-                formato = $"({telefono.Substring(0, 3)}) {telefono.Substring(3, 3)}-{telefono.Substring(6, 4)}";
-            }
+            // Guardar la versión sin formato para la BD
+            _telefonoSoloDigitos = soloDigitos;
 
-            // Mostrar ya formateado en el textbox
-            TelefonoTextBox.Text = formato;
+            // Mostrar con formato
+            if (soloDigitos.StartsWith("55") || soloDigitos.StartsWith("56"))
+                TelefonoTextBox.Text = $"({soloDigitos.Substring(0, 2)}) {soloDigitos.Substring(2, 4)}-{soloDigitos.Substring(6, 4)}";
+            else
+                TelefonoTextBox.Text = $"({soloDigitos.Substring(0, 3)}) {soloDigitos.Substring(3, 3)}-{soloDigitos.Substring(6, 4)}";
         }
+
 
         // 👉 implementación de INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        private void NombreTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !regexCaracteres.IsMatch(e.Text);
+        }
+
+        private void NombreTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var texto = NombreTextBox.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(texto))
+                return;
+
+            // separar en palabras (quita dobles espacios)
+            var palabras = texto.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (palabras.Length < 3)
+            {
+                MessageBox.Show(
+                    "El nombre debe contener al menos un nombre y dos apellidos (3 palabras).",
+                    "Validación",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+                NombreTextBox.Text = string.Empty;
+                return;
+            }
+
+            if (palabras.Length > 4)
+            {
+                MessageBox.Show(
+                    "El nombre no puede tener más de dos nombres y dos apellidos (4 palabras).",
+                    "Validación",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+                NombreTextBox.Text = string.Empty;
+                return;
+            }
+
+            NombreTextBox.Text = string.Join(" ",
+                palabras.Select(p => char.ToUpper(p[0]) + p.Substring(1).ToLower()));
+        }
     }
 }
