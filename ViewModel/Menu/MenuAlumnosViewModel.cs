@@ -26,6 +26,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; }
 
+        [ObservableProperty] private string campoTextoNombre = "";
         [ObservableProperty] private string campoTextTelefono = "";
         [ObservableProperty] private int? sedeSeleccionadaId;
         [ObservableProperty] private int? promotorSeleccionadoId;
