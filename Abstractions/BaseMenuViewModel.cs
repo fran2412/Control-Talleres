@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Alumnos;
@@ -46,6 +47,9 @@ namespace ControlTalleresMVP.Abstractions
             }
         }
 
+        private ICommand? _cancelarRegistrarItemCommand;
+        public ICommand CancelarRegistrarItemCommand =>
+            _cancelarRegistrarItemCommand ??= new RelayCommand(CancelarRegistro);
         protected abstract Task RegistrarItemAsync();
         protected abstract void LimpiarCampos();
         public abstract bool Filtro(object o);
@@ -72,6 +76,25 @@ namespace ControlTalleresMVP.Abstractions
         protected void InicializarVista()
         {
             InitializeView(Registros, Filtro);
+        }
+
+        private void CancelarRegistro()
+        {
+            bool confirmar = _dialogService.Confirmar("Está seguro que desea cancelar el registro? Los datos ingresados se perderán.");
+
+            if (confirmar)
+            {
+                try
+                {
+                    LimpiarCampos();
+                    _dialogService.Info("Campos limpiados correctamente.");
+                }
+                catch (Exception ex)
+                {
+                    _dialogService.Error("Error al limpiar los campos.\n" + ex.Message);
+
+                }            
+            }
         }
     }
 }
