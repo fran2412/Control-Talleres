@@ -50,6 +50,20 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 palabras.Select(p => char.ToUpper(p[0]) + p[1..].ToLower()));
         }
 
+        public static void FormatearNombre_NoRangoLetras(object sender, RoutedEventArgs e, IDialogService dialogService)
+        {
+            if (sender is not TextBox textBox) return;
+
+            var texto = textBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(texto)) return;
+
+            var palabras = texto.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            // Aplicar formato Title Case
+            textBox.Text = string.Join(" ",
+                palabras.Select(p => char.ToUpper(p[0]) + p[1..].ToLower()));
+        }
+
         public static void FormatearTelefono_LostFocus(object sender, RoutedEventArgs e, IDialogService dialogService)
         {
             if (sender is not TextBox textBox) return;
@@ -120,6 +134,12 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             textBox.PreviewTextInput += ValidarSoloLetras_PreviewTextInput;
             textBox.LostFocus += (s, e) => FormatearNombre_LostFocus(s, e, dialogService);
+        }
+
+        public static void FormatearTextoTitle(TextBox textBox, IDialogService dialogService)
+        {
+            textBox.PreviewTextInput += ValidarSoloLetras_PreviewTextInput;
+            textBox.LostFocus += (s, e) => FormatearNombre_NoRangoLetras(s, e, dialogService);
         }
 
         public static void ConfigurarValidacionesTelefono(TextBox textBox, IDialogService dialogService)

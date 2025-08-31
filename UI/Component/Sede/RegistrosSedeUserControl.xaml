@@ -49,10 +49,12 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Style="{StaticResource BotonTransparente}" Command="{Binding DataContext.ActualizarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                    CommandParameter="{Binding}" Cursor="Hand" Margin="6,0,6,0">
+                                        <Button Style="{StaticResource BotonTransparente}"
+                                            Click="EditarButton_Click"
+                                            Cursor="Hand" Margin="6,0,6,0">
                                             <svgc:SvgViewbox Source="Resources\Icons\EditarRegistro.svg" Width="35" Height="35"/>
                                         </Button>
+                                        
                                         <Button Style="{StaticResource BotonTransparente}" Command="{Binding DataContext.EliminarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                     CommandParameter="{Binding}" Cursor="Hand" Margin="6,0,6,0">
                                             <svgc:SvgViewbox Source="Resources\Icons\EliminarRegistro.svg" Width="35" Height="35"/>

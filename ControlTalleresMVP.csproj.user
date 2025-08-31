@@ -50,6 +50,9 @@
     <Compile Update="UI\Windows\FormContainer\ContenedorFormPromotorWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UI\Windows\FormContainer\ContenedorFormSedeWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\Windows\MenuWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

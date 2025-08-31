@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ControlTalleresMVP.Persistence.ModelDTO;
+using ControlTalleresMVP.UI.Windows.FormContainer;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -82,5 +84,21 @@ namespace ControlTalleresMVP.UI.Component.Sede
                 textColumn.ElementStyle = style;
             }
         }
+
+        private void EditarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is SedeDTO sedeDto)
+            {
+                var sede = new Persistence.Models.Sede
+                {
+                    IdSede = sedeDto.Id,
+                    Nombre = sedeDto.Nombre,
+                };
+
+                new ContenedorFormSedeWindow(sede).ShowDialog();
+
+            }
+        }
+
     }
 }

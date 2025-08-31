@@ -41,7 +41,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                 <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <!-- Botón Cancelar -->
                     <Button Content="Cancelar" HorizontalAlignment="Right" VerticalAlignment="Center"
-                            ToolTip="Cancelar la actualización"
+                            ToolTip="Cancelar la edición"
                             Click="Cancelar_Click"
                             Width="auto" Height="50" Style="{StaticResource BotonNormal}" Command="{Binding CancelarRegistrarItemCommand}"/>
                     <!-- Botón Principal (Agregar o Guardar) -->

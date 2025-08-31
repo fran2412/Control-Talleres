@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ControlTalleresMVP.Services.Sedes
 {
@@ -42,10 +43,29 @@ namespace ControlTalleresMVP.Services.Sedes
 
         public async Task ActualizarAsync(Sede sede, CancellationToken ct = default)
         {
-            sede.ActualizadoEn = DateTimeOffset.Now;
-            _context.Sedes.Update(sede);
-            await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+            if (sede.IdSede <= 0)
+                throw new ArgumentException("El ID de la sede debe ser válida");
+
+            var sedeExistente = await _context.Sedes
+                .FirstOrDefaultAsync(s => s.IdSede == sede.IdSede, ct);
+
+            if (sedeExistente is null)
+                throw new InvalidOperationException($"No se encontró a la sede con ID {sede.IdSede}");
+
+            // Solo actualizas campos que quieres
+            sedeExistente.Nombre = sede.Nombre;
+            sedeExistente.ActualizadoEn = DateTimeOffset.Now;
+
+            try
+            {
+                await _context.SaveChangesAsync(ct);
+                await InicializarRegistros(ct);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al actualizar la sede: " + ex.Message,
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public async Task<List<SedeDTO>> ObtenerSedesParaGridAsync(CancellationToken ct = default)
