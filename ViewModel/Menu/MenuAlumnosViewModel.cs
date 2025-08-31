@@ -1,4 +1,5 @@
-﻿using ControlTalleresMVP.Helpers.Commands;
+﻿using ControlTalleresMVP.Abstractions;
+using ControlTalleresMVP.Helpers.Commands;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
@@ -14,20 +15,23 @@ using System.Windows.Input;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    public class MenuAlumnosViewModel : INotifyPropertyChanged
+    public class MenuAlumnosViewModel : BaseMenuViewModel<AlumnoDTO, IAlumnoService>
     {
         public string TituloEncabezado { get; set; } = "Gestión de Alumnos";
-        public ObservableCollection<AlumnoDTO> Registros => _alumnoService.RegistrosAlumnos;
-        public ICollectionView? RegistrosView { get; private set; }
+        public override ObservableCollection<AlumnoDTO> Registros => _itemService.RegistrosAlumnos;
         public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; set; }
-        public ICommand RegistrarAlumnoCommand { get; }
-
-        private readonly IAlumnoService _alumnoService;
-        private readonly IDialogService _dialogService;
+        public ICommand RegistrarItemCommand { get; }
 
 
-        public MenuAlumnosViewModel(IAlumnoService alumnoService, IDialogService dialogService)
+
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService)
+            :base(itemService, dialogService)
         {
+            itemService.InicializarRegistros();
+
+            itemService.InicializarRegistros();
+            InicializarVista();
+
             TalleresDisponibles = new ObservableCollection<TallerInscripcion>
             {
                 new TallerInscripcion
@@ -42,12 +46,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 }
             };
 
-            _alumnoService = alumnoService;
-            _dialogService = dialogService;
-            _alumnoService.InicializarRegistros();
-            InitializeView(Registros, Filtro);
 
-            RegistrarAlumnoCommand = new RelayCommand(RegistrarAlumno);
+            RegistrarItemCommand = new AsyncRelayCommand(RegistrarItemAsync);
 
             foreach (var taller in TalleresDisponibles)
             {
@@ -74,34 +74,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public decimal SaldoPendienteTotal =>
             TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.SaldoPendiente);
 
-        private string _campoTextoNombre = "";
-        public string CampoTextoNombre
-        {
-            get => _campoTextoNombre;
-            set
-            {
-                if (_campoTextoNombre != value)
-                {
-                    _campoTextoNombre = value;
-                    OnPropertyChanged(nameof(CampoTextoNombre));
-                }
-            }
-        }
-
-        private string _filtroRegistros = "";
-        public string FiltroRegistros
-        {
-            get => _filtroRegistros;
-            set
-            {
-                if (value != _filtroRegistros)
-                {
-                    _filtroRegistros = value; 
-                    OnPropertyChanged(nameof(FiltroRegistros));
-                    RegistrosView?.Refresh();
-                }
-            }
-        }
 
         private string _campoTextTelefono = "";
         public string CampoTextTelefono
@@ -157,49 +129,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-
-        private void RegistrarAlumno()
-        {
-            if (string.IsNullOrWhiteSpace(CampoTextoNombre))
-            {
-                _dialogService.Alerta("El nombre del alumno es obligatorio"); return;
-            }
-
-            if (_dialogService.Confirmar($"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?") != true)
-            {
-                return;
-            }
-
-            if (InscribirEnTaller)
-            {
-                _dialogService.Alerta("Inscripción en talleres no implementada aún.");
-                // Lógica para inscribir en talleres
-            }
-            try
-            {
-                _alumnoService.GuardarAsync(new Alumno
-                {
-                    Nombre = CampoTextoNombre,
-                    Telefono = CampoTextTelefono,
-                    IdSede = SedeSeleccionadaId,
-                    IdPromotor = PromotorSeleccionadoId,
-                });
-                LimpiarCampos();
-                _dialogService.Info("Alumno registrado correctamente");
-            }
-            catch (Exception ex) 
-            {
-                _dialogService.Error("Error al registrar el alumno.\n" + ex.Message);
-            }
-        }
-
-        protected void InitializeView(ObservableCollection<AlumnoDTO> registros, Predicate<object> filtro)
-        {
-            RegistrosView = CollectionViewSource.GetDefaultView(registros);
-            RegistrosView.Filter = filtro;
-        }
-
-        public bool Filtro(object o)
+        public override bool Filtro(object o)
         {
             if (o is not AlumnoDTO a) return false;
             if (string.IsNullOrWhiteSpace(FiltroRegistros)) return true;
@@ -226,23 +156,45 @@ namespace ControlTalleresMVP.ViewModel.Menu
             return true;
         }
 
-        // Quita acentos y pasa a minúsculas (deja los dígitos tal cual)
-        private static string Normalizar(string s)
-        {
-            var formD = s.Normalize(NormalizationForm.FormD);
-            var sb = new StringBuilder(formD.Length);
 
-            foreach (var ch in formD)
+        protected override async Task RegistrarItemAsync()
+        {
+            if (string.IsNullOrWhiteSpace(CampoTextoNombre))
             {
-                var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
-                if (uc != UnicodeCategory.NonSpacingMark)
-                    sb.Append(char.ToLowerInvariant(ch));
+                _dialogService.Alerta("El nombre del alumno es obligatorio"); return;
             }
 
-            return sb.ToString().Normalize(NormalizationForm.FormC);
+            if (_dialogService.Confirmar($"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?") != true)
+            {
+                return;
+            }
+
+            if (InscribirEnTaller)
+            {
+                _dialogService.Alerta("Inscripción en talleres no implementada aún.");
+                // Lógica para inscribir en talleres
+            }
+            try
+            {
+                await _itemService.GuardarAsync(new Alumno
+                {
+                    Nombre = CampoTextoNombre,
+                    Telefono = CampoTextTelefono,
+                    IdSede = SedeSeleccionadaId,
+                    IdPromotor = PromotorSeleccionadoId,
+                });
+                LimpiarCampos();
+                _dialogService.Info("Alumno registrado correctamente");
+            }
+            catch (Exception ex) 
+            {
+                _dialogService.Error("Error al registrar el alumno.\n" + ex.Message);
+            }
         }
 
-        private void LimpiarCampos()
+
+
+        protected override void LimpiarCampos()
         {
             CampoTextoNombre = "";
             CampoTextTelefono = "";
@@ -254,11 +206,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 taller.Abono = 0;
             }
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
 
