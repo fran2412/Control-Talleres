@@ -5,6 +5,7 @@ using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
+using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.UI.Windows;
 using ControlTalleresMVP.ViewModel.Menu;
 using ControlTalleresMVP.ViewModel.Navigation;
@@ -71,6 +72,7 @@ namespace ControlTalleresMVP
             services.AddTransient<INavigatorService, NavigatorService>();
             services.AddTransient<IDialogService, DialogService>();
             services.AddScoped<IAlumnoService, AlumnoService>();
+            services.AddScoped<ISedeService, SedeService>();
             services.AddTransient<IPromotorService, PromotorService>();
 
 

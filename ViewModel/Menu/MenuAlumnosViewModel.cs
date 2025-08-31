@@ -7,6 +7,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Promotores;
+using ControlTalleresMVP.Services.Sedes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -34,11 +35,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private bool inscribirEnTaller;
 
         private readonly IPromotorService _promotorService;
-        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService)
+        private readonly ISedeService _sedeService;
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService)
             : base(itemService, dialogService)
         {
             _promotorService = promotorService;
+            _sedeService = sedeService;
+
             OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
+            OpcionesSede = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
 
             TalleresDisponibles = new ObservableCollection<TallerInscripcion>
             {

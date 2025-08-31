@@ -2,6 +2,7 @@
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Promotores;
+using ControlTalleresMVP.Services.Sedes;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         private readonly IAlumnoService _alumnoService;
         private readonly IDialogService _dialogService;
         private readonly IPromotorService _promotorService;
+        private readonly ISedeService _sedeService;
         private readonly Alumno _alumnoOriginal;
 
         public ContenedorFormAlumno(Alumno alumno)
@@ -38,6 +40,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             _alumnoService = App.ServiceProvider!.GetRequiredService<IAlumnoService>();
             _dialogService = App.ServiceProvider!.GetRequiredService<IDialogService>();
             _promotorService = App.ServiceProvider!.GetRequiredService<IPromotorService>();
+            _sedeService = App.ServiceProvider!.GetRequiredService<ISedeService>();
             _alumnoOriginal = alumno ?? throw new ArgumentNullException(nameof(alumno));
 
             ConfigurarValidaciones();
@@ -57,6 +60,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             NombreTextBox.Text = _alumnoOriginal.Nombre ?? "";
             TelefonoTextBox.Text = _alumnoOriginal.Telefono ?? "";
             SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.IdSede ?? null;
+            SedeComboBox.ItemsSource = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
             PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.IdPromotor ?? null;
         }
