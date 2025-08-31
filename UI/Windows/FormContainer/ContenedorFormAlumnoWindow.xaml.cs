@@ -23,9 +23,9 @@ using System.Windows.Shapes;
 namespace ControlTalleresMVP.UI.Windows.FormContainer
 {
     /// <summary>
-    /// Lógica de interacción para ContenedorFormAlumno.xaml
+    /// Lógica de interacción para ContenedorFormAlumnoWindow.xaml
     /// </summary>
-    public partial class ContenedorFormAlumno : Window
+    public partial class ContenedorFormAlumnoWindow : Window
     {
         private readonly IAlumnoService _alumnoService;
         private readonly IDialogService _dialogService;
@@ -33,7 +33,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         private readonly ISedeService _sedeService;
         private readonly Alumno _alumnoOriginal;
 
-        public ContenedorFormAlumno(Alumno alumno)
+        public ContenedorFormAlumnoWindow(Alumno alumno)
         {
             InitializeComponent();
 
@@ -41,7 +41,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             _dialogService = App.ServiceProvider!.GetRequiredService<IDialogService>();
             _promotorService = App.ServiceProvider!.GetRequiredService<IPromotorService>();
             _sedeService = App.ServiceProvider!.GetRequiredService<ISedeService>();
-            _alumnoOriginal = alumno ?? throw new ArgumentNullException(nameof(alumno));
+            _alumnoOriginal = alumno;
 
             ConfigurarValidaciones();
             CargarDatos();

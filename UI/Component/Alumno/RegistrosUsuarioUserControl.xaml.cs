@@ -101,7 +101,7 @@ namespace ControlTalleresMVP.UI.Component.Alumno
                     Promotor = alumnoDto.Promotor
                 };
 
-                new ContenedorFormAlumno(alumno).ShowDialog();
+                new ContenedorFormAlumnoWindow(alumno).ShowDialog();
 
             }
         }

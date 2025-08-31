@@ -1,4 +1,4 @@
-﻿<Window x:Class="ControlTalleresMVP.UI.Windows.FormContainer.ContenedorFormAlumno"
+﻿<Window x:Class="ControlTalleresMVP.UI.Windows.FormContainer.ContenedorFormAlumnoWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,7 +8,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         SizeToContent="Height"
-        Title="ContenedorFormAlumno" Width="400">
+        Title="ContenedorFormAlumnoWindow" Width="400">
     <Grid>
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600"
         BorderThickness="1,1,1,1">
@@ -78,7 +78,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
 
                     <!-- Botón Cancelar -->
                     <Button Content="Cancelar" HorizontalAlignment="Right" VerticalAlignment="Center"
-                            ToolTip="Cancelar el registro"
+                            ToolTip="Cancelar la edición"
                             Click="Cancelar_Click"
                     Width="auto" Height="50" Style="{StaticResource BotonNormal}"/>
 

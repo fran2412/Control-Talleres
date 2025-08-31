@@ -42,7 +42,7 @@ namespace ControlTalleresMVP.Services.Sedes
 
         public async Task ActualizarAsync(Sede sede, CancellationToken ct = default)
         {
-            sede.ActualizadoEn = DateTimeOffset.UtcNow;
+            sede.ActualizadoEn = DateTimeOffset.Now;
             _context.Sedes.Update(sede);
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);

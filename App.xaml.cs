@@ -74,7 +74,7 @@ namespace ControlTalleresMVP
             services.AddTransient<IDialogService, DialogService>();
             services.AddScoped<IAlumnoService, AlumnoService>();
             services.AddScoped<ISedeService, SedeService>();
-            services.AddTransient<IPromotorService, PromotorService>();
+            services.AddScoped<IPromotorService, PromotorService>();
 
 
         }

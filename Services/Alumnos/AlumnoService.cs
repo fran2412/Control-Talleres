@@ -57,7 +57,7 @@ namespace ControlTalleresMVP.Services.Alumnos
             alumnoExistente.Telefono = alumno.Telefono;
             alumnoExistente.IdSede = alumno.IdSede == 0 ? null : alumno.IdSede;
             alumnoExistente.IdPromotor = alumno.IdPromotor == 0 ? null : alumno.IdPromotor;
-            alumnoExistente.ActualizadoEn = DateTimeOffset.UtcNow;
+            alumnoExistente.ActualizadoEn = DateTimeOffset.Now;
 
             try
             {

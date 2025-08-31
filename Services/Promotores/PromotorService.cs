@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ControlTalleresMVP.Services.Promotores
 {
@@ -42,12 +43,30 @@ namespace ControlTalleresMVP.Services.Promotores
 
         public async Task ActualizarAsync(Promotor promotor, CancellationToken ct = default)
         {
-            promotor.ActualizadoEn = DateTimeOffset.UtcNow;
-            _context.Promotores.Update(promotor);
-            await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
-        }
+            if (promotor.IdPromotor <= 0)
+                throw new ArgumentException("El ID del alumno debe ser válido");
 
+            var promotorExistente = await _context.Promotores
+                .FirstOrDefaultAsync(p => p.IdPromotor == promotor.IdPromotor, ct);
+
+            if (promotorExistente is null)
+                throw new InvalidOperationException($"No se encontró el promotor con ID {promotor.IdPromotor}");
+
+            // Solo actualizas campos que quieres
+            promotorExistente.Nombre = promotor.Nombre;
+            promotorExistente.ActualizadoEn = DateTimeOffset.Now;
+
+            try
+            {
+                await _context.SaveChangesAsync(ct);
+                await InicializarRegistros(ct);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al actualizar el promotor: " + ex.Message,
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         public async Task<List<PromotorDTO>> ObtenerPromotoresParaGridAsync(CancellationToken ct = default)
         {
 
