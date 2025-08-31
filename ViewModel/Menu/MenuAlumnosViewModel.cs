@@ -1,10 +1,12 @@
 ﻿using ControlTalleresMVP.Helpers.Commands;
+using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Security.AccessControl;
 using System.Text;
 using System.Windows;
 using System.Windows.Data;
@@ -21,9 +23,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public ICommand RegistrarAlumnoCommand { get; }
 
         private readonly IAlumnoService _alumnoService;
+        private readonly IDialogService _dialogService;
 
 
-        public MenuAlumnosViewModel(IAlumnoService alumnoService)
+        public MenuAlumnosViewModel(IAlumnoService alumnoService, IDialogService dialogService)
         {
             TalleresDisponibles = new ObservableCollection<TallerInscripcion>
             {
@@ -40,6 +43,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             };
 
             _alumnoService = alumnoService;
+            _dialogService = dialogService;
             _alumnoService.InicializarRegistros();
             InitializeView(Registros, Filtro);
 
@@ -158,12 +162,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             if (string.IsNullOrWhiteSpace(CampoTextoNombre))
             {
-                MessageBox.Show("El nombre del alumno es obligatorio"); return;
+                _dialogService.Alerta("El nombre del alumno es obligatorio"); return;
+            }
+
+            if (_dialogService.Confirmar($"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?") != true)
+            {
+                return;
             }
 
             if (InscribirEnTaller)
             {
-                MessageBox.Show("Inscripción en talleres no implementada aún.");
+                _dialogService.Alerta("Inscripción en talleres no implementada aún.");
                 // Lógica para inscribir en talleres
             }
             try
@@ -176,11 +185,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     IdPromotor = PromotorSeleccionadoId,
                 });
                 LimpiarCampos();
-                MessageBox.Show("Alumno registrado exitosamente.");
+                _dialogService.Info("Alumno registrado correctamente");
             }
             catch (Exception ex) 
             {
-                MessageBox.Show("Error al registrar el alumno.\n" + ex.Message);
+                _dialogService.Error("Error al registrar el alumno.\n" + ex.Message);
             }
         }
 
