@@ -13,6 +13,5 @@
         </Grid.RowDefinitions>
         <local:FormularioAlumnoUserControl Grid.Row="0" Margin="40,0,40,0"/>
         <local:RegistrosUsuarioUserControl Grid.Row="1" Margin="40,0,40,0"/>
-
     </Grid>
 </UserControl>

@@ -63,6 +63,7 @@ namespace ControlTalleresMVP
             services.AddTransient<MenuTalleresViewModel>();
             services.AddTransient<MenuInscripcionesViewModel>();
             services.AddTransient<MenuPagosViewModel>();
+            services.AddTransient<MenuPromotorViewModel>();
             services.AddTransient<ShellViewModel>();
 
             //Services

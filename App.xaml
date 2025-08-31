@@ -9,6 +9,7 @@
              xmlns:pagocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Pago"
              xmlns:tallercomponent="clr-namespace:ControlTalleresMVP.UI.Component.Taller"
              xmlns:iniciocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Inicio"
+             xmlns:promotorcomponent="clr-namespace:ControlTalleresMVP.UI.Component.Promotor"
              
              >
     <Application.Resources>
@@ -42,6 +43,10 @@
             
             <DataTemplate DataType="{x:Type vmmenu:MenuInicioViewModel}">
                 <iniciocomponent:InicioUserControl/>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type vmmenu:MenuPromotorViewModel}">
+                <promotorcomponent:PromotorUserControl/>
             </DataTemplate>
             
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
