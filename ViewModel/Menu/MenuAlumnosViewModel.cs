@@ -19,7 +19,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
 {
     public partial class MenuAlumnosViewModel : BaseMenuViewModel<AlumnoDTO, IAlumnoService>
     {
-        public string TituloEncabezado { get; set; } = "Gestión de Alumnos";
+        public string TituloEncabezado { get; set; } = "Gestión de alumnos";
 
         public override ObservableCollection<AlumnoDTO> Registros
             => _itemService.RegistrosAlumnos;
@@ -34,7 +34,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService)
             : base(itemService, dialogService)
         {
-            // ✅ CORREGIDO: Inicializar talleres ANTES de la vista
             TalleresDisponibles = new ObservableCollection<TallerInscripcion>
             {
                 new TallerInscripcion { Nombre = "Uñas", Costo = 1200 },
@@ -43,7 +42,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             foreach (var taller in TalleresDisponibles)
             {
-                taller.PropertyChanged += OnTallerPropertyChanged;
+                taller.PropertyChanged += OnTallerPropertyChanged!;
             }
 
             itemService.InicializarRegistros();
@@ -96,7 +95,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     IdPromotor = PromotorSeleccionadoId,
                 });
 
-                // ✅ MEJORADO: Procesar inscripciones si está marcado
+                // Procesar inscripciones si está marcado
                 if (InscribirEnTaller)
                 {
                     await ProcesarInscripcionesTalleres();

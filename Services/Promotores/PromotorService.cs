@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Services.Promotores
 {
-    public class PromotorService
+    public class PromotorService: IPromotorService
     {
         public ObservableCollection<PromotorDTO> RegistrosPromotores { get; set; } = new();
 

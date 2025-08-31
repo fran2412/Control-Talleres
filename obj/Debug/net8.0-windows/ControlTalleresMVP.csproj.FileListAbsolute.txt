@@ -166,3 +166,5 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Promotor\FormularioPromotorUserControl.baml
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Promotor\PromotorUserControl.baml
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows\CommunityToolkit.Mvvm.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Promotor\RegistrosPromotorUserControl.g.cs
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Promotor\RegistrosPromotorUserControl.baml

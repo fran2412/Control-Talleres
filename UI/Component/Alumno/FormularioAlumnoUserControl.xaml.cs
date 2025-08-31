@@ -26,7 +26,6 @@ namespace ControlTalleresMVP.UI.Component.Alumno
     public partial class FormularioAlumnoUserControl : UserControl, INotifyPropertyChanged
     {
         private static readonly Regex regexCaracteres = new(@"^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s']+$");
-        private static readonly Regex regexNombreCompleto = new(@"^(?=(?:[^ ]* ){2,3}[^ ]*$)[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s']+$");
 
         public bool InscribirEnTaller { get; set; } = false;
         public FormularioAlumnoUserControl()

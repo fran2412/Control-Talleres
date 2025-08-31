@@ -32,7 +32,7 @@ namespace ControlTalleresMVP.Abstractions
         private string campoTextoNombre = "";
 
         private string _filtroRegistros = "";
-        // ✅ CORREGIDO: Propiedad manual para controlar el refresh
+        // Propiedad manual para controlar el refresh
         public string FiltroRegistros
         {
             get => _filtroRegistros;
@@ -40,7 +40,7 @@ namespace ControlTalleresMVP.Abstractions
             {
                 if (SetProperty(ref _filtroRegistros, value))
                 {
-                    // ✅ CORREGIDO: Refrescar la vista cuando cambie el filtro
+                    // Refrescar la vista cuando cambie el filtro
                     RegistrosView?.Refresh();
                 }
             }

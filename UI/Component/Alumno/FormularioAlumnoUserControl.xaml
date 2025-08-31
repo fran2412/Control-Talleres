@@ -165,9 +165,9 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                 <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center">
 
                     <!-- Botón Cancelar -->
-                    <Button Content="CANCELAR" HorizontalAlignment="Right" VerticalAlignment="Center"
-                            ToolTip="Cancelar la inscripción"
-                    Width="auto" Height="50" Style="{StaticResource BotonNormal}" Command="{Binding CancelarRegistrarAlumnoCommand}"/>
+                    <Button Content="Cancelar" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            ToolTip="Cancelar el registro"
+                    Width="auto" Height="50" Style="{StaticResource BotonNormal}" Command="{Binding CancelarRegistrarItemCommand}"/>
 
                     <!-- Botón Principal (Agregar o Guardar) -->
                     <Button x:Name="RegistrarAlumnoButton" Content="Registrar alumno" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"
