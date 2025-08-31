@@ -111,5 +111,14 @@ namespace ControlTalleresMVP.Services.Alumnos
                 RegistrosAlumnos.Add(alumno);
             }
         }
+
+        public List<Alumno> ObtenerTodos(CancellationToken ct = default)
+        {
+            return _context.Alumnos
+                .AsNoTracking()
+                .Where(a => !a.Eliminado)
+                .ToList();
+        }
+
     }
 }

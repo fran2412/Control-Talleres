@@ -6,6 +6,7 @@ using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
+using ControlTalleresMVP.Services.Promotores;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -32,9 +33,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private int? promotorSeleccionadoId;
         [ObservableProperty] private bool inscribirEnTaller;
 
-        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService)
+        private readonly IPromotorService _promotorService;
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService)
             : base(itemService, dialogService)
         {
+            _promotorService = promotorService;
+            OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
+
             TalleresDisponibles = new ObservableCollection<TallerInscripcion>
             {
                 new TallerInscripcion { Nombre = "Uñas", Costo = 1200 },
@@ -78,6 +83,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public decimal SaldoPendienteTotal =>
             TalleresDisponibles?.Where(t => t.EstaSeleccionado).Sum(t => t.SaldoPendiente) ?? 0;
+
+        public ObservableCollection<Sede> OpcionesSede { get; set; }
+
+        public ObservableCollection<Promotor> OpcionesPromotor { get; }
+
 
         [RelayCommand]
         protected override async Task RegistrarItemAsync()

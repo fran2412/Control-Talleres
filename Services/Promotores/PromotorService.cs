@@ -82,5 +82,13 @@ namespace ControlTalleresMVP.Services.Promotores
                 RegistrosPromotores.Add(promotor);
             }
         }
+
+        public List<Promotor> ObtenerTodos(CancellationToken ct = default)
+        {
+            return _context.Promotores
+                .AsNoTracking()
+                .Where(p => !p.Eliminado)
+                .ToList();
+        }
     }
 }

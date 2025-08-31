@@ -57,7 +57,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                           SelectedValuePath="IdSede"
                                           ToolTip="Seleccione una sede"
                                           SelectedValue="{Binding SedeSeleccionadaId, Mode=TwoWay}"
-                                          Width="200" Height="30"
+                                          Width="260" Height="30"
                                           Style="{StaticResource MinimalComboBoxStyle}" />
                             </StackPanel>
 
@@ -69,7 +69,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                           SelectedValuePath="IdPromotor"
                                             ToolTip="Seleccione un promotor"
                                           SelectedValue="{Binding PromotorSeleccionadoId, Mode=TwoWay}"
-                                          Width="200" Height="30"
+                                          Width="260" Height="30"
                                           Style="{StaticResource MinimalComboBoxStyle}"/>
                             </StackPanel>
                         </WrapPanel>

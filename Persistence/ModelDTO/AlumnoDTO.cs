@@ -17,11 +17,16 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Nombre completo")]
         public string Nombre { get; set; } = "";
 
-        [Display(Name = "Sede")]
+        [ScaffoldColumn(false)]
         public Sede? Sede { get; set; }
 
-        [Display(Name = "Promotor")]
+        [Display(Name = "Sede")]
+        public string? SedeNombre => Sede?.Nombre;
+
+        [ScaffoldColumn(false)]
         public Promotor? Promotor { get; set; }
+        [Display(Name = "Promotor")]
+        public string? PromotorNombre => Promotor?.Nombre;
 
         [Display(Name = "Teléfono")]
         public string? Telefono { get; set; } = "";

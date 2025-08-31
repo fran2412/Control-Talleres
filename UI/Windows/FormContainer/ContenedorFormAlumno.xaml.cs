@@ -1,9 +1,11 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
+using ControlTalleresMVP.Services.Promotores;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -26,6 +28,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
     {
         private readonly IAlumnoService _alumnoService;
         private readonly IDialogService _dialogService;
+        private readonly IPromotorService _promotorService;
         private readonly Alumno _alumnoOriginal;
 
         public ContenedorFormAlumno(Alumno alumno)
@@ -34,6 +37,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
 
             _alumnoService = App.ServiceProvider!.GetRequiredService<IAlumnoService>();
             _dialogService = App.ServiceProvider!.GetRequiredService<IDialogService>();
+            _promotorService = App.ServiceProvider!.GetRequiredService<IPromotorService>();
             _alumnoOriginal = alumno ?? throw new ArgumentNullException(nameof(alumno));
 
             ConfigurarValidaciones();
@@ -52,8 +56,9 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             NombreTextBox.Text = _alumnoOriginal.Nombre ?? "";
             TelefonoTextBox.Text = _alumnoOriginal.Telefono ?? "";
-            SedeComboBox.SelectedValue = _alumnoOriginal.IdSede ?? null;
-            PromotorComboBox.SelectedValue = _alumnoOriginal.IdPromotor ?? null;
+            SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.IdSede ?? null;
+            PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
+            PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.IdPromotor ?? null;
         }
 
         private bool ValidarFormulario()
@@ -67,11 +72,13 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
 
             var alumnoActualizado = CrearAlumnoActualizado();
 
+            if (!_dialogService.Confirmar("¿Desea guardar los cambios?")) return;
+
             try
             {
                 await _alumnoService.ActualizarAsync(alumnoActualizado);
-                _dialogService.Info("Alumno actualizado correctamente.");
                 Close();
+                _dialogService.Info("Alumno actualizado correctamente.");
             }
             catch (Exception ex)
             {
@@ -91,10 +98,9 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             {
                 IdAlumno = _alumnoOriginal.IdAlumno,
                 Nombre = NombreTextBox.Text.Trim(),
-                Telefono = string.IsNullOrWhiteSpace(TelefonoTextBox.Text)
-                    ? null : TelefonoTextBox.Text.Trim(),
-                IdSede = _alumnoOriginal.IdSede,
-                IdPromotor = _alumnoOriginal.IdPromotor,
+                Telefono = string.IsNullOrWhiteSpace(TelefonoTextBox.Text) ? null : TelefonoTextBox.Text.Trim(),
+                IdSede = SedeComboBox.SelectedValue as int?,
+                IdPromotor = PromotorComboBox.SelectedValue as int?,
                 CreadoEn = _alumnoOriginal.CreadoEn
             };
         }

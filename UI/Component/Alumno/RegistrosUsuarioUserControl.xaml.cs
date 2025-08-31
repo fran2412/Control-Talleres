@@ -97,8 +97,8 @@ namespace ControlTalleresMVP.UI.Component.Alumno
                     IdAlumno = alumnoDto.Id,
                     Nombre = alumnoDto.Nombre,
                     Telefono = alumnoDto.Telefono,
-                    IdSede = alumnoDto.Sede?.IdSede,
-                    IdPromotor = alumnoDto.Promotor?.IdPromotor
+                    Sede = alumnoDto.Sede,
+                    Promotor = alumnoDto.Promotor
                 };
 
                 new ContenedorFormAlumno(alumno).ShowDialog();
