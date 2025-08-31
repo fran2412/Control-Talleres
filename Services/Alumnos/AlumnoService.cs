@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ControlTalleresMVP.Services.Alumnos
 {
@@ -42,10 +43,32 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         public async Task ActualizarAsync(Alumno alumno, CancellationToken ct = default)
         {
-            alumno.ActualizadoEn = DateTimeOffset.UtcNow;
-            _context.Alumnos.Update(alumno);
-            await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+            if (alumno.IdAlumno <= 0)
+                throw new ArgumentException("El ID del alumno debe ser válido");
+
+            var alumnoExistente = await _context.Alumnos
+                .FirstOrDefaultAsync(a => a.IdAlumno == alumno.IdAlumno, ct);
+
+            if (alumnoExistente is null)
+                throw new InvalidOperationException($"No se encontró el alumno con ID {alumno.IdAlumno}");
+
+            // Solo actualizas campos que quieres
+            alumnoExistente.Nombre = alumno.Nombre;
+            alumnoExistente.Telefono = alumno.Telefono;
+            alumnoExistente.IdSede = alumno.IdSede == 0 ? null : alumno.IdSede;
+            alumnoExistente.IdPromotor = alumno.IdPromotor == 0 ? null : alumno.IdPromotor;
+            alumnoExistente.ActualizadoEn = DateTimeOffset.UtcNow;
+
+            try
+            {
+                await _context.SaveChangesAsync(ct);
+                await InicializarRegistros(ct);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al actualizar el alumno: " + ex.Message,
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public async Task<List<AlumnoDTO>> ObtenerAlumnosParaGridAsync(CancellationToken ct = default)

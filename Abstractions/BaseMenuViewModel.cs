@@ -26,9 +26,6 @@ namespace ControlTalleresMVP.Abstractions
         public ICommand EliminarCommand { get; }
         public ICommand ActualizarCommand { get; }
 
-        public abstract string TextGuardarItemButton { get; }
-        public abstract string TituloFormulario { get; }
-
         public BaseMenuViewModel(TService itemService, IDialogService dialogService)
         {
             _itemService = itemService;

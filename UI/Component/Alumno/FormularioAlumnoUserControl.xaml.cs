@@ -23,7 +23,7 @@ namespace ControlTalleresMVP.UI.Component.Alumno
     /// <summary>
     /// Lógica de interacción para FormularioAlumnoUserControl.xaml
     /// </summary>
-    public partial class FormularioAlumnoUserControl : UserControl, INotifyPropertyChanged
+    public partial class FormularioAlumnoUserControl : UserControl
     {
         private static readonly Regex regexCaracteres = new(@"^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s']+$");
 
@@ -73,12 +73,6 @@ namespace ControlTalleresMVP.UI.Component.Alumno
             else
                 TelefonoTextBox.Text = $"({soloDigitos.Substring(0, 3)}) {soloDigitos.Substring(3, 3)}-{soloDigitos.Substring(6, 4)}";
         }
-
-
-        // 👉 implementación de INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         private void NombreTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {

@@ -70,7 +70,7 @@ namespace ControlTalleresMVP
             //Services
             services.AddTransient<INavigatorService, NavigatorService>();
             services.AddTransient<IDialogService, DialogService>();
-            services.AddTransient<IAlumnoService, AlumnoService>();
+            services.AddScoped<IAlumnoService, AlumnoService>();
             services.AddTransient<IPromotorService, PromotorService>();
 
 

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using ControlTalleresMVP.Persistence.ModelDTO;
+using ControlTalleresMVP.Persistence.Models;
+using ControlTalleresMVP.UI.Windows.FormContainer;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -81,6 +85,24 @@ namespace ControlTalleresMVP.UI.Component.Alumno
                 e.Column.Width = new DataGridLength(1, DataGridLengthUnitType.Star);
 
                 textColumn.ElementStyle = style;
+            }
+        }
+
+        private void EditarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is AlumnoDTO alumnoDto)
+            {
+                var alumno = new Persistence.Models.Alumno
+                {
+                    IdAlumno = alumnoDto.Id,
+                    Nombre = alumnoDto.Nombre,
+                    Telefono = alumnoDto.Telefono,
+                    IdSede = alumnoDto.Sede?.IdSede,
+                    IdPromotor = alumnoDto.Promotor?.IdPromotor
+                };
+
+                new ContenedorFormAlumno(alumno).ShowDialog();
+
             }
         }
     }
