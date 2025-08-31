@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlTalleresMVP.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Persistence.ModelDTO
 {
-    public class PromotorDTO
+    public class PromotorDTO : ICrudDTO
     {
         [ScaffoldColumn(false)]
         public int Id { get; set; }

@@ -16,7 +16,7 @@ using System.Windows.Input;
 
 namespace ControlTalleresMVP.Abstractions
 {
-    public abstract partial class BaseMenuViewModel<TDto, TService> : ObservableObject
+    public abstract partial class BaseMenuViewModel<TDto, Item, TService> :ObservableObject where TDto : ICrudDTO where TService : ICrudService<Item>
     {
         public abstract ObservableCollection<TDto> Registros { get; }
         public ICollectionView? RegistrosView { get; set; }
@@ -62,7 +62,20 @@ namespace ControlTalleresMVP.Abstractions
         protected abstract void LimpiarCampos();
         public abstract bool Filtro(object o);
         protected abstract Task ActualizarAsync(TDto? ItemSeleccionado);
-        protected abstract Task EliminarAsync(TDto? ItemSeleccionado);
+        protected async Task EliminarAsync(TDto? itemSeleccionado)
+        {
+            if (itemSeleccionado == null) return;
+            if (!_dialogService.Confirmar($"¿Está seguro de eliminar el item {itemSeleccionado.Nombre}?")) return;
+            try
+            {
+                await _itemService.EliminarAsync(itemSeleccionado.Id);
+                _dialogService.Info("Item eliminado correctamente");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("Error al eliminar el alumno.\n" + ex.Message);
+            }
+        }
 
         protected static string Normalizar(string s)
         {

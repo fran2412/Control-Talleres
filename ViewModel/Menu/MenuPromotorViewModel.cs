@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    public partial class MenuPromotorViewModel: BaseMenuViewModel<PromotorDTO, IPromotorService>
+    public partial class MenuPromotorViewModel: BaseMenuViewModel<PromotorDTO, Promotor, IPromotorService>
     {
         public string TituloEncabezado { get; set; } = "Gestión de promotores";
         public override string TextGuardarItemButton => "Guardar promotor";
@@ -59,21 +59,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             catch (Exception ex)
             {
                 _dialogService.Error("Error al registrar el promotor.\n" + ex.Message);
-            }
-        }
-
-        protected override async Task EliminarAsync(PromotorDTO? promotorSeleccionado)
-        {
-            if (promotorSeleccionado == null) return;
-            if (!_dialogService.Confirmar($"¿Está seguro de eliminar al alumno {promotorSeleccionado.Nombre}?")) return;
-            try
-            {
-                await _itemService.EliminarAsync(promotorSeleccionado.Id);
-                _dialogService.Info("Alumno eliminado correctamente");
-            }
-            catch (Exception ex)
-            {
-                _dialogService.Error("Error al eliminar el alumno.\n" + ex.Message);
             }
         }
 

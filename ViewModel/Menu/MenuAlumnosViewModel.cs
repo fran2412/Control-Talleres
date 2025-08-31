@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    public partial class MenuAlumnosViewModel : BaseMenuViewModel<AlumnoDTO, IAlumnoService>
+    public partial class MenuAlumnosViewModel : BaseMenuViewModel<AlumnoDTO, Alumno, IAlumnoService>
     {
         public string TituloEncabezado { get; set; } = "Gestión de alumnos";
         public override string TextGuardarItemButton => "Guardar alumno";
@@ -51,20 +51,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             itemService.InicializarRegistros();
             InicializarVista();
-        }
-        protected override async Task EliminarAsync(AlumnoDTO? alumnoSeleccionado)
-        {
-            if (alumnoSeleccionado == null) return;
-            if (!_dialogService.Confirmar($"¿Está seguro de eliminar al alumno {alumnoSeleccionado.Nombre}?")) return;
-            try
-            {
-                await _itemService.EliminarAsync(alumnoSeleccionado.Id);
-                _dialogService.Info("Alumno eliminado correctamente"); 
-            }
-            catch (Exception ex)
-            {
-                _dialogService.Error("Error al eliminar el alumno.\n" + ex.Message);
-            }
         }
 
         protected override async Task ActualizarAsync(AlumnoDTO? alumnoSeleccionado)
