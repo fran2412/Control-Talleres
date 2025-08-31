@@ -23,6 +23,9 @@ namespace ControlTalleresMVP.Abstractions
         protected readonly TService _itemService;
         protected readonly IDialogService _dialogService;
 
+        public abstract string TextGuardarItemButton { get; }
+        public abstract string TituloFormulario { get; }
+
         public BaseMenuViewModel(TService itemService, IDialogService dialogService)
         {
             _itemService = itemService;

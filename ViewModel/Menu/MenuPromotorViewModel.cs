@@ -18,7 +18,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
     public partial class MenuPromotorViewModel: BaseMenuViewModel<PromotorDTO, IPromotorService>
     {
         public string TituloEncabezado { get; set; } = "Gestión de promotores";
-
+        public override string TextGuardarItemButton => "Guardar promotor";
+        public override string TituloFormulario => "Registrar promotor";
         public override ObservableCollection<PromotorDTO> Registros
             => _itemService.RegistrosPromotores;
 

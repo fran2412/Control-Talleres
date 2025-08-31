@@ -20,6 +20,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
     public partial class MenuAlumnosViewModel : BaseMenuViewModel<AlumnoDTO, IAlumnoService>
     {
         public string TituloEncabezado { get; set; } = "Gestión de alumnos";
+        public override string TextGuardarItemButton => "Guardar alumno";
+        public override string TituloFormulario => "Registrar alumno";
+        public Visibility InscribirEnTallerVisibility => Visibility.Visible;
 
         public override ObservableCollection<AlumnoDTO> Registros
             => _itemService.RegistrosAlumnos;
