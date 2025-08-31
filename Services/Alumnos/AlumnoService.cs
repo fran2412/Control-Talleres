@@ -28,24 +28,6 @@ namespace ControlTalleresMVP.Services.Alumnos
             await InicializarRegistros(ct);
         }
 
-        public void EditarAlumno(Alumno alumno)
-        {
-            var existente = _context.Alumnos
-                           .FirstOrDefault(a => a.IdAlumno == alumno.IdAlumno);
-
-            if (existente == null)
-                throw new InvalidOperationException("El alumno no existe");
-
-            // Actualizar propiedades necesarias
-            existente.Nombre = alumno.Nombre;
-            existente.Telefono = alumno.Telefono;
-            existente.IdSede = alumno.IdSede;
-            existente.IdPromotor = alumno.IdPromotor;
-            existente.ActualizadoEn = DateTimeOffset.UtcNow;
-
-            _context.SaveChanges();
-        }
-
         public async Task EliminarAsync(int id, CancellationToken ct = default)
         {
             var alumno = await _context.Alumnos.FirstOrDefaultAsync(a => a.IdAlumno == id);

@@ -10,5 +10,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
     {
         public string TituloEncabezado { get; set; } = "Gestión de Promotor";
 
+
     }
 }

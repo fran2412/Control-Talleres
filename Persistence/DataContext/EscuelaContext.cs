@@ -99,6 +99,23 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(e => e.IdPromotor).HasColumnName("id_promotor");
                 entity.Property(e => e.Nombre).HasColumnName("nombre");
+
+                entity.Property(e => e.CreadoEn)
+                    .HasColumnName("creado_en")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.ActualizadoEn)
+                    .HasColumnName("actualizado_en")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Eliminado)
+                    .HasColumnName("eliminado")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.EliminadoEn)
+                    .HasColumnName("eliminado_en");
             });
 
             OnModelCreatingPartial(modelBuilder);

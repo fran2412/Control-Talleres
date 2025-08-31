@@ -13,7 +13,6 @@ namespace ControlTalleresMVP.Services.Alumnos
     {
         public ObservableCollection<AlumnoDTO> RegistrosAlumnos { get; set; }
         public Task GuardarAsync(Alumno alumno, CancellationToken ct = default);
-        public void EditarAlumno(Alumno alumno);
         public Task EliminarAsync(int id, CancellationToken ct = default);
         public Task ActualizarAsync(Alumno alumno, CancellationToken ct = default);
         public Task<List<AlumnoDTO>> ObtenerAlumnosParaGridAsync(CancellationToken ct = default);

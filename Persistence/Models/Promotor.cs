@@ -10,6 +10,12 @@ namespace ControlTalleresMVP.Persistence.Models
     {
         public int IdPromotor { get; set; }
         public string Nombre { get; set; } = null!;
+        public DateTimeOffset CreadoEn { get; set; }
+        public DateTimeOffset ActualizadoEn { get; set; }
+
+        public bool Eliminado { get; set; } = false;
+        public DateTimeOffset? EliminadoEn { get; set; }
+
 
         // Relación inversa: un promotor puede tener muchos alumnos
         public ICollection<Alumno> Alumnos { get; set; } = new List<Alumno>();
