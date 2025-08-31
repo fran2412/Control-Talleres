@@ -23,6 +23,9 @@ namespace ControlTalleresMVP.Abstractions
         protected readonly TService _itemService;
         protected readonly IDialogService _dialogService;
 
+        public ICommand EliminarCommand { get; }
+        public ICommand ActualizarCommand { get; }
+
         public abstract string TextGuardarItemButton { get; }
         public abstract string TituloFormulario { get; }
 
@@ -30,6 +33,8 @@ namespace ControlTalleresMVP.Abstractions
         {
             _itemService = itemService;
             _dialogService = dialogService;
+            EliminarCommand = new AsyncRelayCommand<TDto>(EliminarAsync);
+            ActualizarCommand = new AsyncRelayCommand<TDto>(ActualizarAsync);
         }
 
         [ObservableProperty]
@@ -56,6 +61,8 @@ namespace ControlTalleresMVP.Abstractions
         protected abstract Task RegistrarItemAsync();
         protected abstract void LimpiarCampos();
         public abstract bool Filtro(object o);
+        protected abstract Task ActualizarAsync(TDto? ItemSeleccionado);
+        protected abstract Task EliminarAsync(TDto? ItemSeleccionado);
 
         protected static string Normalizar(string s)
         {

@@ -52,6 +52,28 @@ namespace ControlTalleresMVP.ViewModel.Menu
             itemService.InicializarRegistros();
             InicializarVista();
         }
+        protected override async Task EliminarAsync(AlumnoDTO? alumnoSeleccionado)
+        {
+            if (alumnoSeleccionado == null) return;
+            if (!_dialogService.Confirmar($"¿Está seguro de eliminar al alumno {alumnoSeleccionado.Nombre}?")) return;
+            try
+            {
+                await _itemService.EliminarAsync(alumnoSeleccionado.Id);
+                _dialogService.Info("Alumno eliminado correctamente"); 
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("Error al eliminar el alumno.\n" + ex.Message);
+            }
+        }
+
+        protected override async Task ActualizarAsync(AlumnoDTO? alumnoSeleccionado)
+        {
+            await Task.CompletedTask;
+            _dialogService.Info(alumnoSeleccionado!.Nombre);
+        }
+
+
 
         private void OnTallerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {

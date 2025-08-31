@@ -4,6 +4,7 @@ using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
+using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,28 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 _dialogService.Error("Error al registrar el promotor.\n" + ex.Message);
             }
         }
+
+        protected override async Task EliminarAsync(PromotorDTO? promotorSeleccionado)
+        {
+            if (promotorSeleccionado == null) return;
+            if (!_dialogService.Confirmar($"¿Está seguro de eliminar al alumno {promotorSeleccionado.Nombre}?")) return;
+            try
+            {
+                await _itemService.EliminarAsync(promotorSeleccionado.Id);
+                _dialogService.Info("Alumno eliminado correctamente");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("Error al eliminar el alumno.\n" + ex.Message);
+            }
+        }
+
+        protected override async Task ActualizarAsync(PromotorDTO? promotorSeleccionado)
+        {
+            await Task.CompletedTask;
+            _dialogService.Info(promotorSeleccionado!.Nombre);
+        }
+
 
         protected override void LimpiarCampos()
         {
