@@ -32,6 +32,15 @@
     <Compile Update="UI\Component\Promotor\RegistrosPromotorUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UI\Component\Sede\FormularioSedeUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\Component\Sede\RegistrosSedeUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\Component\Sede\SedeUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\Component\Taller\FormularioTallerUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

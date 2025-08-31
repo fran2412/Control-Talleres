@@ -8,6 +8,7 @@
              xmlns:inscripcioncomponent="clr-namespace:ControlTalleresMVP.UI.Component.Inscripcion"
              xmlns:pagocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Pago"
              xmlns:tallercomponent="clr-namespace:ControlTalleresMVP.UI.Component.Taller"
+             xmlns:sedecomponent="clr-namespace:ControlTalleresMVP.UI.Component.Sede"
              xmlns:iniciocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Inicio"
              xmlns:promotorcomponent="clr-namespace:ControlTalleresMVP.UI.Component.Promotor"
              
@@ -47,6 +48,10 @@
             
             <DataTemplate DataType="{x:Type vmmenu:MenuPromotorViewModel}">
                 <promotorcomponent:PromotorUserControl/>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type vmmenu:MenuSedeViewModel}">
+                <sedecomponent:SedeUserControl/>
             </DataTemplate>
             
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>

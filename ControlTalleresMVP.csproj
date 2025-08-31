@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Icons\SedeIcono.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\Icons\InscripcionIcono.svg" />
   </ItemGroup>
 
@@ -25,6 +29,7 @@
     <Resource Include="Resources\Icons\MaestroIcono.svg" />
     <Resource Include="Resources\Icons\PagoIcono.svg" />
     <Resource Include="Resources\Icons\PromotorIcono.svg" />
+    <Resource Include="Resources\Icons\SedeIcono.svg" />
     <Resource Include="Resources\Icons\TallerIcono.svg" />
     <Resource Include="Resources\Icons\UsuarioIcono.svg" />
     <Resource Include="Resources\Images\AlumnoMenuItem.png" />

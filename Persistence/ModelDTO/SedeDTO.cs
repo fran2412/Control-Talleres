@@ -13,7 +13,7 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [ScaffoldColumn(false)]
         public int Id { get; set; }
 
-        [Display(Name = "Nombre del promotor")]
+        [Display(Name = "Nombre de la sede")]
         public string Nombre { get; set; } = "";
 
         [Display(Name = "Fecha de alta")]

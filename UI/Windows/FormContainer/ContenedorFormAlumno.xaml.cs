@@ -59,10 +59,10 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             NombreTextBox.Text = _alumnoOriginal.Nombre ?? "";
             TelefonoTextBox.Text = _alumnoOriginal.Telefono ?? "";
-            SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.IdSede ?? null;
             SedeComboBox.ItemsSource = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
+            SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.IdSede;
             PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
-            PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.IdPromotor ?? null;
+            PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.IdPromotor;
         }
 
         private bool ValidarFormulario()

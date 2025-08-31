@@ -39,28 +39,39 @@
                                 <TextBlock Text="Alumnos" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
+                    
                     <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoInscripciones}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\InscripcionIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Inscripciones" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
+                    
                     <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoTalleres}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\TallerIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Talleres" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
+                    
                     <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoPagos}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\PagoIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Pagos" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
+                    
                     <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoPromotores}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\PromotorIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
                                 <TextBlock Text="Promotores" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
+                        </WrapPanel>
+                    </Button>
+
+                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoSedes}" Height="40">
+                        <WrapPanel Width="180" Margin="11,0,0,0">
+                            <svgc:SvgViewbox Source="Resources\Icons\SedeIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
+                                <TextBlock Text="Sedes" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
                     

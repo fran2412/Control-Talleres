@@ -95,5 +95,4 @@ namespace ControlTalleresMVP.ViewModel.Menu
             return true;
         }
     }
-
 }
