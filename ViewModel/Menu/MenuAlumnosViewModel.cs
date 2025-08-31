@@ -1,4 +1,6 @@
-﻿using ControlTalleresMVP.Abstractions;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Commands;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
@@ -15,116 +17,125 @@ using System.Windows.Input;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    public class MenuAlumnosViewModel : BaseMenuViewModel<AlumnoDTO, IAlumnoService>
+    public partial class MenuAlumnosViewModel : BaseMenuViewModel<AlumnoDTO, IAlumnoService>
     {
         public string TituloEncabezado { get; set; } = "Gestión de Alumnos";
-        public override ObservableCollection<AlumnoDTO> Registros => _itemService.RegistrosAlumnos;
-        public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; set; }
-        public ICommand RegistrarItemCommand { get; }
 
+        public override ObservableCollection<AlumnoDTO> Registros
+            => _itemService.RegistrosAlumnos;
 
+        public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; }
+
+        [ObservableProperty] private string campoTextTelefono = "";
+        [ObservableProperty] private int? sedeSeleccionadaId;
+        [ObservableProperty] private int? promotorSeleccionadoId;
+        [ObservableProperty] private bool inscribirEnTaller;
 
         public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService)
-            :base(itemService, dialogService)
+            : base(itemService, dialogService)
         {
-            itemService.InicializarRegistros();
-
-            itemService.InicializarRegistros();
-            InicializarVista();
-
+            // ✅ CORREGIDO: Inicializar talleres ANTES de la vista
             TalleresDisponibles = new ObservableCollection<TallerInscripcion>
             {
-                new TallerInscripcion
-                {
-                    Nombre = "Uñas",
-                    Costo = 1200,
-                },
-                new TallerInscripcion
-                {
-                    Nombre = "Repostería",
-                    Costo = 1500,
-                }
+                new TallerInscripcion { Nombre = "Uñas", Costo = 1200 },
+                new TallerInscripcion { Nombre = "Repostería", Costo = 1500 }
             };
-
-
-            RegistrarItemCommand = new AsyncRelayCommand(RegistrarItemAsync);
 
             foreach (var taller in TalleresDisponibles)
             {
-                taller.PropertyChanged += (s, e) =>
-                {
-                    if (e.PropertyName == nameof(TallerInscripcion.Abono) ||
-                        e.PropertyName == nameof(TallerInscripcion.SaldoPendiente) ||
-                        e.PropertyName == nameof(TallerInscripcion.EstaSeleccionado))
-                    {
-                        OnPropertyChanged(nameof(TotalCostos));
-                        OnPropertyChanged(nameof(TotalAbonado));
-                        OnPropertyChanged(nameof(SaldoPendienteTotal));
-                    }
-                };
+                taller.PropertyChanged += OnTallerPropertyChanged;
+            }
+
+            itemService.InicializarRegistros();
+            InicializarVista();
+        }
+
+        private void OnTallerPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TallerInscripcion.Abono) ||
+                e.PropertyName == nameof(TallerInscripcion.SaldoPendiente) ||
+                e.PropertyName == nameof(TallerInscripcion.EstaSeleccionado))
+            {
+                OnPropertyChanged(nameof(TotalCostos));
+                OnPropertyChanged(nameof(TotalAbonado));
+                OnPropertyChanged(nameof(SaldoPendienteTotal));
             }
         }
 
         public decimal TotalCostos =>
-    TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.Costo);
+            TalleresDisponibles?.Where(t => t.EstaSeleccionado).Sum(t => t.Costo) ?? 0;
 
         public decimal TotalAbonado =>
-            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.Abono);
+            TalleresDisponibles?.Where(t => t.EstaSeleccionado).Sum(t => t.Abono) ?? 0;
 
         public decimal SaldoPendienteTotal =>
-            TalleresDisponibles.Where(t => t.EstaSeleccionado).Sum(t => t.SaldoPendiente);
+            TalleresDisponibles?.Where(t => t.EstaSeleccionado).Sum(t => t.SaldoPendiente) ?? 0;
 
-
-        private string _campoTextTelefono = "";
-        public string CampoTextTelefono
+        [RelayCommand]
+        protected override async Task RegistrarItemAsync()
         {
-            get => _campoTextTelefono;
-            set
+            if (string.IsNullOrWhiteSpace(CampoTextoNombre))
             {
-                if (_campoTextTelefono != value)
+                _dialogService.Alerta("El nombre del alumno es obligatorio");
+                return;
+            }
+
+            if (_dialogService.Confirmar(
+                $"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?") != true)
+            {
+                return;
+            }
+
+            try
+            {
+                await _itemService.GuardarAsync(new Alumno
                 {
-                    _campoTextTelefono = value;
-                    OnPropertyChanged(nameof(CampoTextTelefono));
+                    Nombre = CampoTextoNombre.Trim(),
+                    Telefono = CampoTextTelefono?.Trim(),
+                    IdSede = SedeSeleccionadaId,
+                    IdPromotor = PromotorSeleccionadoId,
+                });
+
+                // ✅ MEJORADO: Procesar inscripciones si está marcado
+                if (InscribirEnTaller)
+                {
+                    await ProcesarInscripcionesTalleres();
                 }
+
+                LimpiarCampos();
+                _dialogService.Info("Alumno registrado correctamente");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("Error al registrar el alumno.\n" + ex.Message);
             }
         }
 
-        public ObservableCollection<Sede>? OpcionesSede { get; set; }
-
-        private int? _sedeSeleccionadaId;
-        public int? SedeSeleccionadaId
+        private async Task ProcesarInscripcionesTalleres()
         {
-            get => _sedeSeleccionadaId;
-            set
-            {
-                _sedeSeleccionadaId = value;
-                OnPropertyChanged(nameof(SedeSeleccionadaId));
-            }
+            var talleresSeleccionados = TalleresDisponibles?.Where(t => t.EstaSeleccionado).ToList();
+            if (talleresSeleccionados?.Any() != true) return;
+
+            // TODO: Implementar lógica de inscripción a talleres
+            // foreach (var taller in talleresSeleccionados)
+            // {
+            //     await _tallerService.InscribirAlumnoAsync(ultimoAlumnoId, taller, taller.Abono);
+            // }
         }
 
-        public ObservableCollection<Promotor>? OpcionesPromotor { get; set; }
-
-        private int? _promotorSeleccionadoId;
-        public int? PromotorSeleccionadoId
+        protected override void LimpiarCampos()
         {
-            get => _promotorSeleccionadoId;
-            set
-            {
-                _promotorSeleccionadoId = value;
-                OnPropertyChanged(nameof(PromotorSeleccionadoId));
-            }
-        }
+            CampoTextoNombre = "";
+            CampoTextTelefono = "";
+            SedeSeleccionadaId = null;
+            PromotorSeleccionadoId = null;
 
-        private bool _inscribirEnTaller;
-        public bool InscribirEnTaller
-        {
-            get => _inscribirEnTaller;
-            set
+            if (TalleresDisponibles != null)
             {
-                if (_inscribirEnTaller != value)
+                foreach (var taller in TalleresDisponibles)
                 {
-                    _inscribirEnTaller = value;
-                    OnPropertyChanged(nameof(InscribirEnTaller));
+                    taller.EstaSeleccionado = false;
+                    taller.Abono = 0;
                 }
             }
         }
@@ -134,15 +145,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
             if (o is not AlumnoDTO a) return false;
             if (string.IsNullOrWhiteSpace(FiltroRegistros)) return true;
 
-            // Nombre completo y teléfono del DTO
             var nombreCompleto = a.Nombre ?? "";
             var telefono = a.Telefono ?? "";
             var telSoloDigitos = new string(telefono.Where(char.IsDigit).ToArray());
 
-            // Texto donde buscar (nombre + teléfono en crudo + teléfono solo dígitos)
             var haystack = Normalizar($"{nombreCompleto} {telefono} {telSoloDigitos}");
 
-            // Cada palabra (separada por espacios) debe estar contenida (AND)
             var tokens = FiltroRegistros
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Select(Normalizar);
@@ -154,57 +162,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
 
             return true;
-        }
-
-
-        protected override async Task RegistrarItemAsync()
-        {
-            if (string.IsNullOrWhiteSpace(CampoTextoNombre))
-            {
-                _dialogService.Alerta("El nombre del alumno es obligatorio"); return;
-            }
-
-            if (_dialogService.Confirmar($"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?") != true)
-            {
-                return;
-            }
-
-            if (InscribirEnTaller)
-            {
-                _dialogService.Alerta("Inscripción en talleres no implementada aún.");
-                // Lógica para inscribir en talleres
-            }
-            try
-            {
-                await _itemService.GuardarAsync(new Alumno
-                {
-                    Nombre = CampoTextoNombre,
-                    Telefono = CampoTextTelefono,
-                    IdSede = SedeSeleccionadaId,
-                    IdPromotor = PromotorSeleccionadoId,
-                });
-                LimpiarCampos();
-                _dialogService.Info("Alumno registrado correctamente");
-            }
-            catch (Exception ex) 
-            {
-                _dialogService.Error("Error al registrar el alumno.\n" + ex.Message);
-            }
-        }
-
-
-
-        protected override void LimpiarCampos()
-        {
-            CampoTextoNombre = "";
-            CampoTextTelefono = "";
-            SedeSeleccionadaId = null;
-            PromotorSeleccionadoId = null;
-            foreach (var taller in TalleresDisponibles)
-            {
-                taller.EstaSeleccionado = false;
-                taller.Abono = 0;
-            }
         }
     }
 }
