@@ -43,7 +43,9 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         private void ConfigurarValidaciones()
         {
             // Configurar validaciones usando el helper
-            BaseFormHelper.FormatearTextoTitle(NombreTextBox, _dialogService);
+            BaseFormHelper.ConfigurarTitleCase(NombreTextBox);
+            BaseFormHelper.ConfigurarTitleCase(HorarioTextBox);
+            BaseFormHelper.ConfigurarCerrarConEscape(this);
         }
 
         private void CargarDatos()
@@ -54,7 +56,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
 
         private bool ValidarFormulario()
         {
-            return BaseFormHelper.ValidarCampoObligatorio(NombreTextBox, "El nombre", _dialogService);
+            return BaseFormHelper.ValidarCampoObligatorio(NombreTextBox, "El nombre", _dialogService) && BaseFormHelper.ValidarCampoObligatorio(HorarioTextBox, "El horario", _dialogService);
         }
 
         private async void EditarTaller_Click(object sender, RoutedEventArgs e)

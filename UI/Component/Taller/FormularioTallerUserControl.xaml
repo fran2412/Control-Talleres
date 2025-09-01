@@ -28,6 +28,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                 <TextBlock Text="* Nombre del taller" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
                                 <TextBox x:Name="NombreTextBox" Text="{Binding CampoTextoNombre, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
                          Style="{StaticResource TextBoxCampo}" 
+                                         LostFocus="NombreTextBox_LostFocus"
                                          ToolTip="Ingrese el nombre del taller"
                          Height="30" Width="260"
                          Tag="Ej. Uñas"/>
@@ -36,7 +37,8 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                             <StackPanel Margin="0,20,20,0">
                                 <TextBlock Text="* Horario del taller" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
                                 <TextBox x:Name="HorarioTextBox" Text="{Binding CampoTextoHorario, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                         Style="{StaticResource TextBoxCampo}" 
+                         Style="{StaticResource TextBoxCampo}"
+                                         LostFocus="HorarioTextBox_LostFocus"
                                          ToolTip="Ingrese el horario del taller"
                          Height="30" Width="260"
                          Tag="Ej. Sábados de 12:00 - 1:00"/>

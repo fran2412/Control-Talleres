@@ -136,6 +136,41 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             textBox.LostFocus += (s, e) => FormatearNombre_LostFocus(s, e, dialogService);
         }
 
+        public static void ConfigurarTitleCase(TextBox textBox)
+        {
+            textBox.LostFocus += FormatearTitleCase_LostFocus;
+        }
+
+        public static void ConfigurarPrimeraMayuscula(TextBox textBox)
+        {
+            textBox.LostFocus += FormatearPrimeraMayuscula_LostFocus;
+        }
+
+
+        public static void FormatearTitleCase_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TextBox textBox) return;
+
+            var texto = textBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(texto)) return;
+
+            var palabras = texto
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => char.ToUpper(p[0]) + p[1..].ToLower());
+
+            textBox.Text = string.Join(" ", palabras);
+        }
+
+        public static void FormatearPrimeraMayuscula_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TextBox textBox) return;
+
+            var texto = textBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(texto)) return;
+
+            textBox.Text = char.ToUpper(texto[0]) + texto[1..].ToLower();
+        }
+
         public static void FormatearTextoTitle(TextBox textBox, IDialogService dialogService)
         {
             textBox.PreviewTextInput += ValidarSoloLetras_PreviewTextInput;

@@ -54,6 +54,7 @@ namespace ControlTalleresMVP.Services.Talleres
 
             // Solo actualizas campos que quieres
             tallerExistente.Nombre = taller.Nombre;
+            tallerExistente.Horario = taller.Horario;
             tallerExistente.ActualizadoEn = DateTimeOffset.Now;
 
             try

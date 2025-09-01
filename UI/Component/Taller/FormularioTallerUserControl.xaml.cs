@@ -25,5 +25,26 @@ namespace ControlTalleresMVP.UI.Component.Taller
         {
             InitializeComponent();
         }
+
+        private void NombreTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var texto = NombreTextBox.Text.Trim();
+
+            var palabras = texto.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            NombreTextBox.Text = string.Join(" ",
+                palabras.Select(p => char.ToUpper(p[0]) + p.Substring(1).ToLower()));
+
+        }
+
+        private void HorarioTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var texto = HorarioTextBox.Text.Trim();
+
+            var palabras = texto.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            HorarioTextBox.Text = string.Join(" ",
+                palabras.Select(p => char.ToUpper(p[0]) + p.Substring(1).ToLower()));
+        }
     }
 }
