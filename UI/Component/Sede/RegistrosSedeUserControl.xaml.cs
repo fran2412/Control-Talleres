@@ -91,7 +91,7 @@ namespace ControlTalleresMVP.UI.Component.Sede
             {
                 var sede = new Persistence.Models.Sede
                 {
-                    IdSede = sedeDto.Id,
+                    SedeId = sedeDto.Id,
                     Nombre = sedeDto.Nombre,
                 };
 

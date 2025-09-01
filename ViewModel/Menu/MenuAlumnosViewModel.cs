@@ -115,8 +115,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     Nombre = CampoTextoNombre.Trim(),
                     Telefono = CampoTextTelefono?.Trim(),
-                    IdSede = SedeSeleccionadaId,
-                    IdPromotor = PromotorSeleccionadoId,
+                    SedeId = SedeSeleccionadaId,
+                    PromotorId = PromotorSeleccionadoId,
                 });
 
                 // Procesar inscripciones si está marcado

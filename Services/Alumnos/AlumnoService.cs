@@ -31,7 +31,7 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)
         {
-            var alumno = await _context.Alumnos.FirstOrDefaultAsync(a => a.IdAlumno == id);
+            var alumno = await _context.Alumnos.FirstOrDefaultAsync(a => a.AlumnoId == id);
             if (alumno is null) return;
 
             alumno.Eliminado = true;
@@ -43,20 +43,20 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         public async Task ActualizarAsync(Alumno alumno, CancellationToken ct = default)
         {
-            if (alumno.IdAlumno <= 0)
+            if (alumno.AlumnoId <= 0)
                 throw new ArgumentException("El ID del alumno debe ser válido");
 
             var alumnoExistente = await _context.Alumnos
-                .FirstOrDefaultAsync(a => a.IdAlumno == alumno.IdAlumno, ct);
+                .FirstOrDefaultAsync(a => a.AlumnoId == alumno.AlumnoId, ct);
 
             if (alumnoExistente is null)
-                throw new InvalidOperationException($"No se encontró el alumno con ID {alumno.IdAlumno}");
+                throw new InvalidOperationException($"No se encontró el alumno con ID {alumno.AlumnoId}");
 
             // Solo actualizas campos que quieres
             alumnoExistente.Nombre = alumno.Nombre;
             alumnoExistente.Telefono = alumno.Telefono;
-            alumnoExistente.IdSede = alumno.IdSede == 0 ? null : alumno.IdSede;
-            alumnoExistente.IdPromotor = alumno.IdPromotor == 0 ? null : alumno.IdPromotor;
+            alumnoExistente.SedeId = alumno.SedeId == 0 ? null : alumno.SedeId;
+            alumnoExistente.PromotorId = alumno.PromotorId == 0 ? null : alumno.PromotorId;
             alumnoExistente.ActualizadoEn = DateTimeOffset.Now;
 
             try
@@ -79,7 +79,7 @@ namespace ControlTalleresMVP.Services.Alumnos
                 .Where(a => !a.Eliminado)
                 .Select(u => new
                 {
-                    u.IdAlumno,
+                    u.AlumnoId,
                     u.Nombre,
                     u.Telefono,
                     u.Sede,
@@ -90,7 +90,7 @@ namespace ControlTalleresMVP.Services.Alumnos
 
             return datos.Select(u => new AlumnoDTO
             {
-                Id = u.IdAlumno,
+                Id = u.AlumnoId,
                 Nombre = u.Nombre,
                 Telefono = u.Telefono,
                 Sede = u.Sede,

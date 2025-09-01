@@ -19,7 +19,7 @@ namespace ControlTalleresMVP.Migrations
 
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Alumno", b =>
                 {
-                    b.Property<int>("IdAlumno")
+                    b.Property<int>("AlumnoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_alumno");
@@ -46,37 +46,105 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
-                    b.Property<int?>("IdPromotor")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id_promotor");
-
-                    b.Property<int?>("IdSede")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id_sede");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("nombre");
 
+                    b.Property<int?>("PromotorId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id_promotor");
+
+                    b.Property<int?>("SedeId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id_sede");
+
                     b.Property<string>("Telefono")
                         .HasColumnType("TEXT")
                         .HasColumnName("telefono");
 
-                    b.HasKey("IdAlumno");
+                    b.HasKey("AlumnoId");
 
-                    b.HasIndex("IdPromotor");
+                    b.HasIndex("PromotorId");
 
-                    b.HasIndex("IdSede");
+                    b.HasIndex("SedeId");
 
                     b.HasIndex(new[] { "Nombre" }, "idx_alumnos_nombre");
 
                     b.ToTable("alumnos", (string)null);
                 });
 
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Generacion", b =>
+                {
+                    b.Property<int>("GeneracionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("ActualizadoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreadoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Eliminado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("EliminadoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EsActual")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("FechaFin")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("GeneracionId");
+
+                    b.ToTable("Generacion");
+                });
+
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Inscripcion", b =>
+                {
+                    b.Property<int>("InscripcionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AlumnoId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Costo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GeneracionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TallerId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("InscripcionId");
+
+                    b.HasIndex("AlumnoId");
+
+                    b.HasIndex("GeneracionId");
+
+                    b.HasIndex("TallerId");
+
+                    b.ToTable("Inscripciones");
+                });
+
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Promotor", b =>
                 {
-                    b.Property<int>("IdPromotor")
+                    b.Property<int>("PromotorId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_promotor");
@@ -108,14 +176,14 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("nombre");
 
-                    b.HasKey("IdPromotor");
+                    b.HasKey("PromotorId");
 
                     b.ToTable("promotores", (string)null);
                 });
 
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Sede", b =>
                 {
-                    b.Property<int>("IdSede")
+                    b.Property<int>("SedeId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_sede");
@@ -147,21 +215,52 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("nombre");
 
-                    b.HasKey("IdSede");
+                    b.HasKey("SedeId");
 
                     b.ToTable("sedes", (string)null);
+                });
+
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Taller", b =>
+                {
+                    b.Property<int>("TallerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("ActualizadoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreadoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Eliminado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("EliminadoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Horario")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("TallerId");
+
+                    b.ToTable("Talleres");
                 });
 
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Alumno", b =>
                 {
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Promotor", "Promotor")
                         .WithMany("Alumnos")
-                        .HasForeignKey("IdPromotor")
+                        .HasForeignKey("PromotorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Sede", "Sede")
                         .WithMany("Alumnos")
-                        .HasForeignKey("IdSede")
+                        .HasForeignKey("SedeId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Promotor");
@@ -169,6 +268,43 @@ namespace ControlTalleresMVP.Migrations
                     b.Navigation("Sede");
                 });
 
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Inscripcion", b =>
+                {
+                    b.HasOne("ControlTalleresMVP.Persistence.Models.Alumno", "Alumno")
+                        .WithMany("Inscripciones")
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ControlTalleresMVP.Persistence.Models.Generacion", "Generacion")
+                        .WithMany("Inscripciones")
+                        .HasForeignKey("GeneracionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ControlTalleresMVP.Persistence.Models.Taller", "Taller")
+                        .WithMany("Inscripciones")
+                        .HasForeignKey("TallerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Alumno");
+
+                    b.Navigation("Generacion");
+
+                    b.Navigation("Taller");
+                });
+
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Alumno", b =>
+                {
+                    b.Navigation("Inscripciones");
+                });
+
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Generacion", b =>
+                {
+                    b.Navigation("Inscripciones");
+                });
+
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Promotor", b =>
                 {
                     b.Navigation("Alumnos");
@@ -177,6 +313,11 @@ namespace ControlTalleresMVP.Migrations
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Sede", b =>
                 {
                     b.Navigation("Alumnos");
+                });
+
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Taller", b =>
+                {
+                    b.Navigation("Inscripciones");
                 });
 #pragma warning restore 612, 618
         }

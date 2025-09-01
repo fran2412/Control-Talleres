@@ -8,7 +8,7 @@ namespace ControlTalleresMVP.Persistence.Models
 {
     public class Sede
     {
-        public int IdSede { get; set; }
+        public int SedeId { get; set; }
         public string Nombre { get; set; } = null!;
 
         public DateTimeOffset CreadoEn { get; set; }

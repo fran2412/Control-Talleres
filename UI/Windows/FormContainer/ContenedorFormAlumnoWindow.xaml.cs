@@ -60,9 +60,9 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             NombreTextBox.Text = _alumnoOriginal.Nombre ?? "";
             TelefonoTextBox.Text = _alumnoOriginal.Telefono ?? "";
             SedeComboBox.ItemsSource = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
-            SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.IdSede;
+            SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.SedeId;
             PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
-            PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.IdPromotor;
+            PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.PromotorId;
         }
 
         private bool ValidarFormulario()
@@ -100,11 +100,11 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             return new Alumno
             {
-                IdAlumno = _alumnoOriginal.IdAlumno,
+                AlumnoId = _alumnoOriginal.AlumnoId,
                 Nombre = NombreTextBox.Text.Trim(),
                 Telefono = string.IsNullOrWhiteSpace(TelefonoTextBox.Text) ? null : TelefonoTextBox.Text.Trim(),
-                IdSede = SedeComboBox.SelectedValue as int?,
-                IdPromotor = PromotorComboBox.SelectedValue as int?,
+                SedeId = SedeComboBox.SelectedValue as int?,
+                PromotorId = PromotorComboBox.SelectedValue as int?,
                 CreadoEn = _alumnoOriginal.CreadoEn
             };
         }

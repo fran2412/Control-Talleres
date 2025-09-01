@@ -22,7 +22,7 @@ namespace ControlTalleresMVP.Migrations
 
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Alumno", b =>
                 {
-                    b.Property<int>("IdAlumno")
+                    b.Property<int>("AlumnoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_alumno");
@@ -49,11 +49,11 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
-                    b.Property<int?>("IdPromotor")
+                    b.Property<int?>("PromotorId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_promotor");
 
-                    b.Property<int?>("IdSede")
+                    b.Property<int?>("SedeId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_sede");
 
@@ -66,11 +66,11 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("telefono");
 
-                    b.HasKey("IdAlumno");
+                    b.HasKey("AlumnoId");
 
-                    b.HasIndex("IdPromotor");
+                    b.HasIndex("PromotorId");
 
-                    b.HasIndex("IdSede");
+                    b.HasIndex("SedeId");
 
                     b.HasIndex(new[] { "Nombre" }, "idx_alumnos_nombre");
 
@@ -79,7 +79,7 @@ namespace ControlTalleresMVP.Migrations
 
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Promotor", b =>
                 {
-                    b.Property<int>("IdPromotor")
+                    b.Property<int>("PromotorId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_promotor");
@@ -89,14 +89,14 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("nombre");
 
-                    b.HasKey("IdPromotor");
+                    b.HasKey("PromotorId");
 
                     b.ToTable("promotores", (string)null);
                 });
 
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Sede", b =>
                 {
-                    b.Property<int>("IdSede")
+                    b.Property<int>("SedeId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_sede");
@@ -106,7 +106,7 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("nombre");
 
-                    b.HasKey("IdSede");
+                    b.HasKey("SedeId");
 
                     b.ToTable("sedes", (string)null);
                 });
@@ -115,12 +115,12 @@ namespace ControlTalleresMVP.Migrations
                 {
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Promotor", "Promotor")
                         .WithMany("Alumnos")
-                        .HasForeignKey("IdPromotor")
+                        .HasForeignKey("PromotorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Sede", "Sede")
                         .WithMany("Alumnos")
-                        .HasForeignKey("IdSede")
+                        .HasForeignKey("SedeId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Promotor");

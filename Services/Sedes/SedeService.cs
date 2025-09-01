@@ -31,7 +31,7 @@ namespace ControlTalleresMVP.Services.Sedes
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)
         {
-            var sede = await _context.Sedes.FirstOrDefaultAsync(p => p.IdSede == id);
+            var sede = await _context.Sedes.FirstOrDefaultAsync(p => p.SedeId == id);
             if (sede is null) return;
 
             sede.Eliminado = true;
@@ -43,14 +43,14 @@ namespace ControlTalleresMVP.Services.Sedes
 
         public async Task ActualizarAsync(Sede sede, CancellationToken ct = default)
         {
-            if (sede.IdSede <= 0)
+            if (sede.SedeId <= 0)
                 throw new ArgumentException("El ID de la sede debe ser válida");
 
             var sedeExistente = await _context.Sedes
-                .FirstOrDefaultAsync(s => s.IdSede == sede.IdSede, ct);
+                .FirstOrDefaultAsync(s => s.SedeId == sede.SedeId, ct);
 
             if (sedeExistente is null)
-                throw new InvalidOperationException($"No se encontró a la sede con ID {sede.IdSede}");
+                throw new InvalidOperationException($"No se encontró a la sede con ID {sede.SedeId}");
 
             // Solo actualizas campos que quieres
             sedeExistente.Nombre = sede.Nombre;
@@ -76,7 +76,7 @@ namespace ControlTalleresMVP.Services.Sedes
                 .Where(a => !a.Eliminado)
                 .Select(u => new
                 {
-                    u.IdSede,
+                    u.SedeId,
                     u.Nombre,
                     u.CreadoEn
                 })
@@ -84,7 +84,7 @@ namespace ControlTalleresMVP.Services.Sedes
 
             return datos.Select(u => new SedeDTO
             {
-                Id = u.IdSede,
+                Id = u.SedeId,
                 Nombre = u.Nombre,
                 CreadoEn = u.CreadoEn
             }).ToList();

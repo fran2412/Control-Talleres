@@ -22,7 +22,7 @@ namespace ControlTalleresMVP.Migrations
 
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Alumno", b =>
                 {
-                    b.Property<int>("IdAlumno")
+                    b.Property<int>("AlumnoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_alumno");
@@ -58,7 +58,7 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("telefono");
 
-                    b.HasKey("IdAlumno");
+                    b.HasKey("AlumnoId");
 
                     b.HasIndex(new[] { "Nombre" }, "idx_alumnos_nombre");
 

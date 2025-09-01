@@ -31,7 +31,7 @@ namespace ControlTalleresMVP.Services.Promotores
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)
         {
-            var promotor = await _context.Promotores.FirstOrDefaultAsync(p => p.IdPromotor== id);
+            var promotor = await _context.Promotores.FirstOrDefaultAsync(p => p.PromotorId== id);
             if (promotor is null) return;
 
             promotor.Eliminado = true;
@@ -43,14 +43,14 @@ namespace ControlTalleresMVP.Services.Promotores
 
         public async Task ActualizarAsync(Promotor promotor, CancellationToken ct = default)
         {
-            if (promotor.IdPromotor <= 0)
+            if (promotor.PromotorId <= 0)
                 throw new ArgumentException("El ID del alumno debe ser válido");
 
             var promotorExistente = await _context.Promotores
-                .FirstOrDefaultAsync(p => p.IdPromotor == promotor.IdPromotor, ct);
+                .FirstOrDefaultAsync(p => p.PromotorId == promotor.PromotorId, ct);
 
             if (promotorExistente is null)
-                throw new InvalidOperationException($"No se encontró el promotor con ID {promotor.IdPromotor}");
+                throw new InvalidOperationException($"No se encontró el promotor con ID {promotor.PromotorId}");
 
             // Solo actualizas campos que quieres
             promotorExistente.Nombre = promotor.Nombre;
@@ -75,7 +75,7 @@ namespace ControlTalleresMVP.Services.Promotores
                 .Where(a => !a.Eliminado)
                 .Select(u => new
                 {
-                    u.IdPromotor,
+                    u.PromotorId,
                     u.Nombre,
                     u.CreadoEn
                 })
@@ -83,7 +83,7 @@ namespace ControlTalleresMVP.Services.Promotores
 
             return datos.Select(u => new PromotorDTO
             {
-                Id = u.IdPromotor,
+                Id = u.PromotorId,
                 Nombre = u.Nombre,
                 CreadoEn = u.CreadoEn
             }).ToList();

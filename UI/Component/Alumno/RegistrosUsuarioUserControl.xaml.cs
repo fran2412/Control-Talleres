@@ -94,7 +94,7 @@ namespace ControlTalleresMVP.UI.Component.Alumno
             {
                 var alumno = new Persistence.Models.Alumno
                 {
-                    IdAlumno = alumnoDto.Id,
+                    AlumnoId = alumnoDto.Id,
                     Nombre = alumnoDto.Nombre,
                     Telefono = alumnoDto.Telefono,
                     Sede = alumnoDto.Sede,

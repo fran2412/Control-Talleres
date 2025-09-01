@@ -91,7 +91,7 @@ namespace ControlTalleresMVP.UI.Component.Promotor
             {
                 var promotor = new Persistence.Models.Promotor
                 {
-                    IdPromotor = promotorDto.Id,
+                    PromotorId = promotorDto.Id,
                     Nombre = promotorDto.Nombre,
                 };
 

@@ -8,7 +8,7 @@ namespace ControlTalleresMVP.Persistence.Models
 {
     public class Promotor
     {
-        public int IdPromotor { get; set; }
+        public int PromotorId { get; set; }
         public string Nombre { get; set; } = null!;
         public DateTimeOffset CreadoEn { get; set; }
         public DateTimeOffset ActualizadoEn { get; set; }

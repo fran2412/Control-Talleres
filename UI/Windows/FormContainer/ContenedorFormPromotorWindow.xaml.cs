@@ -86,7 +86,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             return new Promotor
             {
-                IdPromotor = _promotorOriginal.IdPromotor,
+                PromotorId = _promotorOriginal.PromotorId,
                 Nombre = NombreTextBox.Text.Trim(),
                 CreadoEn = _promotorOriginal.CreadoEn
             };

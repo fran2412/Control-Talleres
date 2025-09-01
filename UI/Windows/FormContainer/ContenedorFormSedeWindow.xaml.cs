@@ -86,7 +86,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             return new Sede
             {
-                IdSede = _sedeOriginal.IdSede,
+                SedeId = _sedeOriginal.SedeId,
                 Nombre = NombreTextBox.Text.Trim(),
                 CreadoEn = _sedeOriginal.CreadoEn
             };
