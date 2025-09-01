@@ -12,5 +12,6 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <local:FormularioTallerUserControl Grid.Row="0" Margin="40,0,40,0"/>
+        <local:RegistrosTallerUserControl Grid.Row="1" Margin="40,40,40,0"/>
     </Grid>
 </UserControl>

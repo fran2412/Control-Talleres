@@ -44,6 +44,9 @@
     <Compile Update="UI\Component\Taller\FormularioTallerUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UI\Component\Taller\RegistrosTallerUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\Component\Taller\TallerUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -51,6 +54,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UI\Windows\FormContainer\ContenedorFormSedeWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\Windows\FormContainer\ContenedorFormTallerWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UI\Windows\MenuWindow.xaml.cs">

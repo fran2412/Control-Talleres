@@ -54,7 +54,7 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                 <TextBlock Text="Sede" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
                                 <ComboBox ItemsSource="{Binding OpcionesSede}"
                                           DisplayMemberPath="Nombre"
-                                          SelectedValuePath="IdSede"
+                                          SelectedValuePath="SedeId"
                                           ToolTip="Seleccione una sede"
                                           SelectedValue="{Binding SedeSeleccionadaId, Mode=TwoWay}"
                                           Width="260" Height="30"
@@ -66,8 +66,8 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                 <TextBlock Text="Promotor" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
                                 <ComboBox ItemsSource="{Binding OpcionesPromotor}"
                                           DisplayMemberPath="Nombre"
-                                          SelectedValuePath="IdPromotor"
-                                            ToolTip="Seleccione un promotor"
+                                          SelectedValuePath="PromotorId"
+                                          ToolTip="Seleccione un promotor"
                                           SelectedValue="{Binding PromotorSeleccionadoId, Mode=TwoWay}"
                                           Width="260" Height="30"
                                           Style="{StaticResource MinimalComboBoxStyle}"/>

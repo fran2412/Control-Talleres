@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "lBiMi4gYPao=",
+  "dgSpecHash": "s0v/Aoq3MZo=",
   "success": true,
   "projectFilePath": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\ControlTalleresMVP.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\panch\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
+    "C:\\Users\\panch\\.nuget\\packages\\efcore.namingconventions\\8.0.0\\efcore.namingconventions.8.0.0.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\microsoft.codeanalysis.analyzers\\3.3.3\\microsoft.codeanalysis.analyzers.3.3.3.nupkg.sha512",

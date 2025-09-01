@@ -180,3 +180,8 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Windows\FormContainer\ContenedorFormPromotorWindow.baml
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Windows\FormContainer\ContenedorFormSedeWindow.g.cs
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Windows\FormContainer\ContenedorFormSedeWindow.baml
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows\EFCore.NamingConventions.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Taller\RegistrosTallerUserControl.g.cs
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Windows\FormContainer\ContenedorFormTallerWindow.g.cs
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Taller\RegistrosTallerUserControl.baml
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Windows\FormContainer\ContenedorFormTallerWindow.baml

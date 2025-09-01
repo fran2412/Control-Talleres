@@ -6,6 +6,7 @@ using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Talleres;
 using ControlTalleresMVP.UI.Windows;
 using ControlTalleresMVP.ViewModel.Menu;
 using ControlTalleresMVP.ViewModel.Navigation;
@@ -53,7 +54,8 @@ namespace ControlTalleresMVP
         {
             //DbContext
             services.AddDbContext<EscuelaContext>(opt =>
-                opt.UseSqlite($"Data Source={AppPaths.DbPath}"));
+                opt.UseSqlite($"Data Source={AppPaths.DbPath}")
+                .UseSnakeCaseNamingConvention());
 
             //Ventanas
             services.AddSingleton<MainWindow>();
@@ -74,6 +76,7 @@ namespace ControlTalleresMVP
             services.AddTransient<IDialogService, DialogService>();
             services.AddScoped<IAlumnoService, AlumnoService>();
             services.AddScoped<ISedeService, SedeService>();
+            services.AddScoped<ITallerService, TallerService>();
             services.AddScoped<IPromotorService, PromotorService>();
 
 
