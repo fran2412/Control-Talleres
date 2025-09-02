@@ -11,11 +11,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
     {
         Task<bool> ExisteActivaAsync(int alumnoId, int tallerId, int generacionId, CancellationToken ct = default);
         Task<Inscripcion> InscribirAsync(
-            int alumnoId, int tallerId, int generacionId,
+            int alumnoId, int tallerId,
             decimal abonoInicial = 0m,
             DateTime? fecha = null, CancellationToken ct = default);
-        Task RecalcularEstadoAsync(int inscripcionId, CancellationToken ct = default);
-        Task CancelarAsync(int inscripcionId, string? motivo = null, CancellationToken ct = default);
-
     }
 }

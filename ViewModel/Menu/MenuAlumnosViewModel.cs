@@ -7,6 +7,8 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Configuracion;
+using ControlTalleresMVP.Services.Generaciones;
+using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
@@ -35,14 +37,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private readonly ISedeService _sedeService;
         private readonly IConfiguracionService _configuracionService;
         private readonly ITallerService _tallerService;
+        private readonly IInscripcionService _inscripcionService;
 
-        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, IConfiguracionService configuracionService)
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, IConfiguracionService configuracionService, IInscripcionService inscripcionesService)
             : base(itemService, dialogService)
         {
             _promotorService = promotorService;
             _sedeService = sedeService;
             _configuracionService = configuracionService;
             _tallerService = tallerService;
+            _inscripcionService = inscripcionesService;
 
             OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             OpcionesSede = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
@@ -151,7 +155,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             try
             {
-                await _itemService.GuardarAsync(new Alumno
+                // IMPORTANTE: capturamos el alumno guardado para obtener AlumnoId
+                var alumnoGuardado = await _itemService.GuardarAsync(new Alumno
                 {
                     Nombre = CampoTextoNombre.Trim(),
                     Telefono = CampoTextTelefono?.Trim(),
@@ -162,7 +167,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 // Procesar inscripciones si está marcado
                 if (InscribirEnTaller)
                 {
-                    await ProcesarInscripcionesTalleres();
+                    await ProcesarInscripcionesTalleres(alumnoGuardado.AlumnoId);
                 }
 
                 LimpiarCampos();
@@ -174,16 +179,43 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        private async Task ProcesarInscripcionesTalleres()
+        private async Task ProcesarInscripcionesTalleres(int alumnoId)
         {
-            var talleresSeleccionados = TalleresDisponibles?.Where(t => t.EstaSeleccionado).ToList();
-            if (talleresSeleccionados?.Any() != true) return;
+            var seleccionados = TalleresDisponibles?.Where(t => t.EstaSeleccionado).ToList();
+            if (seleccionados == null || seleccionados.Count == 0)
+            {
+                _dialogService.Alerta("Marcaste 'Inscribir en taller', pero no seleccionaste ningún taller.");
+                return;
+            }
 
-            // TODO: Implementar lógica de inscripción a talleres
-            // foreach (var taller in talleresSeleccionados)
-            // {
-            //     await _tallerService.InscribirAlumnoAsync(ultimoAlumnoId, taller, taller.Abono);
-            // }
+            var errores = new List<string>();
+            int inscripcionesOk = 0;
+
+            foreach (var taller in seleccionados)
+            {
+                try
+                {
+                    var abono = taller.Abono is decimal dec && dec > 0 ? dec : 0m;
+
+                    await _inscripcionService.InscribirAsync(
+                        alumnoId: alumnoId,
+                        tallerId: taller.TallerId,
+                        abonoInicial: abono
+                    );
+
+                    inscripcionesOk++;
+                }
+                catch (Exception ex)
+                {
+                    errores.Add($"Taller {taller.Nombre ?? taller.TallerId.ToString()}: {ex.Message}");
+                }
+            }
+
+            if (inscripcionesOk > 0)
+                _dialogService.Info($"Se registraron {inscripcionesOk} inscripción(es).");
+
+            if (errores.Count > 0)
+                _dialogService.Alerta("Algunas inscripciones no se pudieron procesar:\n" + string.Join("\n", errores));
         }
 
         protected override void LimpiarCampos()

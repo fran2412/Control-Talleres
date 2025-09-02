@@ -1,6 +1,7 @@
 ﻿using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
+using ControlTalleresMVP.Services.Generaciones;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,13 @@ namespace ControlTalleresMVP.Services.Inscripciones
     {
         private readonly EscuelaContext _escuelaContext;
         private readonly IConfiguracionService _configuracionService;
+        private readonly IGeneracionService _generacionService;
 
-        public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService)
+        public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IGeneracionService generacionService)
         {
             _escuelaContext = escuelaContext;
             _configuracionService = configuracionService;
+            _generacionService = generacionService;
         }
 
         public async Task<bool> ExisteActivaAsync(int alumnoId, int tallerId, int generacionId, CancellationToken ct = default)
@@ -29,19 +32,23 @@ namespace ControlTalleresMVP.Services.Inscripciones
                                                   && !i.Eliminado, ct);
 
         public async Task<Inscripcion> InscribirAsync(
-            int alumnoId, int tallerId, int generacionId,
+            int alumnoId, int tallerId,
             decimal abonoInicial = 0m,
             DateTime? fecha = null, CancellationToken ct = default)
         {
+
+            var generacionId = _generacionService.ObtenerGeneracionActual();
+            if (generacionId == null) throw new InvalidOperationException("No hay una generación activa.");
+
             // Validar duplicado
-            if (await ExisteActivaAsync(alumnoId, tallerId, generacionId, ct))
+            if (await ExisteActivaAsync(alumnoId, tallerId, generacionId.GeneracionId, ct))
                 throw new InvalidOperationException("Ya existe una inscripción activa para este alumno en el mismo taller y generación.");
 
             // (Opcional) validar cupo
             var taller = await _escuelaContext.Talleres.FirstOrDefaultAsync(t => t.TallerId == tallerId, ct)
                          ?? throw new InvalidOperationException("Taller no encontrado.");
 
-            var generacion = await _escuelaContext.Generaciones.FirstOrDefaultAsync(g => g.GeneracionId == generacionId, ct)
+            var generacion = await _escuelaContext.Generaciones.FirstOrDefaultAsync(g => g.GeneracionId == generacionId.GeneracionId, ct)
                              ?? throw new InvalidOperationException("Generación no encontrada.");
 
             var costo = _configuracionService.GetValor<int>("costo_inscripcion", 600);
@@ -58,11 +65,12 @@ namespace ControlTalleresMVP.Services.Inscripciones
             using var transaccion = await _escuelaContext.Database.BeginTransactionAsync(ct);
             try
             {
+                // 1. Crear la inscripción
                 var inscripcion = new Inscripcion
                 {
                     AlumnoId = alumnoId,
                     TallerId = tallerId,
-                    GeneracionId = generacionId,
+                    GeneracionId = generacionId.GeneracionId,
                     Fecha = fecha ?? now,
                     Costo = costo,
                     SaldoActual = saldo,
@@ -75,18 +83,50 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 _escuelaContext.Inscripciones.Add(inscripcion);
                 await _escuelaContext.SaveChangesAsync(ct);
 
-                // (Opcional) Crear Pago inicial si corresponde
+                // 2. Crear el cargo por la inscripción
+                var cargo = new Cargo
+                {
+                    AlumnoId = alumnoId,
+                    InscripcionId = inscripcion.InscripcionId,
+                    Tipo = TipoCargo.Inscripcion,
+                    Monto = costo,
+                    SaldoActual = saldo,
+                    Fecha = now,
+                    CreadoEn = now,
+                    ActualizadoEn = now,
+                    Eliminado = false
+                };
+
+                _escuelaContext.Cargos.Add(cargo);
+                await _escuelaContext.SaveChangesAsync(ct);
+
+                // 3. Si hay abono inicial, crear el pago y su aplicación
                 if (abonoInicial > 0m)
                 {
                     var pago = new Pago
                     {
-                        InscripcionId = inscripcion.InscripcionId,
+                        AlumnoId = alumnoId,
                         Fecha = now,
-                        Monto = abonoInicial,
-                        Concepto = "Abono inicial",
-                        CreadoEn = now
+                        MontoTotal = abonoInicial,
+                        Metodo = "Efectivo",
+                        Notas = "Abono inicial de inscripción",
+                        CreadoEn = now,
+                        ActualizadoEn = now,
+                        Eliminado = false
                     };
-                    _escuelaContext.Pago.Add(pago);
+
+                    _escuelaContext.Pagos.Add(pago);
+                    await _escuelaContext.SaveChangesAsync(ct);
+
+                    // Crear la aplicación del pago al cargo
+                    var aplicacion = new PagoAplicacion
+                    {
+                        PagoId = pago.PagoId,
+                        CargoId = cargo.CargoId,
+                        MontoAplicado = abonoInicial
+                    };
+
+                    _escuelaContext.PagoAplicaciones.Add(aplicacion);
                     await _escuelaContext.SaveChangesAsync(ct);
                 }
 
@@ -99,42 +139,5 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 throw;
             }
         }
-
-        public async Task RecalcularEstadoAsync(int inscripcionId, CancellationToken ct = default)
-        {
-            var ins = await _escuelaContext.Inscripciones.FirstOrDefaultAsync(i => i.InscripcionId == inscripcionId, ct)
-                      ?? throw new InvalidOperationException("Inscripción no encontrada.");
-
-            if (ins.Eliminado) { ins.Estado = EstadoInscripcion.Cancelado; }
-            else
-            {
-                var totalPagos = await _escuelaContext.Pagos
-                    .Where(p => p.InscripcionId == inscripcionId)
-                    .SumAsync(p => (decimal?)p.Monto, ct) ?? 0m;
-
-                ins.SaldoActual = Math.Max(0m, ins.Costo - totalPagos);
-                ins.Estado = ins.SaldoActual == 0 ? EstadoInscripcion.Pagado
-                           : totalPagos > 0 ? EstadoInscripcion.Parcial
-                           : EstadoInscripcion.Pendiente;
-                ins.ActualizadoEn = DateTime.Now;
-            }
-
-            await _escuelaContext.SaveChangesAsync(ct);
-        }
-
-        public async Task CancelarAsync(int inscripcionId, string? motivo = null, CancellationToken ct = default)
-        {
-            var ins = await _escuelaContext.Inscripciones.FirstOrDefaultAsync(i => i.InscripcionId == inscripcionId, ct)
-                      ?? throw new InvalidOperationException("Inscripción no encontrada.");
-
-            ins.Eliminado = true;
-            ins.EliminadoEn = DateTime.Now;
-            ins.Estado = EstadoInscripcion.Cancelado;
-            ins.ActualizadoEn = DateTime.Now;
-
-            // (Opcional) guardar motivo en una tabla de bitácora
-            await _escuelaContext.SaveChangesAsync(ct);
-        }
     }
-
 }
