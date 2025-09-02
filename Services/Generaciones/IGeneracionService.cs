@@ -12,8 +12,9 @@ namespace ControlTalleresMVP.Services.Generaciones
 {
     public interface IGeneracionService: ICrudService<Generacion>
     {
-        public void NuevaGeneracion();
+        public ObservableCollection<GeneracionDTO> RegistrosGeneraciones { get; set; }
+        public Task NuevaGeneracion(CancellationToken ct = default);
         public Generacion? ObtenerGeneracionActual();
-
+        public Task InicializarRegistros(CancellationToken ct = default);
     }
 }

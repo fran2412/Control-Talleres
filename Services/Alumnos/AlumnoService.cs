@@ -35,7 +35,7 @@ namespace ControlTalleresMVP.Services.Alumnos
             if (alumno is null) return;
 
             alumno.Eliminado = true;
-            alumno.EliminadoEn = DateTimeOffset.Now;
+            alumno.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
@@ -57,7 +57,7 @@ namespace ControlTalleresMVP.Services.Alumnos
             alumnoExistente.Telefono = alumno.Telefono;
             alumnoExistente.SedeId = alumno.SedeId == 0 ? null : alumno.SedeId;
             alumnoExistente.PromotorId = alumno.PromotorId == 0 ? null : alumno.PromotorId;
-            alumnoExistente.ActualizadoEn = DateTimeOffset.Now;
+            alumnoExistente.ActualizadoEn = DateTime.Now;
 
             try
             {

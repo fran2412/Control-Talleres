@@ -35,7 +35,7 @@ namespace ControlTalleresMVP.Services.Promotores
             if (promotor is null) return;
 
             promotor.Eliminado = true;
-            promotor.EliminadoEn = DateTimeOffset.Now;
+            promotor.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
@@ -54,7 +54,7 @@ namespace ControlTalleresMVP.Services.Promotores
 
             // Solo actualizas campos que quieres
             promotorExistente.Nombre = promotor.Nombre;
-            promotorExistente.ActualizadoEn = DateTimeOffset.Now;
+            promotorExistente.ActualizadoEn = DateTime.Now;
 
             try
             {

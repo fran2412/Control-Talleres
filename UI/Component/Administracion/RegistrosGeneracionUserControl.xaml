@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="500" Height="auto">
+    <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="710" Height="auto">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

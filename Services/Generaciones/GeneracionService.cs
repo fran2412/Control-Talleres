@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,7 +29,6 @@ namespace ControlTalleresMVP.Services.Generaciones
         {
             _context.Generaciones.Add(generacion);
             await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
         }
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)
@@ -37,7 +37,7 @@ namespace ControlTalleresMVP.Services.Generaciones
             if (generacion is null) return;
 
             generacion.Eliminado = true;
-            generacion.EliminadoEn = DateTimeOffset.Now;
+            generacion.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
@@ -58,7 +58,7 @@ namespace ControlTalleresMVP.Services.Generaciones
             generacionExistente.Nombre = generacion.Nombre;
             generacionExistente.FechaInicio = generacion.FechaInicio;
             generacionExistente.FechaFin = generacion.FechaFin;
-            generacionExistente.ActualizadoEn = DateTimeOffset.Now;
+            generacionExistente.ActualizadoEn = DateTime.Now;
 
             try
             {
@@ -84,7 +84,6 @@ namespace ControlTalleresMVP.Services.Generaciones
                     u.Nombre,
                     u.FechaInicio,
                     u.FechaFin,
-                    u.CreadoEn
                 })
                 .ToListAsync(ct);
 
@@ -94,7 +93,6 @@ namespace ControlTalleresMVP.Services.Generaciones
                 Nombre = u.Nombre,
                 FechaInicio = u.FechaInicio,
                 FechaFin = u.FechaFin,
-                CreadoEn = u.CreadoEn
             }).ToList();
         }
 
@@ -119,7 +117,7 @@ namespace ControlTalleresMVP.Services.Generaciones
                 .ToList();
         }
 
-        public void NuevaGeneracion()
+        public async Task NuevaGeneracion(CancellationToken ct = default)
         {
             var año = DateTime.Now.Year;
 
@@ -146,11 +144,12 @@ namespace ControlTalleresMVP.Services.Generaciones
                 Nombre = nombre,
                 FechaInicio = DateTime.Now,
                 FechaFin = null,
-                CreadoEn = DateTimeOffset.Now
+                CreadoEn = DateTime.Now
             };
 
-            _context.Generaciones.Add(nuevaGeneracion);
-            _context.SaveChanges();
+            await _context.Generaciones.AddAsync(nuevaGeneracion);
+            await _context.SaveChangesAsync();
+            await InicializarRegistros(ct);
         }
 
         public Generacion? ObtenerGeneracionActual()

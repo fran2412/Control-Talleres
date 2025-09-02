@@ -35,7 +35,7 @@ namespace ControlTalleresMVP.Services.Sedes
             if (sede is null) return;
 
             sede.Eliminado = true;
-            sede.EliminadoEn = DateTimeOffset.Now;
+            sede.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
@@ -54,7 +54,7 @@ namespace ControlTalleresMVP.Services.Sedes
 
             // Solo actualizas campos que quieres
             sedeExistente.Nombre = sede.Nombre;
-            sedeExistente.ActualizadoEn = DateTimeOffset.Now;
+            sedeExistente.ActualizadoEn = DateTime.Now;
 
             try
             {

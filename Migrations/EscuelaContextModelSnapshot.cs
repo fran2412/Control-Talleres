@@ -24,13 +24,13 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_alumno");
 
-                    b.Property<DateTimeOffset>("ActualizadoEn")
+                    b.Property<DateTime>("ActualizadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("actualizado_en")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<DateTimeOffset>("CreadoEn")
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("creado_en")
@@ -42,7 +42,7 @@ namespace ControlTalleresMVP.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("eliminado");
 
-                    b.Property<DateTimeOffset?>("EliminadoEn")
+                    b.Property<DateTime?>("EliminadoEn")
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
@@ -81,13 +81,13 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_generacion");
 
-                    b.Property<DateTimeOffset>("ActualizadoEn")
+                    b.Property<DateTime>("ActualizadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("actualizado_en")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<DateTimeOffset>("CreadoEn")
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("creado_en")
@@ -99,11 +99,11 @@ namespace ControlTalleresMVP.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("eliminado");
 
-                    b.Property<DateTimeOffset?>("EliminadoEn")
+                    b.Property<DateTime?>("EliminadoEn")
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
-                    b.Property<DateTime>("FechaFin")
+                    b.Property<DateTime?>("FechaFin")
                         .HasColumnType("TEXT")
                         .HasColumnName("fecha_fin");
 
@@ -166,13 +166,13 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_promotor");
 
-                    b.Property<DateTimeOffset>("ActualizadoEn")
+                    b.Property<DateTime>("ActualizadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("actualizado_en")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<DateTimeOffset>("CreadoEn")
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("creado_en")
@@ -184,7 +184,7 @@ namespace ControlTalleresMVP.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("eliminado");
 
-                    b.Property<DateTimeOffset?>("EliminadoEn")
+                    b.Property<DateTime?>("EliminadoEn")
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
@@ -205,13 +205,13 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_sede");
 
-                    b.Property<DateTimeOffset>("ActualizadoEn")
+                    b.Property<DateTime>("ActualizadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("actualizado_en")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<DateTimeOffset>("CreadoEn")
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("creado_en")
@@ -223,7 +223,7 @@ namespace ControlTalleresMVP.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("eliminado");
 
-                    b.Property<DateTimeOffset?>("EliminadoEn")
+                    b.Property<DateTime?>("EliminadoEn")
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
@@ -244,13 +244,13 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_taller");
 
-                    b.Property<DateTimeOffset>("ActualizadoEn")
+                    b.Property<DateTime>("ActualizadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("actualizado_en")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<DateTimeOffset>("CreadoEn")
+                    b.Property<DateTime>("CreadoEn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("creado_en")
@@ -262,7 +262,7 @@ namespace ControlTalleresMVP.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("eliminado");
 
-                    b.Property<DateTimeOffset?>("EliminadoEn")
+                    b.Property<DateTime?>("EliminadoEn")
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 

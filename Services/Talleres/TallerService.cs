@@ -35,7 +35,7 @@ namespace ControlTalleresMVP.Services.Talleres
             if (taller is null) return;
 
             taller.Eliminado = true;
-            taller.EliminadoEn = DateTimeOffset.Now;
+            taller.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
@@ -55,7 +55,7 @@ namespace ControlTalleresMVP.Services.Talleres
             // Solo actualizas campos que quieres
             tallerExistente.Nombre = taller.Nombre;
             tallerExistente.Horario = taller.Horario;
-            tallerExistente.ActualizadoEn = DateTimeOffset.Now;
+            tallerExistente.ActualizadoEn = DateTime.Now;
 
             try
             {

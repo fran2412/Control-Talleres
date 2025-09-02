@@ -15,11 +15,11 @@ namespace ControlTalleresMVP.Persistence.Models
         public string? Telefono { get; set; }
 
 
-        public DateTimeOffset CreadoEn { get; set; }
-        public DateTimeOffset ActualizadoEn { get; set; }
+        public DateTime CreadoEn { get; set; }
+        public DateTime ActualizadoEn { get; set; }
 
         public bool Eliminado { get; set; } = false;
-        public DateTimeOffset? EliminadoEn { get; set; }
+        public DateTime? EliminadoEn { get; set; }
 
         // Clave foránea a Sede
         public int? SedeId { get; set; }
