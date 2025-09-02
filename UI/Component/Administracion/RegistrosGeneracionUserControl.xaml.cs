@@ -1,5 +1,7 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Migrations;
 using ControlTalleresMVP.Persistence.ModelDTO;
+using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.UI.Windows.FormContainer;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -101,17 +104,23 @@ namespace ControlTalleresMVP.UI.Component.Administracion
 
         private void IniciarGeneracionButton_Click(object sender, RoutedEventArgs e)
         {
-            string? input = _dialogService.PedirTexto(
-                "Escriba CONFIRMAR para iniciar una nueva generación.",
-                "Confirmación crítica");
+            string? input = _dialogService!.PedirTexto(
+                    "ATENCIÓN\n\n" +
+                    "Para iniciar una NUEVA GENERACIÓN debe escribir: CONFIRMAR\n\n" +
+                    "Este proceso:\n" +
+                    " - Dará FIN al ciclo anterior\n" +
+                    " - Creará un NUEVO ciclo\n\n" +
+                    "Solo confirme si está completamente seguro de continuar.",
+                    "Confirmación crítica");
 
-            if (input?.ToUpper() != "CONFIRMAR")
+            if (input != "CONFIRMAR")
             {
                 _dialogService.Info("Operación cancelada. No escribió CONFIRMAR.");
                 return;
             }
 
-            _generacionService.NuevaGeneracion();
+
+            _generacionService!.NuevaGeneracion();
         }
     }
 }
