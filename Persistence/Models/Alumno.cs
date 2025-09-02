@@ -17,7 +17,6 @@ namespace ControlTalleresMVP.Persistence.Models
 
         public DateTime CreadoEn { get; set; }
         public DateTime ActualizadoEn { get; set; }
-
         public bool Eliminado { get; set; } = false;
         public DateTime? EliminadoEn { get; set; }
 
@@ -30,5 +29,7 @@ namespace ControlTalleresMVP.Persistence.Models
         public Promotor? Promotor { get; set; }
 
         public ICollection<Inscripcion> Inscripciones { get; set; } = new List<Inscripcion>();
+        public ICollection<Cargo> Cargos { get; set; } = new List<Cargo>();
+        public ICollection<Pago> Pagos { get; set; } = new List<Pago>();
     }
 }

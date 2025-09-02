@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ControlTalleresMVP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6deecc16ace743a96b13c3aad89cbe1f69035c93")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c9c2bb9b4e557d9a65c0a637f507ee6bee67c16b")]
 [assembly: System.Reflection.AssemblyProductAttribute("ControlTalleresMVP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ControlTalleresMVP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

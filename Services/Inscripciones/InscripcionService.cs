@@ -86,7 +86,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                         Concepto = "Abono inicial",
                         CreadoEn = now
                     };
-                    _escuelaContext.Pagos.Add(pago);
+                    _escuelaContext.Pago.Add(pago);
                     await _escuelaContext.SaveChangesAsync(ct);
                 }
 

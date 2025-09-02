@@ -7,4 +7,10 @@
         Pagado = 2,
         Cancelado = 3
     }
+
+    public enum TipoCargo
+    {
+        Inscripcion = 1,
+        Clase = 2,
+    }
 }
