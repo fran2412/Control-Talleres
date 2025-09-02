@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Windows;
 
 namespace ControlTalleresMVP.Helpers.Dialogs
 {
-    public class DialogService: IDialogService
+    public class DialogService : IDialogService
     {
         /// <summary>
         /// Muestra un mensaje informativo (solo OK).
@@ -57,6 +58,15 @@ namespace ControlTalleresMVP.Helpers.Dialogs
         {
             var r = MessageBox.Show(mensaje, titulo, MessageBoxButton.OKCancel, MessageBoxImage.Question);
             return r == MessageBoxResult.OK;
+        }
+
+        /// <summary>
+        /// Pide confirmación Escrita.
+        /// </summary>
+
+        public string? PedirTexto(string mensaje, string titulo = "Ingresar texto")
+        {
+            return Interaction.InputBox(mensaje, titulo, "");
         }
     }
 }

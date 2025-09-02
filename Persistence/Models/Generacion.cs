@@ -12,8 +12,7 @@ namespace ControlTalleresMVP.Persistence.Models
         public string Nombre { get; set; } = null!;
 
         public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; }
-        public bool EsActual { get; set; }
+        public DateTime? FechaFin { get; set; }
 
         public DateTimeOffset CreadoEn { get; set; }
         public DateTimeOffset ActualizadoEn { get; set; }

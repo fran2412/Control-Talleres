@@ -9,10 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Icons\AdministracionIcono.svg" />
     <None Remove="Resources\Icons\SedeIcono.svg" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Icons\AdministracionIcono.svg" />
     <Resource Include="Resources\Icons\InscripcionIcono.svg" />
   </ItemGroup>
 

@@ -103,10 +103,6 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
-                    b.Property<bool>("EsActual")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("es_actual");
-
                     b.Property<DateTime>("FechaFin")
                         .HasColumnType("TEXT")
                         .HasColumnName("fecha_fin");

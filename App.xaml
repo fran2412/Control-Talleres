@@ -11,6 +11,7 @@
              xmlns:sedecomponent="clr-namespace:ControlTalleresMVP.UI.Component.Sede"
              xmlns:iniciocomponent="clr-namespace:ControlTalleresMVP.UI.Component.Inicio"
              xmlns:promotorcomponent="clr-namespace:ControlTalleresMVP.UI.Component.Promotor"
+             xmlns:administracioncomponent="clr-namespace:ControlTalleresMVP.UI.Component.Administracion"
              
              >
     <Application.Resources>
@@ -52,6 +53,10 @@
             
             <DataTemplate DataType="{x:Type vmmenu:MenuSedeViewModel}">
                 <sedecomponent:SedeUserControl/>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type vmmenu:MenuAdministracionViewModel}">
+                <administracioncomponent:AdministracionUserControl/>
             </DataTemplate>
             
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>

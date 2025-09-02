@@ -74,7 +74,14 @@
                                 <TextBlock Text="Sedes" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
-                    
+
+                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoAdministracion}" Height="40">
+                        <WrapPanel Width="180" Margin="11,0,0,0">
+                            <svgc:SvgViewbox Source="Resources\Icons\AdministracionIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
+                            <TextBlock Text="Administración" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
+                        </WrapPanel>
+                    </Button>
+
                 </StackPanel>
             </ScrollViewer>
 

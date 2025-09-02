@@ -15,6 +15,7 @@ namespace ControlTalleresMVP.Helpers.Dialogs
         public bool Confirmar(string mensaje, string titulo = "Confirmación");
         public MessageBoxResult Decidir(string mensaje, string titulo = "Decisión");
         public bool ConfirmarOkCancel(string mensaje, string titulo = "Confirmación");
+        string? PedirTexto(string mensaje, string titulo = "Ingresar texto");
 
     }
 }

@@ -20,6 +20,7 @@ namespace ControlTalleresMVP.ViewModel.Navigation
         public ICommand GoPagos { get; set; }
         public ICommand GoPromotores { get; set; }
         public ICommand GoSedes { get; set; }
+        public ICommand GoAdministracion { get; set; }
         public ICommand NavigateCommand { get; }
 
         public ShellViewModel (INavigatorService navigator)
@@ -33,6 +34,7 @@ namespace ControlTalleresMVP.ViewModel.Navigation
             GoPagos = new RelayCommand(() => Navigator.NavigateTo<MenuPagosViewModel>());
             GoPromotores = new RelayCommand(() => Navigator.NavigateTo<MenuPromotorViewModel>());
             GoSedes = new RelayCommand(() => Navigator.NavigateTo<MenuSedeViewModel>());
+            GoAdministracion = new RelayCommand(() => Navigator.NavigateTo<MenuAdministracionViewModel>());
 
             NavigateCommand = new RelayCommandGeneric<Type>(t => Navigator.NavigateTo(t));
 

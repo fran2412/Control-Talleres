@@ -3,6 +3,7 @@ using ControlTalleresMVP.Configuraciones;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Services.Alumnos;
+using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
@@ -69,6 +70,7 @@ namespace ControlTalleresMVP
             services.AddTransient<MenuPagosViewModel>();
             services.AddTransient<MenuPromotorViewModel>();
             services.AddTransient<MenuSedeViewModel>();
+            services.AddTransient<MenuAdministracionViewModel>();
             services.AddTransient<ShellViewModel>();
 
             //Services
@@ -76,10 +78,9 @@ namespace ControlTalleresMVP
             services.AddTransient<IDialogService, DialogService>();
             services.AddScoped<IAlumnoService, AlumnoService>();
             services.AddScoped<ISedeService, SedeService>();
+            services.AddScoped<IGeneracionService, GeneracionService>();
             services.AddScoped<ITallerService, TallerService>();
             services.AddScoped<IPromotorService, PromotorService>();
-
-
         }
     }
 }

@@ -26,6 +26,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
         public virtual DbSet<Promotor> Promotores { get; set; }
         public virtual DbSet<Taller> Talleres { get; set; }
         public virtual DbSet<Inscripcion> Inscripciones { get; set; }
+        public virtual DbSet<Generacion> Generaciones { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -226,7 +227,6 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(e => e.FechaInicio).HasColumnName("fecha_inicio");
                 entity.Property(e => e.FechaFin).HasColumnName("fecha_fin");
-                entity.Property(e => e.EsActual).HasColumnName("es_actual");
 
                 entity.Property(e => e.CreadoEn)
                     .HasColumnName("creado_en")
