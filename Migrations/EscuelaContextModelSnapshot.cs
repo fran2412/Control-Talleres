@@ -65,11 +65,11 @@ namespace ControlTalleresMVP.Migrations
 
                     b.HasKey("AlumnoId");
 
+                    b.HasIndex("Nombre");
+
                     b.HasIndex("PromotorId");
 
                     b.HasIndex("SedeId");
-
-                    b.HasIndex(new[] { "Nombre" }, "idx_alumnos_nombre");
 
                     b.ToTable("alumnos", (string)null);
                 });
@@ -148,13 +148,42 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("id_inscripcion");
 
+                    b.Property<DateTime>("ActualizadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actualizado_en")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
                     b.Property<int>("AlumnoId")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id_alumno");
+                        .HasColumnName("alumno_id");
 
                     b.Property<decimal>("Costo")
+                        .HasPrecision(10, 2)
                         .HasColumnType("TEXT")
                         .HasColumnName("costo");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("creado_en")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<bool>("Eliminado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("eliminado");
+
+                    b.Property<DateTime?>("EliminadoEn")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("eliminado_en");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("estado");
 
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("TEXT")
@@ -162,19 +191,25 @@ namespace ControlTalleresMVP.Migrations
 
                     b.Property<int>("GeneracionId")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id_generacion");
+                        .HasColumnName("generacion_id");
+
+                    b.Property<decimal>("SaldoActual")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("saldo_actual");
 
                     b.Property<int>("TallerId")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id_taller");
+                        .HasColumnName("taller_id");
 
                     b.HasKey("InscripcionId");
-
-                    b.HasIndex("AlumnoId");
 
                     b.HasIndex("GeneracionId");
 
                     b.HasIndex("TallerId");
+
+                    b.HasIndex("AlumnoId", "TallerId", "GeneracionId")
+                        .IsUnique();
 
                     b.ToTable("inscripciones", (string)null);
                 });
@@ -323,7 +358,7 @@ namespace ControlTalleresMVP.Migrations
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Alumno", "Alumno")
                         .WithMany("Inscripciones")
                         .HasForeignKey("AlumnoId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ControlTalleresMVP.Persistence.Models.Generacion", "Generacion")

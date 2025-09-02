@@ -1,12 +1,6 @@
 ﻿using ControlTalleresMVP.Configuraciones;
 using ControlTalleresMVP.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace ControlTalleresMVP.Persistence.DataContext
 {
@@ -27,7 +21,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
         public virtual DbSet<Taller> Talleres { get; set; }
         public virtual DbSet<Inscripcion> Inscripciones { get; set; }
         public virtual DbSet<Generacion> Generaciones { get; set; }
-        public virtual DbSet<Configuracion> Configuraciones{ get; set; }
+        public virtual DbSet<Configuracion> Configuraciones { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -47,7 +41,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.ToTable("alumnos");
 
-                entity.HasIndex(e => new { e.Nombre }, "idx_alumnos_nombre");
+                entity.HasIndex(e => new { e.Nombre });
 
                 entity.Property(e => e.AlumnoId).HasColumnName("id_alumno");
 
@@ -184,67 +178,103 @@ namespace ControlTalleresMVP.Persistence.DataContext
             // ====================
             modelBuilder.Entity<Inscripcion>(entity =>
             {
-                entity.HasKey(e => e.InscripcionId);
+                entity.HasKey(i => i.InscripcionId);
 
                 entity.ToTable("inscripciones");
 
-                entity.Property(e => e.InscripcionId).HasColumnName("id_inscripcion");
-                entity.Property(e => e.Fecha).HasColumnName("fecha");
-                entity.Property(e => e.Costo).HasColumnName("costo");
+                // Columnas (snake_case)
+                entity.Property(i => i.InscripcionId).HasColumnName("id_inscripcion");
 
-                // 🔹 FK a Alumno
-                entity.Property(e => e.AlumnoId).HasColumnName("id_alumno");
+                entity.Property(i => i.Fecha)
+                      .HasColumnName("fecha");
+
+                entity.Property(i => i.Costo)
+                      .HasColumnName("costo")
+                      .HasPrecision(10, 2);
+
+                entity.Property(i => i.SaldoActual)
+                      .HasColumnName("saldo_actual")
+                      .HasPrecision(10, 2);
+
+                entity.Property(i => i.Estado)
+                      .HasColumnName("estado")
+                      .HasConversion<string>()
+                      .HasMaxLength(20);
+
+                entity.Property(i => i.CreadoEn)
+                      .HasColumnName("creado_en")
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                      .ValueGeneratedOnAdd();
+
+                entity.Property(i => i.ActualizadoEn)
+                      .HasColumnName("actualizado_en")
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                      .ValueGeneratedOnAdd();
+
+                entity.Property(i => i.Eliminado)
+                      .HasColumnName("eliminado")
+                      .HasDefaultValue(false);
+
+                entity.Property(i => i.EliminadoEn)
+                      .HasColumnName("eliminado_en");
+
+                // FKs (snake_case)
+                entity.Property(i => i.AlumnoId).HasColumnName("alumno_id");
+                entity.Property(i => i.TallerId).HasColumnName("taller_id");
+                entity.Property(i => i.GeneracionId).HasColumnName("generacion_id");
+
+                // Relaciones
                 entity.HasOne(i => i.Alumno)
-                    .WithMany(a => a.Inscripciones)
-                    .HasForeignKey(i => i.AlumnoId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                      .WithMany(a => a.Inscripciones)
+                      .HasForeignKey(i => i.AlumnoId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
-                // 🔹 FK a Taller
-                entity.Property(e => e.TallerId).HasColumnName("id_taller");
                 entity.HasOne(i => i.Taller)
-                    .WithMany(t => t.Inscripciones)
-                    .HasForeignKey(i => i.TallerId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                      .WithMany(t => t.Inscripciones)
+                      .HasForeignKey(i => i.TallerId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-                // 🔹 FK a Generacion
-                entity.Property(e => e.GeneracionId).HasColumnName("id_generacion");
                 entity.HasOne(i => i.Generacion)
-                    .WithMany(g => g.Inscripciones)
-                    .HasForeignKey(i => i.GeneracionId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                      .WithMany(g => g.Inscripciones)
+                      .HasForeignKey(i => i.GeneracionId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Índice único (nombre normalizado)
+                entity.HasIndex(i => new { i.AlumnoId, i.TallerId, i.GeneracionId })
+                      .IsUnique();
             });
 
             // ====================
             // Entidad Generacion
             // ====================
             modelBuilder.Entity<Generacion>(entity =>
-            {
-                entity.HasKey(e => e.GeneracionId);
+                {
+                    entity.HasKey(e => e.GeneracionId);
 
-                entity.ToTable("generaciones");
+                    entity.ToTable("generaciones");
 
-                entity.Property(e => e.GeneracionId).HasColumnName("id_generacion");
-                entity.Property(e => e.Nombre).HasColumnName("nombre");
+                    entity.Property(e => e.GeneracionId).HasColumnName("id_generacion");
+                    entity.Property(e => e.Nombre).HasColumnName("nombre");
 
-                entity.Property(e => e.FechaInicio).HasColumnName("fecha_inicio");
-                entity.Property(e => e.FechaFin).HasColumnName("fecha_fin");
+                    entity.Property(e => e.FechaInicio).HasColumnName("fecha_inicio");
+                    entity.Property(e => e.FechaFin).HasColumnName("fecha_fin");
 
-                entity.Property(e => e.CreadoEn)
-                    .HasColumnName("creado_en")
-                    .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                    .ValueGeneratedOnAdd();
+                    entity.Property(e => e.CreadoEn)
+                        .HasColumnName("creado_en")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .ValueGeneratedOnAdd();
 
-                entity.Property(e => e.ActualizadoEn)
-                    .HasColumnName("actualizado_en")
-                    .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                    .ValueGeneratedOnAdd();
+                    entity.Property(e => e.ActualizadoEn)
+                        .HasColumnName("actualizado_en")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .ValueGeneratedOnAdd();
 
-                entity.Property(e => e.Eliminado)
-                    .HasColumnName("eliminado")
-                    .HasDefaultValue(false);
+                    entity.Property(e => e.Eliminado)
+                        .HasColumnName("eliminado")
+                        .HasDefaultValue(false);
 
-                entity.Property(e => e.EliminadoEn).HasColumnName("eliminado_en");
-            });
+                    entity.Property(e => e.EliminadoEn).HasColumnName("eliminado_en");
+                });
 
             modelBuilder.Entity<Configuracion>(entity =>
             {

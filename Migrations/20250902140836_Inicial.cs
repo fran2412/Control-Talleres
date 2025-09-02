@@ -12,6 +12,19 @@ namespace ControlTalleresMVP.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "configuraciones",
+                columns: table => new
+                {
+                    clave = table.Column<string>(type: "TEXT", nullable: false),
+                    valor = table.Column<string>(type: "TEXT", nullable: false),
+                    descripcion = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_configuraciones", x => x.clave);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "generaciones",
                 columns: table => new
                 {
@@ -19,12 +32,11 @@ namespace ControlTalleresMVP.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     nombre = table.Column<string>(type: "TEXT", nullable: false),
                     fecha_inicio = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    fecha_fin = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    es_actual = table.Column<bool>(type: "INTEGER", nullable: false),
-                    creado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    actualizado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    fecha_fin = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    creado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    actualizado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     eliminado = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
-                    eliminado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: true)
+                    eliminado_en = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,10 +50,10 @@ namespace ControlTalleresMVP.Migrations
                     id_promotor = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     nombre = table.Column<string>(type: "TEXT", nullable: false),
-                    creado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    actualizado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    creado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    actualizado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     eliminado = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
-                    eliminado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: true)
+                    eliminado_en = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,10 +67,10 @@ namespace ControlTalleresMVP.Migrations
                     id_sede = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     nombre = table.Column<string>(type: "TEXT", nullable: false),
-                    creado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    actualizado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    creado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    actualizado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     eliminado = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
-                    eliminado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: true)
+                    eliminado_en = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -73,10 +85,10 @@ namespace ControlTalleresMVP.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     nombre = table.Column<string>(type: "TEXT", nullable: false),
                     horario = table.Column<string>(type: "TEXT", nullable: false),
-                    creado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    actualizado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    creado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    actualizado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     eliminado = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
-                    eliminado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: true)
+                    eliminado_en = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -91,10 +103,10 @@ namespace ControlTalleresMVP.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     nombre = table.Column<string>(type: "TEXT", nullable: false),
                     telefono = table.Column<string>(type: "TEXT", nullable: true),
-                    creado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    actualizado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    creado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    actualizado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     eliminado = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
-                    eliminado_en = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    eliminado_en = table.Column<DateTime>(type: "TEXT", nullable: true),
                     id_sede = table.Column<int>(type: "INTEGER", nullable: true),
                     id_promotor = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -122,38 +134,39 @@ namespace ControlTalleresMVP.Migrations
                     id_inscripcion = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    costo = table.Column<decimal>(type: "TEXT", nullable: false),
-                    id_alumno = table.Column<int>(type: "INTEGER", nullable: false),
-                    id_taller = table.Column<int>(type: "INTEGER", nullable: false),
-                    id_generacion = table.Column<int>(type: "INTEGER", nullable: false)
+                    costo = table.Column<decimal>(type: "TEXT", precision: 10, scale: 2, nullable: false),
+                    saldo_actual = table.Column<decimal>(type: "TEXT", precision: 10, scale: 2, nullable: false),
+                    estado = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    creado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    actualizado_en = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    eliminado = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    eliminado_en = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    alumno_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    taller_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    generacion_id = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_inscripciones", x => x.id_inscripcion);
                     table.ForeignKey(
-                        name: "FK_inscripciones_alumnos_id_alumno",
-                        column: x => x.id_alumno,
+                        name: "FK_inscripciones_alumnos_alumno_id",
+                        column: x => x.alumno_id,
                         principalTable: "alumnos",
                         principalColumn: "id_alumno",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_inscripciones_generaciones_id_generacion",
-                        column: x => x.id_generacion,
+                        name: "FK_inscripciones_generaciones_generacion_id",
+                        column: x => x.generacion_id,
                         principalTable: "generaciones",
                         principalColumn: "id_generacion",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_inscripciones_talleres_id_taller",
-                        column: x => x.id_taller,
+                        name: "FK_inscripciones_talleres_taller_id",
+                        column: x => x.taller_id,
                         principalTable: "talleres",
                         principalColumn: "id_taller",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "idx_alumnos_nombre",
-                table: "alumnos",
-                column: "nombre");
 
             migrationBuilder.CreateIndex(
                 name: "IX_alumnos_id_promotor",
@@ -166,24 +179,33 @@ namespace ControlTalleresMVP.Migrations
                 column: "id_sede");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inscripciones_id_alumno",
-                table: "inscripciones",
-                column: "id_alumno");
+                name: "IX_alumnos_nombre",
+                table: "alumnos",
+                column: "nombre");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inscripciones_id_generacion",
+                name: "IX_inscripciones_alumno_id_taller_id_generacion_id",
                 table: "inscripciones",
-                column: "id_generacion");
+                columns: new[] { "alumno_id", "taller_id", "generacion_id" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_inscripciones_id_taller",
+                name: "IX_inscripciones_generacion_id",
                 table: "inscripciones",
-                column: "id_taller");
+                column: "generacion_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_inscripciones_taller_id",
+                table: "inscripciones",
+                column: "taller_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "configuraciones");
+
             migrationBuilder.DropTable(
                 name: "inscripciones");
 

@@ -13,6 +13,15 @@ namespace ControlTalleresMVP.Persistence.Models
 
         public decimal Costo { get; set; }
 
+        public decimal SaldoActual { get; set; }
+
+        public EstadoInscripcion Estado { get; set; } = EstadoInscripcion.Pendiente;
+
+        public DateTime CreadoEn { get; set; } = DateTime.Now;
+        public DateTime ActualizadoEn { get; set; } = DateTime.Now;
+        public bool Eliminado { get; set; } = false;
+        public DateTime? EliminadoEn { get; set; }
+
         public int AlumnoId { get; set; }   
         public Alumno Alumno { get; set; } = null!;
 

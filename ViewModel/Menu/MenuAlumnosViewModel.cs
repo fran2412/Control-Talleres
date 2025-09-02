@@ -72,7 +72,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 int costoDefault = 600;
                 try
                 {
-                    // si ya tienes un servicio de config:
                     costoDefault = _configuracionService.GetValor<int>("costo_inscripcion", 600);
                 }
                 catch (Exception ex)
