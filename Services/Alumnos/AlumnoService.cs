@@ -22,11 +22,12 @@ namespace ControlTalleresMVP.Services.Alumnos
             _context = context;
         }
 
-        public async Task GuardarAsync(Alumno alumno, CancellationToken ct = default)
+        public async Task<Alumno> GuardarAsync(Alumno alumno, CancellationToken ct = default)
         {
             _context.Alumnos.Add(alumno);
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
+            return alumno;
         }
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)

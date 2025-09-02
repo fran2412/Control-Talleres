@@ -22,11 +22,12 @@ namespace ControlTalleresMVP.Services.Talleres
             _context = context;
         }
 
-        public async Task GuardarAsync(Taller taller, CancellationToken ct = default)
+        public async Task<Taller> GuardarAsync(Taller taller, CancellationToken ct = default)
         {
             _context.Talleres.Add(taller);
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
+            return taller;
         }
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)

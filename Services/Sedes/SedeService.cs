@@ -22,11 +22,12 @@ namespace ControlTalleresMVP.Services.Sedes
             _context = context;
         }
 
-        public async Task GuardarAsync(Sede sede, CancellationToken ct = default)
+        public async Task<Sede> GuardarAsync(Sede sede, CancellationToken ct = default)
         {
             _context.Sedes.Add(sede);
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
+            return sede;
         }
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)

@@ -25,10 +25,11 @@ namespace ControlTalleresMVP.Services.Generaciones
             _context = context;
         }
 
-        public async Task GuardarAsync(Generacion generacion, CancellationToken ct = default)
+        public async Task<Generacion> GuardarAsync(Generacion generacion, CancellationToken ct = default)
         {
             _context.Generaciones.Add(generacion);
             await _context.SaveChangesAsync(ct);
+            return generacion;
         }
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)

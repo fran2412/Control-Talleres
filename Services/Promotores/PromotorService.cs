@@ -22,11 +22,12 @@ namespace ControlTalleresMVP.Services.Promotores
             _context = context;
         }
 
-        public async Task GuardarAsync(Promotor promotor, CancellationToken ct = default)
+        public async Task<Promotor> GuardarAsync(Promotor promotor, CancellationToken ct = default)
         {
             _context.Promotores.Add(promotor);
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
+            return promotor;
         }
 
         public async Task EliminarAsync(int id, CancellationToken ct = default)
