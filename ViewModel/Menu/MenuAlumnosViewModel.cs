@@ -6,16 +6,13 @@ using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
+using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Talleres;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
-using System.Security.AccessControl;
-using System.Text;
 using System.Windows;
-using System.Windows.Data;
-using System.Windows.Input;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -26,7 +23,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public override ObservableCollection<AlumnoDTO> Registros
             => _itemService.RegistrosAlumnos;
 
-        public ObservableCollection<TallerInscripcion> TalleresDisponibles { get; }
+        public ObservableCollection<TallerInscripcionDTO> TalleresDisponibles { get; }
 
         [ObservableProperty] private string campoTextoNombre = "";
         [ObservableProperty] private string campoTextTelefono = "";
@@ -36,28 +33,28 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         private readonly IPromotorService _promotorService;
         private readonly ISedeService _sedeService;
-        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService)
+        private readonly IConfiguracionService _configuracionService;
+        private readonly ITallerService _tallerService;
+
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, IConfiguracionService configuracionService)
             : base(itemService, dialogService)
         {
             _promotorService = promotorService;
             _sedeService = sedeService;
+            _configuracionService = configuracionService;
+            _tallerService = tallerService;
 
             OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             OpcionesSede = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
 
-            TalleresDisponibles = new ObservableCollection<TallerInscripcion>
-            {
-                new TallerInscripcion { Nombre = "Uñas", Costo = 1200 },
-                new TallerInscripcion { Nombre = "Repostería", Costo = 1500 }
-            };
+            TalleresDisponibles = new ObservableCollection<TallerInscripcionDTO>();
 
-            foreach (var taller in TalleresDisponibles)
-            {
-                taller.PropertyChanged += OnTallerPropertyChanged!;
-            }
 
             itemService.InicializarRegistros();
             InicializarVista();
+
+            Application.Current.Dispatcher.Invoke(() => CargarTalleresDesdeBd());
+
         }
 
         protected override async Task ActualizarAsync(AlumnoDTO? alumnoSeleccionado)
@@ -66,13 +63,57 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _dialogService.Info(alumnoSeleccionado!.Nombre);
         }
 
+        private void CargarTalleresDesdeBd()
+        {
+            try
+            {
+                TalleresDisponibles.Clear();
+
+                int costoDefault = 600;
+                try
+                {
+                    // si ya tienes un servicio de config:
+                    costoDefault = _configuracionService.GetValor<int>("costo_inscripcion", 600);
+                }
+                catch (Exception ex)
+                {
+                    _dialogService.Error("No se pudo obtener el costo por defecto desde configuración.\n" + ex.Message);
+                }
+
+                var talleres = _tallerService.ObtenerTodos();
+
+                foreach (var taller in talleres)
+                {
+                    var item = new TallerInscripcionDTO
+                    {
+                        TallerId = taller.TallerId,
+                        Nombre = taller.Nombre,
+                        Costo  = costoDefault,
+                        EstaSeleccionado = false,
+                        Abono = 0
+                    };
+
+                    item.PropertyChanged += OnTallerPropertyChanged!;
+                    TalleresDisponibles.Add(item);
+                }
+
+                // Refresca totales
+                OnPropertyChanged(nameof(TotalCostos));
+                OnPropertyChanged(nameof(TotalAbonado));
+                OnPropertyChanged(nameof(SaldoPendienteTotal));
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("No se pudieron cargar los talleres.\n" + ex.Message);
+            }
+        }
 
 
         private void OnTallerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(TallerInscripcion.Abono) ||
-                e.PropertyName == nameof(TallerInscripcion.SaldoPendiente) ||
-                e.PropertyName == nameof(TallerInscripcion.EstaSeleccionado))
+            if (e.PropertyName == nameof(TallerInscripcionDTO.Abono) ||
+                e.PropertyName == nameof(TallerInscripcionDTO.SaldoPendiente) ||
+                e.PropertyName == nameof(TallerInscripcionDTO.EstaSeleccionado))
             {
                 OnPropertyChanged(nameof(TotalCostos));
                 OnPropertyChanged(nameof(TotalAbonado));
@@ -165,8 +206,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public override bool Filtro(object o)
         {
-            if (o is not AlumnoDTO a) return false;
-            if (string.IsNullOrWhiteSpace(FiltroRegistros)) return true;
+            if (o is not AlumnoDTO a)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(FiltroRegistros))
+                return true;
 
             var nombreCompleto = a.Nombre ?? "";
             var telefono = a.Telefono ?? "";
@@ -187,59 +231,4 @@ namespace ControlTalleresMVP.ViewModel.Menu
             return true;
         }
     }
-}
-
-
-
-
-
-
-
-
-public class TallerInscripcion : INotifyPropertyChanged
-{
-    public string Nombre { get; set; } = "";
-
-    private bool _estaSeleccionado;
-    public bool EstaSeleccionado
-    {
-        get => _estaSeleccionado;
-        set
-        {
-            if (_estaSeleccionado != value)
-            {
-                _estaSeleccionado = value;
-                OnPropertyChanged(nameof(EstaSeleccionado));
-            }
-        }
-    }
-
-    public decimal Costo { get; set; } = 1200;
-
-    private decimal _abono;
-    public decimal Abono
-    {
-        get => _abono;
-        set
-        {
-
-            decimal nuevoValor = value;
-            // ✅ Evitar que el abono sea mayor al costo
-            if (nuevoValor > Costo)
-                nuevoValor = Costo;
-
-            if (_abono != nuevoValor)
-            {
-                _abono = nuevoValor;
-                OnPropertyChanged(nameof(Abono));
-                OnPropertyChanged(nameof(SaldoPendiente));
-            }
-        }
-    }
-
-    public decimal SaldoPendiente => Math.Max(0, Costo - Abono);
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
