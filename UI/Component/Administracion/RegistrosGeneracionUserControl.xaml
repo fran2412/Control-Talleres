@@ -8,45 +8,50 @@
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
              d:DesignHeight="450" d:DesignWidth="800">
     <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="710" Height="auto">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Registros de generación" FontSize="20" Margin="10,10,0,20"/>
 
-            <!--TextBox de búsqueda-->
-            <TextBox Grid.Row="0" Margin="20,20,190,0"
-             HorizontalAlignment="Stretch" Style="{StaticResource TextBoxCampo}"
-             Text="{Binding FiltroRegistros, UpdateSourceTrigger=PropertyChanged, Delay=300}"
-             Tag="Buscar"
-             FontSize="18"/>
-            <!--Botón de búsqueda-->
-            <Button Height="50" Width="150" Style="{StaticResource BotonNormal}" HorizontalAlignment="Right" Margin="0,20,20,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
-                    </Grid.ColumnDefinitions>
-                    <svgc:SvgViewbox Source="Resources/Icons/LupaBusqueda.svg"
-                             Width="20" Height="20" Grid.Column="0"
-                             Margin="0,0,10,0"/>
-                    <TextBlock Text="BUSCAR" VerticalAlignment="Center"
-                       FontSize="18" 
-                       FontWeight="Regular"
-                       Grid.Column="1"
-                       Foreground="#333333"/>
-                </Grid>
-            </Button>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <!--DataGrid-->
-            <DataGrid Style="{StaticResource DataGridRegistros}" Grid.Row="1" Margin="20"
-              ItemsSource="{Binding RegistrosView}" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn">
-            </DataGrid>
+                <!--TextBox de búsqueda-->
+                <TextBox Grid.Row="0" Margin="20,20,190,0"
+     HorizontalAlignment="Stretch" Style="{StaticResource TextBoxCampo}"
+     Text="{Binding FiltroRegistros, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+     Tag="Buscar"
+     FontSize="18"/>
+                <!--Botón de búsqueda-->
+                <Button Height="50" Width="150" Style="{StaticResource BotonNormal}" HorizontalAlignment="Right" Margin="0,20,20,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <svgc:SvgViewbox Source="Resources/Icons/LupaBusqueda.svg"
+                     Width="20" Height="20" Grid.Column="0"
+                     Margin="0,0,10,0"/>
+                        <TextBlock Text="BUSCAR" VerticalAlignment="Center"
+               FontSize="18" 
+               FontWeight="Regular"
+               Grid.Column="1"
+               Foreground="#333333"/>
+                    </Grid>
+                </Button>
 
-            <Button Style="{StaticResource FeaturedButton}" Content="Iniciar nueva generación" VerticalAlignment="Center"
-                    Height="45" FontSize="16" Grid.Row="2" x:Name="IniciarGeneracionButton"
-                    HorizontalAlignment="Right" Click="IniciarGeneracionButton_Click"/>
-        </Grid>
+                <!--DataGrid-->
+                <DataGrid Style="{StaticResource DataGridRegistros}" Grid.Row="1" Margin="20"
+      ItemsSource="{Binding RegistrosView}" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                          MaxHeight="374">
+                </DataGrid>
+
+                <Button Style="{StaticResource FeaturedButton}" Content="Iniciar nueva generación" VerticalAlignment="Center"
+            Height="45" FontSize="16" Grid.Row="2" x:Name="IniciarGeneracionButton"
+            HorizontalAlignment="Right" Click="IniciarGeneracionButton_Click"/>
+            </Grid>
+        </StackPanel>
     </Border>
 </UserControl>

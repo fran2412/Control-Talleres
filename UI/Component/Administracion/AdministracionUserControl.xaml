@@ -6,9 +6,10 @@
              xmlns:local="clr-namespace:ControlTalleresMVP.UI.Component.Administracion"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
         <StackPanel Orientation="Vertical">
-            <local:RegistrosGeneracionUserControl Margin="0,0,0,20"/>
+            <local:RegistrosGeneracionUserControl Margin="40,0,40,0"/>
+            <local:ConfiguracionesUserControl Margin="40,40,40,0"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

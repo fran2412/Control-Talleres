@@ -5,6 +5,9 @@
     <Compile Update="UI\Component\Administracion\AdministracionUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UI\Component\Administracion\ConfiguracionesUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\Component\Administracion\RegistrosGeneracionUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

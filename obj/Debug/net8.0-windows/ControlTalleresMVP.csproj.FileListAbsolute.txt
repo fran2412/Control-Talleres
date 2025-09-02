@@ -189,3 +189,5 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Administracion\RegistrosGeneracionUserControl.g.cs
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Administracion\AdministracionUserControl.baml
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Administracion\RegistrosGeneracionUserControl.baml
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Administracion\ConfiguracionesUserControl.g.cs
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows\UI\Component\Administracion\ConfiguracionesUserControl.baml

@@ -27,6 +27,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
         public virtual DbSet<Taller> Talleres { get; set; }
         public virtual DbSet<Inscripcion> Inscripciones { get; set; }
         public virtual DbSet<Generacion> Generaciones { get; set; }
+        public virtual DbSet<Configuracion> Configuraciones{ get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -243,6 +244,17 @@ namespace ControlTalleresMVP.Persistence.DataContext
                     .HasDefaultValue(false);
 
                 entity.Property(e => e.EliminadoEn).HasColumnName("eliminado_en");
+            });
+
+            modelBuilder.Entity<Configuracion>(entity =>
+            {
+                entity.ToTable("configuraciones");
+
+                entity.HasKey(c => c.Clave); // 👈 Clave como PK
+
+                entity.Property(c => c.Clave).HasColumnName("clave");
+                entity.Property(c => c.Valor).HasColumnName("valor");
+                entity.Property(c => c.Descripcion).HasColumnName("descripcion");
             });
 
             OnModelCreatingPartial(modelBuilder);

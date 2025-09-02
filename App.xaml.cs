@@ -3,6 +3,7 @@ using ControlTalleresMVP.Configuraciones;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Services.Alumnos;
+using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
@@ -80,6 +81,7 @@ namespace ControlTalleresMVP
             services.AddScoped<ISedeService, SedeService>();
             services.AddScoped<IGeneracionService, GeneracionService>();
             services.AddScoped<ITallerService, TallerService>();
+            services.AddScoped<IConfiguracionService, ConfiguracionService>();
             services.AddScoped<IPromotorService, PromotorService>();
         }
     }

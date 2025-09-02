@@ -74,6 +74,26 @@ namespace ControlTalleresMVP.Migrations
                     b.ToTable("alumnos", (string)null);
                 });
 
+            modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Configuracion", b =>
+                {
+                    b.Property<string>("Clave")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("clave");
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("descripcion");
+
+                    b.Property<string>("Valor")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Clave");
+
+                    b.ToTable("configuraciones", (string)null);
+                });
+
             modelBuilder.Entity("ControlTalleresMVP.Persistence.Models.Generacion", b =>
                 {
                     b.Property<int>("GeneracionId")

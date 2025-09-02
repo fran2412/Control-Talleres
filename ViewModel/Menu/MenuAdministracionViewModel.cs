@@ -4,6 +4,7 @@ using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
+using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Talleres;
 using System;
@@ -18,20 +19,28 @@ using System.Windows.Data;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    public class MenuAdministracionViewModel : ObservableObject
+    public partial class MenuAdministracionViewModel : ObservableObject
     {
+        public string TituloEncabezado { get; set; } = "Administración del sistema";
+
         public ObservableCollection<GeneracionDTO> Registros => _generacionService.RegistrosGeneraciones;
         public ICollectionView? RegistrosView { get; set; }
         protected readonly IGeneracionService _generacionService;
         protected readonly IDialogService _dialogService;
+        private readonly IConfiguracionService _configuracionService;
 
-        public MenuAdministracionViewModel(IGeneracionService generacionService, IDialogService dialogService)
+        [ObservableProperty]
+        private string costoInscripcion = "";
+
+        public MenuAdministracionViewModel(IGeneracionService generacionService, IConfiguracionService configuracionService, IDialogService dialogService)
         {
             _generacionService = generacionService;
             _dialogService = dialogService;
+            _configuracionService = configuracionService;
 
             _generacionService.InicializarRegistros();
             InicializarVista();
+            CostoInscripcion = _configuracionService.GetValor<int>("costo_inscripcion", 600).ToString();
         }
 
 
@@ -82,6 +91,33 @@ namespace ControlTalleresMVP.ViewModel.Menu
             RegistrosView.Filter = filtro;
         }
 
+        [RelayCommand]
+        private void GuardarCostoInscripcion()
+        {
+            if (!int.TryParse(CostoInscripcion, out int valor))
+            {
+                // Aquí podrías usar tu IDialogService en lugar de Exception
+                throw new InvalidOperationException("El costo de inscripción debe ser un número entero válido.");
+            }
+
+            if (valor < 400 || valor > 1400)
+            {
+                _dialogService.Alerta($"El costo de inscripción debe estar entre 400 y 1400.");
+                return;
+            }
+
+            bool confirmacion = _dialogService.ConfirmarOkCancel($"¿Estás seguro de que deseas actualizar el costo de inscripción a {valor}?", "Confirmar actualización");
+
+            if (confirmacion == false)
+            {
+                return;
+            }
+
+
+            _configuracionService.SetValor("costo_inscripcion", valor.ToString());
+
+            _dialogService.Info("Costo de inscripción actualizado correctamente.");
+        }
         protected void InicializarVista()
         {
             InitializeView(Registros, Filtro);
