@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Remove="Resources\Icons\AdministracionIcono.svg" />
     <None Remove="Resources\Icons\LupaIcono.svg" />
+    <None Remove="Resources\Icons\LupaNegraIcono.svg" />
     <None Remove="Resources\Icons\SedeIcono.svg" />
   </ItemGroup>
 
@@ -29,6 +30,7 @@
     <Resource Include="Resources\Icons\EliminarRegistro.svg" />
     <Resource Include="Resources\Icons\ErrorIcono.svg" />
     <Resource Include="Resources\Icons\LupaIcono.svg" />
+    <Resource Include="Resources\Icons\LupaNegraIcono.svg" />
     <Resource Include="Resources\Icons\MaestroIcono.svg" />
     <Resource Include="Resources\Icons\PagoIcono.svg" />
     <Resource Include="Resources\Icons\PromotorIcono.svg" />

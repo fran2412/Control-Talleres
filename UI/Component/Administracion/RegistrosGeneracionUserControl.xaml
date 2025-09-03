@@ -31,7 +31,7 @@
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
-                        <svgc:SvgViewbox Source="Resources/Icons/LupaBusqueda.svg"
+                        <svgc:SvgViewbox Source="Resources/Icons/LupaNegraIcono.svg"
                      Width="20" Height="20" Grid.Column="0"
                      Margin="0,0,10,0"/>
                         <TextBlock Text="BUSCAR" VerticalAlignment="Center"
