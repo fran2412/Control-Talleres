@@ -2,10 +2,22 @@
 {
     public enum EstadoInscripcion
     {
-        Pendiente = 0,
-        Parcial = 1,
-        Pagado = 2,
-        Cancelado = 3
+        Activa = 0,
+        Cancelada= 1,
+        Finalizada = 2,
+    }
+
+    public enum EstadoCargo
+    {
+        Vigente = 0,
+        Anulado = 1,
+        Ajuste = 2,
+    }
+
+    public enum EstadoAplicacionCargo
+    {
+        Vigente = 0,
+        Anulada = 1,
     }
 
     public enum TipoCargo

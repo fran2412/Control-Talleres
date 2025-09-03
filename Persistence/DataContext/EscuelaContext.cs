@@ -241,6 +241,11 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .HasDefaultValueSql("CURRENT_TIMESTAMP")
                       .ValueGeneratedOnAdd();
 
+                entity.Property(i => i.CanceladaEn)
+                      .HasColumnName("cancelada_en");
+                entity.Property(i => i.MotivoCancelacion)
+                      .HasColumnName("motivo_cancelacion");
+                
                 entity.Property(i => i.Eliminado)
                       .HasColumnName("eliminado")
                       .HasDefaultValue(false);
@@ -314,6 +319,11 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(c => c.Fecha)
                       .HasColumnName("fecha");
+
+                entity.Property(c => c.Estado)
+                      .HasColumnName("estado")
+                      .HasConversion<string>();
+                ;
 
                 entity.Property(c => c.CreadoEn)
                       .HasColumnName("creado_en")
@@ -428,6 +438,9 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .HasPrecision(10, 2);
 
                 entity.Property(pa => pa.PagoId).HasColumnName("pago_id");
+                entity.Property(pa => pa.Estado)
+                       .HasColumnName("estado")
+                       .HasConversion<string>();
                 entity.Property(pa => pa.CargoId).HasColumnName("cargo_id");
 
                 // Relaciones

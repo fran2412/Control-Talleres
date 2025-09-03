@@ -3,6 +3,7 @@ using System;
 using ControlTalleresMVP.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ControlTalleresMVP.Migrations
 {
     [DbContext(typeof(EscuelaContext))]
-    partial class EscuelaContextModelSnapshot : ModelSnapshot
+    [Migration("20250903152603_EstadosPagos")]
+    partial class EstadosPagos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -111,9 +114,8 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("estado");
 
                     b.Property<DateTime>("Fecha")
@@ -371,9 +373,8 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("cargo_id");
 
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("estado");
 
                     b.Property<decimal>("MontoAplicado")

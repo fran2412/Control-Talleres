@@ -60,9 +60,9 @@ namespace ControlTalleresMVP.Services.Inscripciones
             if (abonoInicial < 0 || abonoInicial > costo) throw new InvalidOperationException("Abono inicial inválido.");
 
             var saldo = costo - abonoInicial;
-            var estado = saldo == 0 ? EstadoInscripcion.Pagado
-                        : abonoInicial > 0 ? EstadoInscripcion.Parcial
-                        : EstadoInscripcion.Pendiente;
+            var estado = saldo == 0 ? EstadoInscripcion.Finalizada
+                        : abonoInicial > 0 ? EstadoInscripcion.Activa
+                        : EstadoInscripcion.Activa;
 
             var now = DateTime.Now;
 
@@ -98,7 +98,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     Fecha = now,
                     CreadoEn = now,
                     ActualizadoEn = now,
-                    Eliminado = false
+                    Eliminado = false,
+                    Estado = EstadoCargo.Vigente
                 };
 
                 _escuelaContext.Cargos.Add(cargo);
@@ -127,7 +128,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     {
                         PagoId = pago.PagoId,
                         CargoId = cargo.CargoId,
-                        MontoAplicado = abonoInicial
+                        MontoAplicado = abonoInicial,
+                        Estado = EstadoAplicacionCargo.Vigente
                     };
 
                     _escuelaContext.PagoAplicaciones.Add(aplicacion);
@@ -147,14 +149,14 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
         public async Task CancelarAsync(int inscripcionId, string? motivo = null, CancellationToken ct = default)
         {
-            var ins = await _escuelaContext.Inscripciones
+            var inscripcion = await _escuelaContext.Inscripciones
                 .FirstOrDefaultAsync(i => i.InscripcionId == inscripcionId, ct)
                       ?? throw new InvalidOperationException("Inscripción no encontrada.");
 
-            ins.Eliminado = true;
-            ins.EliminadoEn = DateTime.Now;
-            ins.Estado = EstadoInscripcion.Cancelado;
-            ins.ActualizadoEn = DateTime.Now;
+            inscripcion.Eliminado = true;
+            inscripcion.EliminadoEn = DateTime.Now;
+            inscripcion.Estado = EstadoInscripcion.Cancelada;
+            inscripcion.ActualizadoEn = DateTime.Now;
 
             await _escuelaContext.SaveChangesAsync(ct);
         }

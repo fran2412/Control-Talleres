@@ -6,6 +6,8 @@
 
         public decimal MontoAplicado { get; set; }
 
+        public EstadoAplicacionCargo Estado { get; set; } = EstadoAplicacionCargo.Vigente;
+
         public int PagoId { get; set; }
         public Pago Pago { get; set; } = null!;
 
