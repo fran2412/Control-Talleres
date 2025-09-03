@@ -6,7 +6,8 @@
         public DateTime Fecha { get; set; } = DateTime.Now; 
         
         public decimal MontoTotal { get; set; }
-        public string Metodo { get; set; } = "Efectivo"; public string? Referencia { get; set; }
+        public MetodoPago Metodo { get; set; } = MetodoPago.Efectivo;
+        public string? Referencia { get; set; }
         public string? Notas { get; set; }
 
         // Auditoría

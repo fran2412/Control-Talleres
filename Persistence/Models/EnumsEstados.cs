@@ -3,7 +3,7 @@
     public enum EstadoInscripcion
     {
         Activa = 0,
-        Cancelada= 1,
+        Cancelada = 1,
         Finalizada = 2,
     }
 
@@ -24,5 +24,12 @@
     {
         Inscripcion = 1,
         Clase = 2,
+    } 
+
+    public enum MetodoPago
+    {
+        Efectivo = 1,
+        TarjetaCredito = 2,
+        Otro = 3,
     }
 }

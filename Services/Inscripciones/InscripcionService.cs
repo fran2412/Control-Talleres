@@ -113,7 +113,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                         AlumnoId = alumnoId,
                         Fecha = now,
                         MontoTotal = abonoInicial,
-                        Metodo = "Efectivo",
+                        Metodo = MetodoPago.Efectivo,
                         Notas = "Abono inicial de inscripción",
                         CreadoEn = now,
                         ActualizadoEn = now,

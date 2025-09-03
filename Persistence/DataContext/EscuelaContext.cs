@@ -383,6 +383,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(p => p.Metodo)
                       .HasColumnName("metodo")
+                      .HasConversion<string>()
                       .HasMaxLength(50);
 
                 entity.Property(p => p.Referencia)
