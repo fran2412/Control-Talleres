@@ -1,0 +1,171 @@
+﻿<UserControl x:Class="ControlTalleresMVP.UI.Component.Inscripcion.FormularioInscripcionUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="980">
+    <Grid Background="White">
+        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" Margin="0" Padding="16" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Header -->
+                    <RowDefinition Height="*"/>
+                    <!-- Body -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Footer -->
+                </Grid.RowDefinitions>
+
+                <!-- HEADER -->
+                <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
+                    <Label Content="Inscribir alumno en talleres"
+                           FontSize="20"
+                           FontFamily="Inter 28pt 28pt ExtraBold"
+                           Foreground="#FF3E3E3E"
+                           DockPanel.Dock="Left"/>
+                </DockPanel>
+
+                <!-- BODY -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LADO IZQUIERDO: Alumno + Talleres -->
+                    <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,12,0">
+                        <!-- Selección de Alumno + Fecha -->
+                        <WrapPanel Margin="0,0,0,8">
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="* Alumno" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <StackPanel Orientation="Horizontal" Width="550">
+                                    <TextBox Text="{Binding CampoTextoNombre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource TextBoxCampo}"
+                                             IsReadOnly="True"
+                                             Height="30" Width="430"
+                                             ToolTip="Alumno seleccionado"/>
+                                    <Button Command="{Binding BuscarAlumnoCommand}"
+                                            Style="{StaticResource SemiFeaturedButton}"
+                                            Height="50" Width="110" Margin="6,0,0,0"
+                                            ToolTip="Buscar alumno">
+                                        
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </WrapPanel>
+
+                        <!-- Tabla de Talleres -->
+                        <TextBlock Text="Selecciona los talleres a inscribir y registra un abono opcional"
+                                   Margin="0,4,0,6" Foreground="Gray"/>
+                        <DataGrid ItemsSource="{Binding TalleresDisponibles}"
+                                  Style="{StaticResource DataGridRegistros}"
+                                  AutoGenerateColumns="False"
+                                  HeadersVisibility="Column"
+                                  CanUserAddRows="False" CanUserDeleteRows="False"
+                                  IsReadOnly="False"
+                                  RowHeaderWidth="0"
+                                  EnableRowVirtualization="True"
+                                  Margin="0,0,0,8">
+                            <DataGrid.Columns>
+                                <!-- Seleccionar -->
+                                <DataGridCheckBoxColumn Binding="{Binding EstaSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Seleccionar" Width="100"/>
+
+                                <!-- Taller -->
+                                <DataGridTextColumn Binding="{Binding Nombre}" Header="Taller" Width="2*"
+                                                    IsReadOnly="True"/>
+
+                                <!-- Generación (opcional). Si tu DTO expone Generaciones, úsalo; si no, deja GeneracionId nulo para 'Auto'. -->
+                                
+
+                                <!-- Costo -->
+                                <DataGridTextColumn Binding="{Binding Costo, StringFormat=C}" Header="Costo" Width="100"
+                                                    IsReadOnly="True"/>
+
+                                <!-- Abono -->
+                                <DataGridTemplateColumn Header="Abono" Width="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Abono, StringFormat=C}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Abono, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:C0}}"
+                                                     Height="28" Padding="4,0"
+                                                     HorizontalContentAlignment="Right"
+                                                     ToolTip="Abono inicial (0 a Costo)"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- Saldo -->
+                                <DataGridTextColumn Binding="{Binding SaldoPendiente, StringFormat=C}" Header="Saldo" Width="100" IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+
+                    <!-- LADO DERECHO: Resumen -->
+                    <Border Grid.Column="1" Padding="12" CornerRadius="12" BorderBrush="#DDD" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Resumen" FontSize="20" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Total costo" Grid.Row="0" Grid.Column="0" Foreground="#555" FontSize="14"/>
+                                <TextBlock Text="{Binding TotalCostoSeleccionado, StringFormat=C}" Grid.Row="0" FontSize="14" Grid.Column="1" FontWeight="Bold"/>
+
+                                <TextBlock Text="Total abono" Grid.Row="1" Grid.Column="0" FontSize="14" Foreground="#555" Margin="0,6,0,0"/>
+                                <TextBlock Text="{Binding TotalAbonoSeleccionado, StringFormat=C}" Grid.Row="1" FontSize="14" Grid.Column="1" FontWeight="Bold" Margin="0,6,0,0"/>
+
+                                <TextBlock Text="Total saldo" Grid.Row="2" Grid.Column="0" FontSize="14" Foreground="#555" Margin="0,6,0,0"/>
+                                <TextBlock Text="{Binding TotalSaldoSeleccionado, StringFormat=C}" Grid.Row="2" FontSize="14" Grid.Column="1" FontWeight="Bold" Margin="0,6,0,0"/>
+                            </Grid>
+
+                            <Separator Margin="0,6,0,10"/>
+
+                            <TextBlock Text="Notas (opcional)" FontSize="14" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding NotasInscripcion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="70" TextWrapping="Wrap" FontSize="14" AcceptsReturn="True"/>
+
+                            <!-- Si decides permitir método de pago inicial desde UI, agrega una propiedad en VM y extiende el servicio. 
+                                 Por ahora InscribirAsync usa 'Efectivo'. -->
+                            <!--<StackPanel Margin="0,10,0,0">
+                                <TextBlock Text="Método de pago (abonos)" Margin="0,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding MetodosPago}"
+                                          SelectedItem="{Binding MetodoPagoSeleccionado, Mode=TwoWay}"
+                                          SelectedValuePath="." />
+                            </StackPanel>-->
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- FOOTER -->
+                <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,12,0,0">
+                    <Button Content="Cancelar"
+                            ToolTip="Cancelar"
+                            Height="44" MinWidth="120"
+                            Style="{StaticResource BotonNormal}"
+                            Command="{Binding CancelarRegistrarItemCommand}"/>
+
+                    <Button x:Name="RegistrarButton"
+                            Content="Inscribir"
+                            Command="{Binding RegistrarItemCommand}"
+                            Height="44" MinWidth="160" Margin="12,0,0,0"
+                            ToolTip="Inscribir al alumno en los talleres seleccionados"
+                            Style="{StaticResource FeaturedButton}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

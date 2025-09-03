@@ -122,14 +122,11 @@ namespace ControlTalleresMVP.Services.Generaciones
         {
             var año = DateTime.Now.Year;
 
-            // Contar cuántas generaciones ya existen en este año
             var count = _context.Generaciones
                 .Count(g => g.FechaInicio.Year == año);
 
-            // Formato: GEN-2025-01, GEN-2025-02, etc.
             string nombre = $"GEN-{año}-{(count + 1):00}";
 
-            // Cerrar la última generación si aún no tiene fin
             var ultimaGeneracion = _context.Generaciones
                 .OrderByDescending(g => g.FechaInicio)
                 .FirstOrDefault();

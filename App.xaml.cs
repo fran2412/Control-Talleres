@@ -7,6 +7,7 @@ using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Navigation;
+using ControlTalleresMVP.Services.Picker;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
@@ -85,6 +86,7 @@ namespace ControlTalleresMVP
             services.AddScoped<IInscripcionService, InscripcionService>();
             services.AddScoped<IConfiguracionService, ConfiguracionService>();
             services.AddScoped<IPromotorService, PromotorService>();
+            services.AddTransient<IAlumnoPickerService, AlumnoPickerService>();
         }
     }
 }

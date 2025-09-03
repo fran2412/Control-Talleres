@@ -39,7 +39,8 @@
             </Button>
 
             <!--DataGrid-->
-            <DataGrid Style="{StaticResource DataGridRegistros}" Grid.Row="1" Margin="20"
+            <DataGrid x:Name="AlumnosGrid"
+                Style="{StaticResource DataGridRegistros}" Grid.Row="1" Margin="20"
                   ItemsSource="{Binding RegistrosView}" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn">
                 <DataGrid.Columns>
                     <!-- Columna fija de acciones -->

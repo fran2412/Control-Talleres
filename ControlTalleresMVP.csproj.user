@@ -23,6 +23,9 @@
     <Compile Update="UI\Component\Inicio\InicioUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UI\Component\Inscripcion\FormularioInscripcionUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\Component\Inscripcion\InscripcionTallerUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
