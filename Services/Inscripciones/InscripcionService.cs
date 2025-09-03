@@ -1,10 +1,12 @@
 ﻿using ControlTalleresMVP.Persistence.DataContext;
+using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +19,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
         private readonly EscuelaContext _escuelaContext;
         private readonly IConfiguracionService _configuracionService;
         private readonly IGeneracionService _generacionService;
+
+        public ObservableCollection<InscripcionDTO> RegistrosInscripciones { get; set; } = new();
 
         public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IGeneracionService generacionService)
         {
@@ -131,6 +135,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 }
 
                 await transaccion.CommitAsync(ct);
+                await InicializarRegistros(ct);
                 return inscripcion;
             }
             catch
@@ -138,6 +143,56 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 await transaccion.RollbackAsync(ct);
                 throw;
             }
+        }
+
+        public async Task CancelarAsync(int inscripcionId, string? motivo = null, CancellationToken ct = default)
+        {
+            var ins = await _escuelaContext.Inscripciones
+                .FirstOrDefaultAsync(i => i.InscripcionId == inscripcionId, ct)
+                      ?? throw new InvalidOperationException("Inscripción no encontrada.");
+
+            ins.Eliminado = true;
+            ins.EliminadoEn = DateTime.Now;
+            ins.Estado = EstadoInscripcion.Cancelado;
+            ins.ActualizadoEn = DateTime.Now;
+
+            await _escuelaContext.SaveChangesAsync(ct);
+        }
+
+
+        public async Task InicializarRegistros(CancellationToken ct = default)
+        {
+            var inscripciones = await ObtenerInscripcionesParaGridAsync(ct);
+
+            RegistrosInscripciones.Clear();
+
+            foreach (var inscripcion in inscripciones)
+            {
+                RegistrosInscripciones.Add(inscripcion);
+            }
+        }
+
+        public async Task<List<InscripcionDTO>> ObtenerInscripcionesParaGridAsync(CancellationToken ct = default)
+        {
+            var genActualId = _generacionService.ObtenerGeneracionActual()?.GeneracionId
+                ?? throw new InvalidOperationException("No hay generación actual.");
+
+            var datos = await _escuelaContext.Inscripciones
+                .AsNoTracking()
+                .Where(i => !i.Eliminado && i.GeneracionId == genActualId)
+                .Select(i => new InscripcionDTO
+                {
+                    Id          = i.InscripcionId,
+                    Nombre      = i.Alumno.Nombre,  // ← string plano
+                    Taller      = i.Taller.Nombre,  // ← string plano
+                    Costo       = i.Costo,
+                    SaldoActual = i.SaldoActual,
+                    Estado      = i.Estado,
+                    CreadoEn    = i.Fecha
+                })
+                .ToListAsync(ct);
+
+            return datos;
         }
     }
 }

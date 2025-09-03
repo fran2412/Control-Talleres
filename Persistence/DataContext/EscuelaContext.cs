@@ -270,7 +270,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .OnDelete(DeleteBehavior.Restrict);
 
                 // Índice único
-                entity.HasIndex(i => new { i.AlumnoId, i.TallerId, i.GeneracionId })
+                entity.HasIndex(i => new { i.AlumnoId, i.TallerId, i.GeneracionId, i.Eliminado })
                       .IsUnique();
             });
 

@@ -7,6 +7,7 @@ using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Picker;
 using ControlTalleresMVP.Services.Talleres;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,12 +16,16 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
     public partial class MenuInscripcionesViewModel : ObservableObject
     {
         public string TituloEncabezado { get; set; } = "Gestión de Inscripciones";
+
+        public ObservableCollection<InscripcionDTO> Registros => _inscripcionService.RegistrosInscripciones;
+        public ICollectionView? RegistrosView { get; set; }
 
         private readonly IInscripcionService _inscripcionService;
         private readonly ITallerService _tallerService;
@@ -43,6 +48,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _dialogService = dialogService;
 
             TalleresDisponibles.CollectionChanged += TalleresDisponibles_CollectionChanged;
+
+            _inscripcionService.InicializarRegistros();
+            InicializarVista();
 
             // Carga inicial
             _ = CargarTalleresAsync();
@@ -112,10 +120,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 try
                 {
-                    // NOTA sobre Generación:
-                    // El servicio debe asignarla automáticamente (no se expone en UI).
-                    // Si tu InscribirAsync ya acepta generacionId opcional, pasa null.
-                    // Si tu firma aún requiere int generacionId, ajusta el servicio como te propuse.
                     await _inscripcionService.InscribirAsync(
                         alumnoId: AlumnoSeleccionadoId.Value,
                         tallerId: t.TallerId,
@@ -175,6 +179,26 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
+        [RelayCommand]
+        private async Task CancelarInscripcionAsync(int inscripcionId)
+        {
+            if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta inscripción?")) return;
+
+            try
+            {
+                await _inscripcionService.CancelarAsync(inscripcionId);
+
+                // Refrescar la lista después de cancelar
+                await _inscripcionService.InicializarRegistros();
+
+                _dialogService.Info("Inscripción cancelada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("No se pudo cancelar la inscripción.\n" + ex.Message);
+            }
+        }
+
         private void TalleresDisponibles_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.OldItems != null)
@@ -198,6 +222,36 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 RecalcularTotales();
             }
         }
+
+        private string _filtroRegistros = "";
+        // Propiedad manual para controlar el refresh
+        public string FiltroRegistros
+        {
+            get => _filtroRegistros;
+            set
+            {
+                if (SetProperty(ref _filtroRegistros, value))
+                {
+                    // Refrescar la vista cuando cambie el filtro
+                    RegistrosView?.Refresh();
+                }
+            }
+        }
+
+        public bool Filtro(object o)
+        {
+            if (o is InscripcionDTO dto)
+            {
+                if (string.IsNullOrWhiteSpace(FiltroRegistros))
+                    return true;
+
+                return (dto.Nombre?.Contains(FiltroRegistros, StringComparison.OrdinalIgnoreCase) == true)
+                    || (dto.Taller?.Contains(FiltroRegistros, StringComparison.OrdinalIgnoreCase) == true)
+                    || dto.Estado.ToString().Contains(FiltroRegistros, StringComparison.OrdinalIgnoreCase);
+            }
+            return false;
+        }
+
 
         private void RecalcularTotales()
         {
@@ -223,5 +277,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             RecalcularTotales();
         }
+
+        protected void InicializarVista()
+        {
+            InitializeView(Registros, Filtro);
+        }
+
+        protected void InitializeView(ObservableCollection<InscripcionDTO> registros, Predicate<object> filtro)
+        {
+            RegistrosView = CollectionViewSource.GetDefaultView(registros);
+            RegistrosView.Filter = filtro;
+        }
+
     }
 }

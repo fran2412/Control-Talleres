@@ -73,6 +73,18 @@ namespace ControlTalleresMVP.Services.Generaciones
             }
         }
 
+        public async Task InicializarRegistros(CancellationToken ct = default)
+        {
+            var generaciones = await ObtenerGeneracionesParaGridAsync(ct);
+
+            RegistrosGeneraciones.Clear();
+
+            foreach (var generacion in generaciones)
+            {
+                RegistrosGeneraciones.Add(generacion);
+            }
+        }
+
         public async Task<List<GeneracionDTO>> ObtenerGeneracionesParaGridAsync(CancellationToken ct = default)
         {
 
@@ -95,19 +107,6 @@ namespace ControlTalleresMVP.Services.Generaciones
                 FechaInicio = u.FechaInicio,
                 FechaFin = u.FechaFin,
             }).ToList();
-        }
-
-
-        public async Task InicializarRegistros(CancellationToken ct = default)
-        {
-            var generaciones = await ObtenerGeneracionesParaGridAsync(ct);
-
-            RegistrosGeneraciones.Clear();
-
-            foreach (var generacion in generaciones)
-            {
-                RegistrosGeneraciones.Add(generacion);
-            }
         }
 
         public List<Generacion> ObtenerTodos(CancellationToken ct = default)

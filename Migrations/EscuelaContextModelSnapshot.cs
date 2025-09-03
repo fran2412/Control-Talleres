@@ -278,7 +278,7 @@ namespace ControlTalleresMVP.Migrations
 
                     b.HasIndex("TallerId");
 
-                    b.HasIndex("AlumnoId", "TallerId", "GeneracionId")
+                    b.HasIndex("AlumnoId", "TallerId", "GeneracionId", "Eliminado")
                         .IsUnique();
 
                     b.ToTable("inscripciones", (string)null);
