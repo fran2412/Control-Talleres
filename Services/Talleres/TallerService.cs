@@ -30,15 +30,58 @@ namespace ControlTalleresMVP.Services.Talleres
             return taller;
         }
 
-        public async Task EliminarAsync(int id, CancellationToken ct = default)
+        public async Task EliminarAsync(int tallerId, CancellationToken ct = default)
         {
-            var taller = await _context.Talleres.FirstOrDefaultAsync(p => p.TallerId == id);
-            if (taller is null) return;
+            var now = DateTime.Now;
+            using var transaccion = await _context.Database.BeginTransactionAsync(ct);
 
+            var taller = await _context.Talleres.FirstOrDefaultAsync(t => t.TallerId == tallerId, ct)
+                         ?? throw new InvalidOperationException("Taller no encontrado.");
+
+            // 1) Soft-delete del taller
             taller.Eliminado = true;
-            taller.EliminadoEn = DateTime.Now;
+            taller.EliminadoEn = now;
+
+            // 2) Inscripciones del taller (no eliminadas)
+            var inscripciones = await _context.Inscripciones
+                .Where(i => i.TallerId == tallerId && !i.Eliminado && i.Estado != EstadoInscripcion.Cancelada)
+                .ToListAsync(ct);
+
+            var inscripcionesIds = inscripciones.Select(i => i.InscripcionId).ToArray();
+
+            // 3) Cargos ligados a esas inscripciones y vigentes
+            var cargosInscripcion = await _context.Cargos
+                .Where(c => c.InscripcionId != null
+                            && inscripcionesIds.Contains(c.InscripcionId!.Value)
+                            && !c.Eliminado
+                            && c.Estado != EstadoCargo.Anulado)
+                .ToListAsync(ct);
+
+
+            // 4) Anular cargos y perdonar saldo
+            foreach (var c in cargosInscripcion)
+            {
+                c.Estado = EstadoCargo.Anulado;
+                c.SaldoActual = 0m;
+                c.ActualizadoEn = now;
+            }
+
+            // 5) Cancelar inscripciones y dejar saldo en 0 (sin reembolsos)
+            foreach (var i in inscripciones)
+            {
+                i.Estado = EstadoInscripcion.Cancelada;
+                i.CanceladaEn = now;
+                i.MotivoCancelacion = "Taller eliminado";
+                i.SaldoActual = 0m;
+                i.ActualizadoEn = now;
+                // i.Eliminado = true;
+                // i.EliminadoEn = now;
+            }
+
+            // NOTA: PagoAplicacion se mantiene en Estado = Vigente (no reembolsos)
 
             await _context.SaveChangesAsync(ct);
+            await transaccion.CommitAsync(ct);
             await InicializarRegistros(ct);
         }
 

@@ -195,7 +195,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
             var datos = await _escuelaContext.Inscripciones
                 .AsNoTracking()
-                .Where(i => !i.Eliminado && i.GeneracionId == genActualId)
+                .Where(i => !i.Eliminado && i.GeneracionId == genActualId && i.Estado != EstadoInscripcion.Cancelada)
                 .Select(i => new InscripcionDTO
                 {
                     Id          = i.InscripcionId,
