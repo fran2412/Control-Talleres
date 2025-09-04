@@ -1,4 +1,5 @@
-﻿using ControlTalleresMVP.Persistence.DataContext;
+﻿using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
@@ -13,14 +14,16 @@ namespace ControlTalleresMVP.Services.Inscripciones
         private readonly EscuelaContext _escuelaContext;
         private readonly IConfiguracionService _configuracionService;
         private readonly IGeneracionService _generacionService;
+        private readonly IDialogService _dialogService;
 
         public ObservableCollection<InscripcionDTO> RegistrosInscripciones { get; set; } = new();
 
-        public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IGeneracionService generacionService)
+        public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IGeneracionService generacionService, IDialogService dialogService)
         {
             _escuelaContext = escuelaContext;
             _configuracionService = configuracionService;
             _generacionService = generacionService;
+            _dialogService = dialogService;
         }
 
         public async Task<bool> ExisteActivaAsync(int alumnoId, int tallerId, int generacionId, CancellationToken ct = default)
@@ -147,6 +150,11 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 .FirstOrDefaultAsync(i => i.InscripcionId == inscripcionId, ct)
                       ?? throw new InvalidOperationException("Inscripción no encontrada.");
 
+            var motivoCancelacion = _dialogService.PedirTexto("Ingrese el motivo de la cancelación de la inscripción\nOpcional");
+            if (String.IsNullOrWhiteSpace(motivoCancelacion)) motivoCancelacion = "No especificado";
+
+            inscripcion.MotivoCancelacion = motivoCancelacion;
+            inscripcion.CanceladaEn = DateTime.Now;
             inscripcion.Eliminado = true;
             inscripcion.EliminadoEn = DateTime.Now;
             inscripcion.Estado = EstadoInscripcion.Cancelada;

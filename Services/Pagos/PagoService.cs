@@ -113,8 +113,9 @@ namespace ControlTalleresMVP.Services.Pagos
                 {
                     var delta = deltaPorInscripcion[ins.InscripcionId];
                     ins.SaldoActual = Math.Max(0, ins.SaldoActual - delta);
-                    ins.ActualizadoEn = ahora;
 
+                    if (ins.SaldoActual == 0) ins.Estado = EstadoInscripcion.Finalizada;
+                    ins.ActualizadoEn = ahora;
                     // (Opcional) actualizar Estado según tu enum real:
                     // if (ins.SaldoActual <= 0) ins.Estado = EstadoInscripcion.Finalizada; // o Pagada
                     // else if (ins.SaldoActual < ins.Costo) ins.Estado = EstadoInscripcion.Activa; // Parcial si lo manejas
