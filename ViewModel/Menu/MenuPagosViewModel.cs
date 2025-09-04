@@ -67,7 +67,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return;
             }
 
-            var cargos = await _cargosService.ObtenerCargosPendientesAsync(seleccionado.AlumnoId);
+            var cargos = await _cargosService.ObtenerCargosPendientesActualesAsync(seleccionado.AlumnoId);
 
             if (cargos.Length == 0)
             {
@@ -155,7 +155,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 _dialog.Info($"Pago #{pagoId} guardado correctamente.");
                 LimpiarDistribucion();
 
-                var cargos = await _cargosService.ObtenerCargosPendientesAsync(AlumnoId);
+                var cargos = await _cargosService.ObtenerCargosPendientesActualesAsync(AlumnoId);
 
                 if (cargos.Length == 0)
                 {

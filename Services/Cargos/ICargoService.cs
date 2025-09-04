@@ -9,6 +9,6 @@ namespace ControlTalleresMVP.Services.Cargos
 {
     public interface ICargosService
     {
-        Task<DestinoCargoDTO[]> ObtenerCargosPendientesAsync(int alumnoId, CancellationToken ct = default);
+        public Task<DestinoCargoDTO[]> ObtenerCargosPendientesActualesAsync(int alumnoId, CancellationToken ct = default);
     }
 }

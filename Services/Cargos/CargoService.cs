@@ -1,34 +1,43 @@
 ﻿using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
+using ControlTalleresMVP.Services.Generaciones;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ControlTalleresMVP.Services.Cargos
 {
     public class CargoService : ICargosService
     {
         private readonly EscuelaContext _escuelaContext;
+        private readonly IGeneracionService _generacionService;
 
-        public CargoService(EscuelaContext escuelaContext)
+        public CargoService(EscuelaContext escuelaContext, IGeneracionService generacionService)
         {
             _escuelaContext = escuelaContext;
+            _generacionService = generacionService;
         }
 
-        public async Task<DestinoCargoDTO[]> ObtenerCargosPendientesAsync(int alumnoId, CancellationToken ct = default)
+        public async Task<DestinoCargoDTO[]> ObtenerCargosPendientesActualesAsync(int alumnoId, CancellationToken ct = default)
         {
             // Todos los cargos con saldo > 0 del alumno (sin importar si son inscripción o clase)
             // Si quieres excluir inscripciones canceladas, agrega filtro por navegación si la tienes (i.Eliminado == false).
+            var generacion = _generacionService.ObtenerGeneracionActual();
+            if (generacion == null) throw new ArgumentException(nameof(generacion));
+
             var query = _escuelaContext.Cargos
                 .AsNoTracking()
                 .Where(c => c.AlumnoId == alumnoId
                             && !c.Eliminado
                             && c.SaldoActual > 0
-                            && c.Estado != EstadoCargo.Anulado);
+                            && c.Estado != EstadoCargo.Anulado
+                            && (c.InscripcionId == null
+                                || c.Inscripcion!.GeneracionId == generacion.GeneracionId));
 
             // Orden recomendable: Clases primero (si ClaseId != null), luego inscripciones, y por saldo descendente
             var list = await query

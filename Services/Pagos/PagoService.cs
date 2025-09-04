@@ -27,11 +27,6 @@ namespace ControlTalleresMVP.Services.Pagos
             if (captura.Aplicaciones is null || captura.Aplicaciones.Length == 0)
                 throw new InvalidOperationException("Debes proporcionar al menos una aplicación.");
 
-            // SIN saldo a favor: exige que ΣAplicaciones == MontoTotal
-            var totalAplicado = captura.Aplicaciones.Sum(a => a.Monto);
-            if (totalAplicado != captura.MontoTotal)
-                throw new InvalidOperationException("El total aplicado debe ser exactamente igual al monto del pago.");
-
             using var tx = await _ctx.Database.BeginTransactionAsync(ct);
 
             // 1) Crear Pago
@@ -48,6 +43,9 @@ namespace ControlTalleresMVP.Services.Pagos
 
             _ctx.Pagos.Add(pago);
             await _ctx.SaveChangesAsync(ct); // para tener PagoId
+
+            // 🔹 Acumulador: inscId -> total aplicado a inscripción (según CAPTURA)
+            var deltaPorInscripcion = new Dictionary<int, decimal>();
 
             // 2) Validar cargos y crear aplicaciones, rebajando saldos
             foreach (var apl in captura.Aplicaciones)
@@ -80,7 +78,7 @@ namespace ControlTalleresMVP.Services.Pagos
                     PagoId = pago.PagoId,
                     CargoId = cargo.CargoId,
                     MontoAplicado = apl.Monto,
-                    Estado = EstadoAplicacionCargo.Vigente,  // usa tu enum real
+                    Estado = EstadoAplicacionCargo.Vigente,
                 };
                 _ctx.PagoAplicaciones.Add(app);
 
@@ -88,14 +86,47 @@ namespace ControlTalleresMVP.Services.Pagos
                 cargo.SaldoActual -= apl.Monto;
                 cargo.ActualizadoEn = ahora;
 
+                // 🔹 Si la CAPTURA marca INSCRIPCIÓN (apl.InscripcionId y no ClaseId), acumula para Inscripción
+                if (apl.InscripcionId.HasValue && !apl.ClaseId.HasValue)
+                {
+                    var inscId = apl.InscripcionId.Value;
+                    if (!deltaPorInscripcion.TryAdd(inscId, apl.Monto))
+                        deltaPorInscripcion[inscId] += apl.Monto;
+                }
+
                 // (Opcional) si tu cargo maneja estados:
                 // if (cargo.SaldoActual == 0) cargo.Estado = EstadoCargo.Saldado;
             }
 
             await _ctx.SaveChangesAsync(ct);
-            await tx.CommitAsync(ct);
 
+            // 3) Aplicar delta acumulado a las Inscripciones afectadas
+            if (deltaPorInscripcion.Count > 0)
+            {
+                var inscIds = deltaPorInscripcion.Keys.ToArray();
+
+                var inscripciones = await _ctx.Inscripciones
+                    .Where(i => inscIds.Contains(i.InscripcionId))
+                    .ToListAsync(ct);
+
+                foreach (var ins in inscripciones)
+                {
+                    var delta = deltaPorInscripcion[ins.InscripcionId];
+                    ins.SaldoActual = Math.Max(0, ins.SaldoActual - delta);
+                    ins.ActualizadoEn = ahora;
+
+                    // (Opcional) actualizar Estado según tu enum real:
+                    // if (ins.SaldoActual <= 0) ins.Estado = EstadoInscripcion.Finalizada; // o Pagada
+                    // else if (ins.SaldoActual < ins.Costo) ins.Estado = EstadoInscripcion.Activa; // Parcial si lo manejas
+                    // else ins.Estado = EstadoInscripcion.Activa;
+                }
+
+                await _ctx.SaveChangesAsync(ct);
+            }
+
+            await tx.CommitAsync(ct);
             return pago.PagoId;
         }
+
     }
 }
