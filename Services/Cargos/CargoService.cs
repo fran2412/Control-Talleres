@@ -33,7 +33,6 @@ namespace ControlTalleresMVP.Services.Cargos
             // Orden recomendable: Clases primero (si ClaseId != null), luego inscripciones, y por saldo descendente
             var list = await query
                 .OrderByDescending(c => c.ClaseId != null)
-                .ThenByDescending(c => (double) c.SaldoActual)
                 .Select(c => new DestinoCargoDTO(
                     c.CargoId,
                     c.ClaseId != null ? "Clase"

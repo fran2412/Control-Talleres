@@ -42,7 +42,6 @@ namespace ControlTalleresMVP.Services.Pagos
                 AlumnoId = captura.AlumnoId,
                 Fecha = ahora,
                 MontoTotal = captura.MontoTotal,
-                Metodo = captura.Metodo,
                 CreadoEn = ahora,
                 ActualizadoEn = ahora
             };

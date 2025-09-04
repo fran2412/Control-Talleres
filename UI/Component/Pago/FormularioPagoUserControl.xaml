@@ -30,41 +30,26 @@
                    Foreground="#3E3E3E" Margin="0,0,0,8"/>
 
                 <!-- CAPTURA (Alumno, Monto, Método) -->
+                <!-- CAPTURA (Alumno, Método) -->
                 <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+                    <!-- Alumno -->
                     <StackPanel Margin="0,0,20,0">
                         <TextBlock Text="* Alumno" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,4"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBox Text="{Binding AlumnoNombre}" Style="{StaticResource TextBoxCampo}"
-                       IsReadOnly="True" Height="30" Width="360" ToolTip="Alumno seleccionado"/>
+               IsReadOnly="True" Height="30" Width="360" ToolTip="Alumno seleccionado"/>
                             <Button Command="{Binding BuscarAlumnoCommand}"
-                                            Style="{StaticResource SemiFeaturedButton}"
-                                            Height="45" Width="110" Margin="6,0,0,0"
-                                            ToolTip="Buscar alumno">
+              Style="{StaticResource SemiFeaturedButton}"
+              Height="45" Width="110" Margin="6,0,0,0"
+              ToolTip="Buscar alumno">
                                 <svgc:SvgViewbox Source="Resources/Icons/LupaIcono.svg"
-                                                 Width="35" Height="35"/>
-
+                         Width="35" Height="35"/>
                             </Button>
                         </StackPanel>
                     </StackPanel>
 
-                    <StackPanel Margin="0,0,20,0">
-                        <TextBlock Text="* Monto total" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding MontoTotal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:C0}}"
-                     Style="{StaticResource TextBoxCampo}"
-                                 IsEnabled="{Binding PuedeIngresarMonto}"
-                                 Height="30" Width="140"
-                     HorizontalContentAlignment="Right"/>
-                    </StackPanel>
-
-                    <StackPanel>
-                        <TextBlock Text="* Método" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,4"/>
-                        <ComboBox ItemsSource="{Binding MetodosPago}" Style="{StaticResource MinimalComboBoxStyle}"
-                      SelectedItem="{Binding MetodoPagoSeleccionado, Mode=TwoWay}"
-                                  SelectedIndex="{Binding IndiceMetodoSeleccionado}"
-                                  IsEnabled="{Binding PuedeSeleccionarMetodo}"
-                      Width="240" Height="30"/>
-                    </StackPanel>
                 </WrapPanel>
+
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,6" HorizontalAlignment="Right">
                     <Button Command="{Binding LimpiarDistribucionCommand}" Style="{StaticResource BotonNormal}"
@@ -108,13 +93,15 @@
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+
                     <TextBlock Text="{Binding MensajeValidacion}" Foreground="Tomato" VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="1" Text="Aplicado:" Margin="12,0,6,0" VerticalAlignment="Center" Foreground="#555"/>
-                    <TextBlock Grid.Column="2" Text="{Binding TotalAplicado, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="3" Text="{Binding SaldoDisponible, UpdateSourceTrigger=PropertyChanged, StringFormat='  •  Disponible: {0:C}'}"
-                     VerticalAlignment="Center" FontWeight="Bold"/>
+
+                    <TextBlock Grid.Column="1" Text="Total del pago:" Margin="12,0,6,0"
+                               VerticalAlignment="Center" Foreground="#555"/>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding TotalAplicado, UpdateSourceTrigger=PropertyChanged, StringFormat=C}"
+                               FontWeight="Bold" VerticalAlignment="Center"/>
                 </Grid>
 
                 <!-- FOOTER -->

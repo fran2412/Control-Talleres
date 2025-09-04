@@ -20,6 +20,5 @@ namespace ControlTalleresMVP.Services.Inscripciones
             DateTime? fecha = null, CancellationToken ct = default);
         public Task InicializarRegistros(CancellationToken ct = default);
         public Task CancelarAsync(int inscripcionId, string? motivo = null, CancellationToken ct = default);
-
     }
 }

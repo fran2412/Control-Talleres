@@ -26,7 +26,7 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
     public record PagoCapturaDTO(
         int AlumnoId,
         decimal MontoTotal,
-        MetodoPago Metodo,
-        PagoAplicacionCapturaDTO[] Aplicaciones
+        PagoAplicacionCapturaDTO[] Aplicaciones,
+        MetodoPago Metodo = MetodoPago.Efectivo
     );
 }
