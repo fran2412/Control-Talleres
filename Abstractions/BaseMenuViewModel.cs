@@ -59,7 +59,7 @@ namespace ControlTalleresMVP.Abstractions
         protected abstract void LimpiarCampos();
         public abstract bool Filtro(object o);
         protected abstract Task ActualizarAsync(TDto? ItemSeleccionado);
-        protected async Task EliminarAsync(TDto? itemSeleccionado)
+        protected virtual async Task EliminarAsync(TDto? itemSeleccionado)
         {
             if (itemSeleccionado == null) return;
             if (!_dialogService.Confirmar($"¿Está seguro de eliminar el item {itemSeleccionado.Nombre}?")) return;

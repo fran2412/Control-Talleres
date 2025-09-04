@@ -61,7 +61,7 @@ namespace ControlTalleresMVP
             //DbContext
             services.AddDbContext<EscuelaContext>(opt =>
                 opt.UseSqlite($"Data Source={AppPaths.DbPath}")
-                .UseSnakeCaseNamingConvention());
+                .UseSnakeCaseNamingConvention(), ServiceLifetime.Scoped);
 
             //Ventanas
             services.AddSingleton<MainWindow>();

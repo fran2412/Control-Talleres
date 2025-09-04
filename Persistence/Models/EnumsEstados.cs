@@ -2,9 +2,9 @@
 {
     public enum EstadoInscripcion
     {
-        Activa = 0,
+        Pendiente = 0,
         Cancelada = 1,
-        Finalizada = 2,
+        Pagada = 2,
     }
 
     public enum EstadoCargo

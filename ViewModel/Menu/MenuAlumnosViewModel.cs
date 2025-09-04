@@ -6,12 +6,14 @@ using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
+using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -38,14 +40,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private readonly IConfiguracionService _configuracionService;
         private readonly ITallerService _tallerService;
         private readonly IInscripcionService _inscripcionService;
+        private readonly ICargosService _cargoService;
 
-        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, IConfiguracionService configuracionService, IInscripcionService inscripcionesService)
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, ICargosService cargoService, IConfiguracionService configuracionService, IInscripcionService inscripcionesService)
             : base(itemService, dialogService)
         {
             _promotorService = promotorService;
             _sedeService = sedeService;
             _configuracionService = configuracionService;
             _tallerService = tallerService;
+            _cargoService = cargoService;
             _inscripcionService = inscripcionesService;
 
             OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
@@ -137,6 +141,21 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public ObservableCollection<Promotor> OpcionesPromotor { get; }
 
+        protected override async Task EliminarAsync(AlumnoDTO? itemSeleccionado)
+        {
+            if (itemSeleccionado == null) return;
+            if (!_dialogService.Confirmar($"¿Está seguro de eliminar el item {itemSeleccionado.Nombre}?")) return;
+            try
+            {
+                await _itemService.EliminarAsync(itemSeleccionado.Id);
+                _dialogService.Info("Item eliminado correctamente");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("Error al eliminar el alumno.\n" + ex.Message);
+            }
+        }
+
 
         [RelayCommand]
         protected override async Task RegistrarItemAsync()
@@ -197,7 +216,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     var abono = taller.Abono is decimal dec && dec > 0 ? dec : 0m;
 
-                    await _inscripcionService.InscribirAsync(
+                    // 👉 Crear un nuevo scope DI por cada inscripción
+                    using var scope = App.ServiceProvider!.CreateScope();
+                    var inscripcionService = scope.ServiceProvider.GetRequiredService<IInscripcionService>();
+
+                    await inscripcionService.InscribirAsync(
                         alumnoId: alumnoId,
                         tallerId: taller.TallerId,
                         abonoInicial: abono
@@ -217,6 +240,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             if (errores.Count > 0)
                 _dialogService.Alerta("Algunas inscripciones no se pudieron procesar:\n" + string.Join("\n", errores));
         }
+
 
         protected override void LimpiarCampos()
         {

@@ -7,7 +7,7 @@
 
         public decimal Costo { get; set; }
         public decimal SaldoActual { get; set; }
-        public EstadoInscripcion Estado { get; set; } = EstadoInscripcion.Activa;
+        public EstadoInscripcion Estado { get; set; } = EstadoInscripcion.Pendiente;
         public DateTime? CanceladaEn { get; set; }
         public string? MotivoCancelacion { get; set; }
 

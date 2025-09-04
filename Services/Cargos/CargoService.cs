@@ -60,5 +60,14 @@ namespace ControlTalleresMVP.Services.Cargos
 
             return list;
         }
+
+        public async Task<Cargo[]> ObtenerCargosAsync(int alumnoId, CancellationToken ct = default)
+        {
+            var cargos = await _escuelaContext.Cargos
+                .Where(c => c.AlumnoId == alumnoId && !c.Eliminado && c.Estado != EstadoCargo.Anulado)
+                .ToArrayAsync(ct);
+
+            return cargos;
+        }
     }
 }

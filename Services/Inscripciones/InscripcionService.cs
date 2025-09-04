@@ -57,9 +57,9 @@ namespace ControlTalleresMVP.Services.Inscripciones
             if (abonoInicial < 0 || abonoInicial > costo) throw new InvalidOperationException("Abono inicial inválido.");
 
             var saldo = costo - abonoInicial;
-            var estado = saldo == 0 ? EstadoInscripcion.Finalizada
-                        : abonoInicial > 0 ? EstadoInscripcion.Activa
-                        : EstadoInscripcion.Activa;
+            var estado = saldo == 0 ? EstadoInscripcion.Pagada
+                        : abonoInicial > 0 ? EstadoInscripcion.Pendiente
+                        : EstadoInscripcion.Pendiente;
 
             var now = DateTime.Now;
 
@@ -150,10 +150,13 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 .FirstOrDefaultAsync(i => i.InscripcionId == inscripcionId, ct)
                       ?? throw new InvalidOperationException("Inscripción no encontrada.");
 
-            var motivoCancelacion = _dialogService.PedirTexto("Ingrese el motivo de la cancelación de la inscripción\nOpcional");
-            if (String.IsNullOrWhiteSpace(motivoCancelacion)) motivoCancelacion = "No especificado";
-
-            inscripcion.MotivoCancelacion = motivoCancelacion;
+            if (motivo == null)
+            {
+                var motivoCancelacion = _dialogService.PedirTexto("Ingrese el motivo de la cancelación de la inscripción\nOpcional");
+                if (String.IsNullOrWhiteSpace(motivoCancelacion)) motivoCancelacion = "No especificado";
+                 motivo = motivoCancelacion;
+            }
+            inscripcion.MotivoCancelacion = motivo;
             inscripcion.CanceladaEn = DateTime.Now;
             inscripcion.Eliminado = true;
             inscripcion.EliminadoEn = DateTime.Now;
@@ -197,6 +200,15 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 .ToListAsync(ct);
 
             return datos;
+        }
+
+        public async Task<Inscripcion[]> ObtenerInscripcionesAsync(int alumnoId, CancellationToken ct = default)
+        {
+            var cargos = await _escuelaContext.Inscripciones
+                .Where(c => c.AlumnoId == alumnoId && !c.Eliminado && c.Estado != EstadoInscripcion.Cancelada)
+                .ToArrayAsync(ct);
+
+            return cargos;
         }
     }
 }

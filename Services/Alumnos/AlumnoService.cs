@@ -1,6 +1,8 @@
 ﻿using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
+using ControlTalleresMVP.Services.Cargos;
+using ControlTalleresMVP.Services.Inscripciones;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -17,9 +19,13 @@ namespace ControlTalleresMVP.Services.Alumnos
         public ObservableCollection<AlumnoDTO> RegistrosAlumnos { get; set; } = new();
 
         private readonly EscuelaContext _context;
-        public AlumnoService(EscuelaContext context)
+        private readonly ICargosService _cargosService;
+        private readonly IInscripcionService _inscripcionService;
+        public AlumnoService(EscuelaContext context, ICargosService cargosService, IInscripcionService inscripcionService)
         {
             _context = context;
+            _cargosService = cargosService;
+            _inscripcionService = inscripcionService;
         }
 
         public async Task<Alumno> GuardarAsync(Alumno alumno, CancellationToken ct = default)
@@ -37,6 +43,18 @@ namespace ControlTalleresMVP.Services.Alumnos
 
             alumno.Eliminado = true;
             alumno.EliminadoEn = DateTime.Now;
+
+            var cargos = await _cargosService.ObtenerCargosAsync(id);
+            foreach (var cargo in cargos)
+            {
+                cargo.Estado = EstadoCargo.Anulado;
+            }
+
+            var inscripciones = await _inscripcionService.ObtenerInscripcionesAsync(id);
+            foreach (var inscripcion in inscripciones)
+            {
+                await _inscripcionService.CancelarAsync(inscripcion.InscripcionId, "Alumno dado de baja");
+            }
 
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
