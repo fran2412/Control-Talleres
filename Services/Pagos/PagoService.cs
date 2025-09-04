@@ -29,9 +29,9 @@ namespace ControlTalleresMVP.Services.Pagos
 
             using var tx = await _ctx.Database.BeginTransactionAsync(ct);
 
-            // 1) Crear Pago
             var ahora = DateTime.Now;
 
+            // 1) Crear el pago
             var pago = new Pago
             {
                 AlumnoId = captura.AlumnoId,
@@ -42,12 +42,12 @@ namespace ControlTalleresMVP.Services.Pagos
             };
 
             _ctx.Pagos.Add(pago);
-            await _ctx.SaveChangesAsync(ct); // para tener PagoId
+            await _ctx.SaveChangesAsync(ct); // para obtener PagoId
 
-            // 🔹 Acumulador: inscId -> total aplicado a inscripción (según CAPTURA)
+            // 🔹 Acumulador: inscId -> total aplicado en esta captura
             var deltaPorInscripcion = new Dictionary<int, decimal>();
 
-            // 2) Validar cargos y crear aplicaciones, rebajando saldos
+            // 2) Procesar aplicaciones
             foreach (var apl in captura.Aplicaciones)
             {
                 if (apl.Monto <= 0)
@@ -63,14 +63,16 @@ namespace ControlTalleresMVP.Services.Pagos
                 if (cargo.AlumnoId != captura.AlumnoId)
                     throw new InvalidOperationException($"El cargo #{apl.CargoId} no pertenece al alumno #{captura.AlumnoId}.");
 
-                if (apl.Monto > cargo.SaldoActual + 0.0001m) // leve tolerancia por redondeos
-                    throw new InvalidOperationException($"Monto a aplicar ({apl.Monto:C}) excede saldo del cargo #{apl.CargoId} ({cargo.SaldoActual:C}).");
+                if (apl.Monto > cargo.SaldoActual + 0.0001m)
+                    throw new InvalidOperationException(
+                        $"Monto a aplicar ({apl.Monto:C}) excede saldo del cargo #{apl.CargoId} ({cargo.SaldoActual:C}).");
 
-                // (Opcional) coherencia con Inscripcion/Clase si el cargo está asociado:
                 if (cargo.InscripcionId.HasValue && apl.InscripcionId.HasValue && cargo.InscripcionId != apl.InscripcionId)
-                    throw new InvalidOperationException($"Inconsistencia: el cargo #{apl.CargoId} no corresponde a Inscripción #{apl.InscripcionId}.");
+                    throw new InvalidOperationException(
+                        $"Inconsistencia: el cargo #{apl.CargoId} no corresponde a Inscripción #{apl.InscripcionId}.");
                 if (cargo.ClaseId.HasValue && apl.ClaseId.HasValue && cargo.ClaseId != apl.ClaseId)
-                    throw new InvalidOperationException($"Inconsistencia: el cargo #{apl.CargoId} no corresponde a Clase #{apl.ClaseId}.");
+                    throw new InvalidOperationException(
+                        $"Inconsistencia: el cargo #{apl.CargoId} no corresponde a Clase #{apl.ClaseId}.");
 
                 // Crear la aplicación
                 var app = new PagoAplicacion
@@ -86,48 +88,46 @@ namespace ControlTalleresMVP.Services.Pagos
                 cargo.SaldoActual -= apl.Monto;
                 cargo.ActualizadoEn = ahora;
 
-                // 🔹 Si la CAPTURA marca INSCRIPCIÓN (apl.InscripcionId y no ClaseId), acumula para Inscripción
+                // 🔹 Marcar cargo como Pagado si se liquidó
+                if (cargo.SaldoActual == 0)
+                    cargo.Estado = EstadoCargo.Pagado;
+
+                // 🔹 Acumular delta por inscripción
                 if (apl.InscripcionId.HasValue && !apl.ClaseId.HasValue)
                 {
                     var inscId = apl.InscripcionId.Value;
                     if (!deltaPorInscripcion.TryAdd(inscId, apl.Monto))
                         deltaPorInscripcion[inscId] += apl.Monto;
                 }
-
-                // (Opcional) si tu cargo maneja estados:
-                // if (cargo.SaldoActual == 0) cargo.Estado = EstadoCargo.Saldado;
             }
 
-            await _ctx.SaveChangesAsync(ct);
-
-            // 3) Aplicar delta acumulado a las Inscripciones afectadas
+            // 3) Aplicar deltas a inscripciones
             if (deltaPorInscripcion.Count > 0)
             {
                 var inscIds = deltaPorInscripcion.Keys.ToArray();
-
                 var inscripciones = await _ctx.Inscripciones
                     .Where(i => inscIds.Contains(i.InscripcionId))
                     .ToListAsync(ct);
 
                 foreach (var ins in inscripciones)
                 {
-                    var delta = deltaPorInscripcion[ins.InscripcionId];
-                    ins.SaldoActual = Math.Max(0, ins.SaldoActual - delta);
+                    if (deltaPorInscripcion.TryGetValue(ins.InscripcionId, out var delta))
+                    {
+                        ins.SaldoActual = Math.Max(0, ins.SaldoActual - delta);
+                        ins.ActualizadoEn = ahora;
 
-                    if (ins.SaldoActual == 0) ins.Estado = EstadoInscripcion.Pagada;
-                    ins.ActualizadoEn = ahora;
-                    // (Opcional) actualizar Estado según tu enum real:
-                    // if (ins.SaldoActual <= 0) ins.Estado = EstadoInscripcion.Finalizada; // o Pagada
-                    // else if (ins.SaldoActual < ins.Costo) ins.Estado = EstadoInscripcion.Activa; // Parcial si lo manejas
-                    // else ins.Estado = EstadoInscripcion.Activa;
+                        if (ins.SaldoActual == 0)
+                            ins.Estado = EstadoInscripcion.Pagada;
+                    }
                 }
-
-                await _ctx.SaveChangesAsync(ct);
             }
 
+            await _ctx.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
+
             return pago.PagoId;
         }
+
 
     }
 }

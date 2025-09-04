@@ -9,9 +9,10 @@
 
     public enum EstadoCargo
     {
-        Vigente = 0,
-        Anulado = 1,
-        Ajuste = 2,
+        Pendiente = 0,   // Tiene saldo pendiente > 0
+        Pagado = 1,      // SaldoActual == 0 (totalmente cubierto)
+        Anulado = 2,     // Cancelado, ya no exigible
+        Ajuste = 3       // Creado por corrección manual o nota
     }
 
     public enum EstadoAplicacionCargo

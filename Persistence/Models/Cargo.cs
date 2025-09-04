@@ -9,7 +9,7 @@
 
         public TipoCargo Tipo { get; set; }
         public DateTime Fecha { get; set; } = DateTime.Now;
-        public EstadoCargo Estado { get; set; } = EstadoCargo.Vigente;
+        public EstadoCargo Estado { get; set; } = EstadoCargo.Pendiente;
 
         public DateTime CreadoEn { get; set; } = DateTime.Now;
         public DateTime ActualizadoEn { get; set; } = DateTime.Now;

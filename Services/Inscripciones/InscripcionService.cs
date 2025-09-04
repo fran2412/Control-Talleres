@@ -45,7 +45,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             if (await ExisteActivaAsync(alumnoId, tallerId, generacionId.GeneracionId, ct))
                 throw new InvalidOperationException("Ya existe una inscripción activa para este alumno en el mismo taller y generación.");
 
-            // (Opcional) validar cupo
+            // Validar cupo
             var taller = await _escuelaContext.Talleres.FirstOrDefaultAsync(t => t.TallerId == tallerId, ct)
                          ?? throw new InvalidOperationException("Taller no encontrado.");
 
@@ -58,7 +58,6 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
             var saldo = costo - abonoInicial;
             var estado = saldo == 0 ? EstadoInscripcion.Pagada
-                        : abonoInicial > 0 ? EstadoInscripcion.Pendiente
                         : EstadoInscripcion.Pendiente;
 
             var now = DateTime.Now;
@@ -91,12 +90,12 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     InscripcionId = inscripcion.InscripcionId,
                     Tipo = TipoCargo.Inscripcion,
                     Monto = costo,
-                    SaldoActual = saldo,
+                    SaldoActual = costo,
                     Fecha = now,
                     CreadoEn = now,
                     ActualizadoEn = now,
                     Eliminado = false,
-                    Estado = EstadoCargo.Vigente
+                    Estado = EstadoCargo.Pendiente
                 };
 
                 _escuelaContext.Cargos.Add(cargo);
@@ -130,6 +129,14 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     };
 
                     _escuelaContext.PagoAplicaciones.Add(aplicacion);
+
+                    cargo.SaldoActual -= abonoInicial;
+                    cargo.ActualizadoEn = now;
+
+                    // 🔹 Si se liquidó el cargo, marcar Pagado
+                    if (cargo.SaldoActual == 0)
+                        cargo.Estado = EstadoCargo.Pagado;
+
                     await _escuelaContext.SaveChangesAsync(ct);
                 }
 
@@ -156,6 +163,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 if (String.IsNullOrWhiteSpace(motivoCancelacion)) motivoCancelacion = "No especificado";
                  motivo = motivoCancelacion;
             }
+
+            inscripcion.SaldoActual = 0;
             inscripcion.MotivoCancelacion = motivo;
             inscripcion.CanceladaEn = DateTime.Now;
             inscripcion.Eliminado = true;
