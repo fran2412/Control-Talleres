@@ -14,11 +14,9 @@ namespace ControlTalleresMVP.Services.Clases
             decimal abonoInicial = 0m,
             CancellationToken ct = default);
 
-        Task<bool> ExisteCargoClaseAsync(int alumnoId, int claseId, DateTime fecha, CancellationToken ct = default);
-
         Task<Clase[]> ObtenerClasesDeAlumnoAsync(int alumnoId, CancellationToken ct = default);
 
-        Task CancelarClaseAsync(int claseId, CancellationToken ct = default);
+        Task CancelarAsync(int claseID, string? motivo = null, CancellationToken ct = default);
 
     }
 }
