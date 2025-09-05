@@ -72,6 +72,7 @@ namespace ControlTalleresMVP
             services.AddTransient<MenuAlumnosViewModel>();
             services.AddTransient<MenuTalleresViewModel>();
             services.AddTransient<MenuInscripcionesViewModel>();
+            services.AddTransient<MenuClaseUserControl>();
             services.AddTransient<MenuPagosViewModel>();
             services.AddTransient<MenuPromotorViewModel>();
             services.AddTransient<MenuSedeViewModel>();

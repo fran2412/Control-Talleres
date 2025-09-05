@@ -76,6 +76,10 @@
             "SharpVectors.Wpf": {
               "target": "Package",
               "version": "[1.8.5, )"
+            },
+            "extended.wpf.toolkit": {
+              "target": "Package",
+              "version": "[4.7.25104.5739, )"
             }
           },
           "imports": [

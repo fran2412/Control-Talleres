@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <None Remove="Resources\Icons\AdministracionIcono.svg" />
+    <None Remove="Resources\Icons\ClaseIcono.svg" />
+    <None Remove="Resources\Icons\InscripcionIcono.svg" />
     <None Remove="Resources\Icons\LupaIcono.svg" />
     <None Remove="Resources\Icons\LupaNegraIcono.svg" />
     <None Remove="Resources\Icons\SedeIcono.svg" />
@@ -17,7 +19,7 @@
 
   <ItemGroup>
     <Resource Include="Resources\Icons\AdministracionIcono.svg" />
-    <Resource Include="Resources\Icons\InscripcionIcono.svg" />
+    <Resource Include="Resources\Icons\ClaseIcono.svg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +31,7 @@
     <Resource Include="Resources\Icons\EditarRegistro.svg" />
     <Resource Include="Resources\Icons\EliminarRegistro.svg" />
     <Resource Include="Resources\Icons\ErrorIcono.svg" />
+    <Resource Include="Resources\Icons\InscripcionIcono.svg" />
     <Resource Include="Resources\Icons\LupaIcono.svg" />
     <Resource Include="Resources\Icons\LupaNegraIcono.svg" />
     <Resource Include="Resources\Icons\MaestroIcono.svg" />
@@ -43,6 +46,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0" />
+    <PackageReference Include="extended.wpf.toolkit" Version="4.7.25104.5739" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
