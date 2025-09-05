@@ -23,7 +23,7 @@
         public Inscripcion? Inscripcion { get; set; }
 
         public int? ClaseId { get; set; }
-        //Pendiente clase id
+        public Clase? Clase { get; set; }
 
         public ICollection<PagoAplicacion> Aplicaciones { get; set; } = new List<PagoAplicacion>();
     }

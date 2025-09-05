@@ -23,6 +23,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
         public virtual DbSet<Generacion> Generaciones { get; set; }
         public virtual DbSet<Configuracion> Configuraciones { get; set; }
         public DbSet<Cargo> Cargos { get; set; } = null!;
+        public DbSet<Clase> Clases { get; set; } = null!;
         public DbSet<Pago> Pagos { get; set; } = null!;
         public DbSet<PagoAplicacion> PagoAplicaciones { get; set; } = null!;
 
@@ -322,8 +323,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(c => c.Estado)
                       .HasColumnName("estado")
-                      .HasConversion<string>();
-                ;
+                      .HasConversion<string>(); 
 
                 entity.Property(c => c.CreadoEn)
                       .HasColumnName("creado_en")
@@ -355,6 +355,11 @@ namespace ControlTalleresMVP.Persistence.DataContext
                 entity.HasOne(c => c.Inscripcion)
                       .WithMany(i => i.Cargos)
                       .HasForeignKey(c => c.InscripcionId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                
+                entity.HasOne(c => c.Clase)
+                      .WithMany()
+                      .HasForeignKey(c => c.ClaseId)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasMany(c => c.Aplicaciones)
@@ -456,8 +461,31 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // Clase
+            modelBuilder.Entity<Clase>(entity =>
+            {
+                entity.ToTable("clases");
+
+                entity.HasKey(c => c.ClaseId);
+                entity.Property(c => c.ClaseId).HasColumnName("id_clase");
+
+                entity.Property(c => c.Fecha).HasColumnName("fecha");
+                entity.Property(c => c.CreadoEn).HasColumnName("creado_en").HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                entity.Property(c => c.ActualizadoEn).HasColumnName("actualizado_en").HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                entity.Property(c => c.Eliminado).HasColumnName("eliminado").HasDefaultValue(false);
+                entity.Property(c => c.EliminadoEn).HasColumnName("eliminado_en");
+
+                entity.Property(c => c.TallerId).HasColumnName("taller_id");
+
+                entity.HasOne(c => c.Taller)
+                      .WithMany()
+                      .HasForeignKey(c => c.TallerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
+
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
