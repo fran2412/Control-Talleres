@@ -1,4 +1,5 @@
-﻿using ControlTalleresMVP.Persistence.Models;
+﻿using ControlTalleresMVP.Persistence.ModelDTO;
+using ControlTalleresMVP.Persistence.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,10 @@ namespace ControlTalleresMVP.Services.Clases
 
         Task CancelarAsync(int claseID, string? motivo = null, CancellationToken ct = default);
 
+        Task<ClasePagoEstadoDTO[]> ObtenerEstadoPagoHoyAsync(
+            int alumnoId,
+            int[] tallerIds,
+            DateTime fecha,                // usa DateTime.Today al invocar
+            CancellationToken ct = default);
     }
 }

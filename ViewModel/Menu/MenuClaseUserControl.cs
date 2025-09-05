@@ -160,10 +160,49 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return;
             }
 
+            // Set bindings básicos
             TalleresDelAlumno = talleresDisponibles;
-            TallerSeleccionado = TalleresDelAlumno.First();
             AlumnoSeleccionado = alumno;
             AlumnoNombre = alumno.Nombre;
+
+            // ==========================
+            // Verificar pagos de HOY
+            // ==========================
+            var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
+            var estados = await _claseService.ObtenerEstadoPagoHoyAsync(
+                alumno.AlumnoId, ids, DateTime.Today);
+
+            // ¿Todas pagadas?
+            var todosPagados = estados.Length > 0 && estados.All(e => e.EstaPagada);
+
+            if (todosPagados)
+            {
+                var lista = string.Join("\n • ",
+                    talleresDisponibles.Select(t => t.Nombre));
+
+                _dialogService.Alerta(
+                    "El alumno ya tiene pagada la clase de HOY en todos sus talleres:\n" +
+                    $"• {lista}");
+
+                // Aún dejamos seleccionado el primero, por si quiere pagar fechas futuras
+                TallerSeleccionado = TalleresDelAlumno.First();
+                return;
+            }
+
+            // Si hay al menos un taller donde se puede pagar hoy, NO mostrar alerta.
+            // Preselecciona el primero disponible para pagar.
+            var disponibles = estados.Where(e => e.PuedePagar)
+                                     .Select(e => e.TallerId)
+                                     .ToHashSet();
+
+            var primerDisponible = TalleresDelAlumno.FirstOrDefault(t => disponibles.Contains(t.TallerId))
+                                   ?? TalleresDelAlumno.First();
+
+            TallerSeleccionado = primerDisponible;
+
+            // Si quieres, puedes mostrar un mensaje NO modal (texto en pantalla),
+            // pero por tu instrucción NO mostramos nada si se puede pagar al menos uno.
+            // MensajeValidacion = null;
         }
 
         [RelayCommand]

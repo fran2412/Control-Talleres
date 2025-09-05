@@ -1,5 +1,6 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.DataContext;
+using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using Microsoft.EntityFrameworkCore;
@@ -172,5 +173,63 @@ namespace ControlTalleresMVP.Services.Clases
                 && i.ClaseId == claseId
                 && i.Fecha.Date == fecha.Date
                 && !i.Eliminado, ct);
+
+        public async Task<ClasePagoEstadoDTO[]> ObtenerEstadoPagoHoyAsync(
+            int alumnoId,
+            int[] tallerIds,
+            DateTime fecha,
+            CancellationToken ct = default)
+        {
+            var ids = (tallerIds ?? Array.Empty<int>()).Distinct().ToArray();
+            if (alumnoId <= 0 || ids.Length == 0) return Array.Empty<ClasePagoEstadoDTO>();
+
+            var day = fecha.Date;
+
+            var resumen = await (
+                from clases in _escuelaContext.Clases.AsNoTracking()
+                where clases.Fecha == day && ids.Contains(clases.TallerId)
+                join cargos in _escuelaContext.Cargos.AsNoTracking()
+                    on clases.ClaseId equals cargos.ClaseId into caGroup
+                from cargos in caGroup
+                    .Where(c => c.AlumnoId == alumnoId
+                                && !c.Eliminado
+                                && c.Estado != EstadoCargo.Anulado)
+                    .DefaultIfEmpty()
+                group cargos by clases.TallerId into g
+                select new
+                {
+                    TallerId = g.Key,
+                    TieneCargo = g.Where(x => x != null).Any(),
+
+                    Saldo = (decimal)((g.Where(x => x != null)
+                                        .Select(x => (double?)x!.SaldoActual)
+                                        .Sum()) ?? 0.0)
+                })
+                .ToListAsync(ct);
+
+            // Armar mapa por taller
+            var dict = resumen.ToDictionary(
+                x => x.TallerId,
+                x => new ClasePagoEstadoDTO(
+                        x.TallerId,
+                        x.TieneCargo,
+                        x.TieneCargo && x.Saldo == 0m,
+                        !x.TieneCargo || x.Saldo > 0m));
+
+            // Si no existe aún la clase de hoy para algún taller, se puede pagar
+            foreach (var id in ids)
+            {
+                if (!dict.ContainsKey(id))
+                {
+                    dict[id] = new ClasePagoEstadoDTO(
+                        id,
+                        TieneCargo: false,
+                        EstaPagada: false,
+                        PuedePagar: true);
+                }
+            }
+
+            return dict.Values.OrderBy(v => v.TallerId).ToArray();
+        }
     }
 }
