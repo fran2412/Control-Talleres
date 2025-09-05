@@ -59,7 +59,7 @@ namespace ControlTalleresMVP.Services.Clases
             try
             {
                 // Crear el cargo
-                var costoClase = _configuracionService.GetValor<int>("costo_clase", 600);
+                var costoClase = _configuracionService.GetValor<int>("costo_clase", 150);
                 var cargo = new Cargo
                 {
                     AlumnoId = alumnoId,
