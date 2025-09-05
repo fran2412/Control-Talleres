@@ -15,6 +15,13 @@
         Ajuste = 3       // Creado por corrección manual o nota
     }
 
+    public enum EstadoClase
+    {
+        Pendiente = 0,
+        Cancelada = 1,
+        Pagada = 2,
+    }
+
     public enum EstadoAplicacionCargo
     {
         Vigente = 0,

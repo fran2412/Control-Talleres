@@ -11,10 +11,11 @@ namespace ControlTalleresMVP.Persistence.Models
         public int ClaseId { get; set; }
         public int TallerId { get; set; }
         public DateTime Fecha { get; set; }
+        public EstadoClase Estado { get; set; } = EstadoClase.Pendiente;
 
         public DateTime CreadoEn { get; set; } = DateTime.Now;
         public DateTime ActualizadoEn { get; set; } = DateTime.Now;
-        public bool Eliminado { get; set; }
+        public bool Eliminado { get; set; } = false;
         public DateTime? EliminadoEn { get; set; }
 
         public Taller Taller { get; set; } = null!;
