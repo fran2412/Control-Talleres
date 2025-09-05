@@ -165,10 +165,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             AlumnoSeleccionado = alumno;
             AlumnoNombre = alumno.Nombre;
 
-            // ==========================
             // Verificar pagos de HOY
-            // ==========================
-            var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
+                    var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
             var estados = await _claseService.ObtenerEstadoPagoHoyAsync(
                 alumno.AlumnoId, ids, DateTime.Today);
 
@@ -185,7 +183,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     $"• {lista}");
 
                 // Aún dejamos seleccionado el primero, por si quiere pagar fechas futuras
-                TallerSeleccionado = TalleresDelAlumno.First();
+                LimpiarSeleccion();
                 return;
             }
 

@@ -1,4 +1,5 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Migrations;
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
@@ -23,105 +24,92 @@ namespace ControlTalleresMVP.Services.Clases
         // ====================
         // Registrar clase y cargo
         // ====================
-        public async Task<Clase> RegistrarClaseAsync(
-            int alumnoId, int tallerId, DateTime fecha,
-            decimal abonoInicial = 0m,
-            CancellationToken ct = default)
+        public async Task RegistrarClaseAsync(
+        int alumnoId,
+        int tallerId,
+        DateTime fecha,
+        decimal montoAbono,
+        CancellationToken ct = default)
         {
-            var now = DateTime.Now;
+            var day = fecha.Date;
+            var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
 
-            // Verificar si ya existe clase en esa fecha para el taller
+            // 1) Buscar o crear CLASE (taller + día)
             var clase = await _escuelaContext.Clases
-                .FirstOrDefaultAsync(c =>
-                    c.TallerId == tallerId &&
-                    c.Fecha.Date == fecha.Date &&
-                    !c.Eliminado, ct);
+                .FirstOrDefaultAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Fecha == day, ct);
 
             if (clase is null)
             {
-                clase = new Clase
-                {
-                    TallerId = tallerId,
-                    Fecha = fecha.Date,
-                    CreadoEn = now,
-                    ActualizadoEn = now,
-                    Eliminado = false
-                };
-
+                clase = new Clase { TallerId = tallerId, Fecha = day };
                 _escuelaContext.Clases.Add(clase);
                 await _escuelaContext.SaveChangesAsync(ct);
             }
 
-            // Evitar duplicado de cargo
-            if (await ExisteCargoClaseAsync(alumnoId, clase.ClaseId, fecha, ct))
-                throw new InvalidOperationException("Ya existe un cargo activo para este alumno en la misma clase.");
+            // 2) Buscar o crear CARGO (único por alumno+clase activo)
+            var cargo = await _escuelaContext.Cargos
+                .FirstOrDefaultAsync(c => c.AlumnoId == alumnoId
+                                       && c.ClaseId == clase.ClaseId
+                                       && !c.Eliminado
+                                       && c.Estado != EstadoCargo.Anulado, ct);
 
-            using var transaccion = await _escuelaContext.Database.BeginTransactionAsync(ct);
-            try
+            if (cargo is null)
             {
-                // Crear el cargo
-                var costoClase = _configuracionService.GetValor<int>("costo_clase", 150);
-                var cargo = new Cargo
+                cargo = new Cargo
                 {
                     AlumnoId = alumnoId,
                     ClaseId = clase.ClaseId,
                     Tipo = TipoCargo.Clase,
+                    Fecha = day,
                     Monto = costoClase,
                     SaldoActual = costoClase,
-                    Fecha = now,
                     Estado = EstadoCargo.Pendiente,
-                    CreadoEn = now,
-                    ActualizadoEn = now,
                     Eliminado = false
                 };
-
                 _escuelaContext.Cargos.Add(cargo);
+
+                try { await _escuelaContext.SaveChangesAsync(ct); }
+                catch (DbUpdateException)
+                {
+                    // Concurrencia: alguien lo insertó; recupéralo
+                    cargo = await _escuelaContext.Cargos.FirstAsync(c =>
+                        c.AlumnoId == alumnoId &&
+                        c.ClaseId == clase.ClaseId &&
+                        !c.Eliminado &&
+                        c.Estado != EstadoCargo.Anulado, ct);
+                }
+            }
+
+            // 3) Aplicar ABONO (si hay)
+            montoAbono = Math.Round(montoAbono, 2, MidpointRounding.AwayFromZero);
+            if (montoAbono > 0m)
+            {
+                var aAplicar = Math.Min(montoAbono, cargo.SaldoActual);
+
+                var pago = new Pago
+                {
+                    AlumnoId = alumnoId,
+                    Fecha = DateTime.Now,
+                    Metodo = MetodoPago.Efectivo,   // ajusta si manejas otro método en la UI
+                    MontoTotal = aAplicar
+                };
+                _escuelaContext.Pagos.Add(pago);
                 await _escuelaContext.SaveChangesAsync(ct);
 
-                // Abono inicial opcional
-                if (abonoInicial > 0m)
+                var pa = new PagoAplicacion
                 {
-                    var pago = new Pago
-                    {
-                        AlumnoId = alumnoId,
-                        Fecha = now,
-                        MontoTotal = abonoInicial,
-                        Metodo = MetodoPago.Efectivo,
-                        Notas = "Pago de clase",
-                        CreadoEn = now,
-                        ActualizadoEn = now,
-                        Eliminado = false
-                    };
+                    PagoId = pago.PagoId,
+                    CargoId = cargo.CargoId,
+                    MontoAplicado = aAplicar,
+                    Estado = EstadoAplicacionCargo.Vigente
+                };
+                _escuelaContext.PagoAplicaciones.Add(pa);
 
-                    _escuelaContext.Pagos.Add(pago);
-                    await _escuelaContext.SaveChangesAsync(ct);
+                cargo.SaldoActual -= aAplicar;
+                cargo.Estado = cargo.SaldoActual == 0m ? EstadoCargo.Pagado
+                              : (cargo.SaldoActual < cargo.Monto ? EstadoCargo.Pendiente
+                                                                : EstadoCargo.Pendiente);
 
-                    var aplicacion = new PagoAplicacion
-                    {
-                        PagoId = pago.PagoId,
-                        CargoId = cargo.CargoId,
-                        MontoAplicado = abonoInicial,
-                        Estado = EstadoAplicacionCargo.Vigente
-                    };
-
-                    _escuelaContext.PagoAplicaciones.Add(aplicacion);
-
-                    cargo.SaldoActual -= abonoInicial;
-                    cargo.ActualizadoEn = now;
-
-                    if (cargo.SaldoActual == 0)
-                        cargo.Estado = EstadoCargo.Pagado;
-
-                    await _escuelaContext.SaveChangesAsync(ct);
-                }
-
-                await transaccion.CommitAsync(ct);
-                return clase;
-            }
-            catch
-            {
-                await transaccion.RollbackAsync(ct);
-                throw;
+                await _escuelaContext.SaveChangesAsync(ct);
             }
         }
 

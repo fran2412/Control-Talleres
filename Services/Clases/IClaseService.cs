@@ -10,10 +10,12 @@ namespace ControlTalleresMVP.Services.Clases
 {
     public interface IClaseService
     {
-        public Task<Clase> RegistrarClaseAsync(
-            int alumnoId, int tallerId, DateTime fecha,
-            decimal abonoInicial = 0m,
-            CancellationToken ct = default);
+        public Task RegistrarClaseAsync(
+        int alumnoId,
+        int tallerId,
+        DateTime fecha,
+        decimal montoAbono,
+        CancellationToken ct = default);
 
         Task<Clase[]> ObtenerClasesDeAlumnoAsync(int alumnoId, CancellationToken ct = default);
 
