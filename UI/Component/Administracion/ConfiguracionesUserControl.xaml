@@ -23,6 +23,20 @@
                         Margin="30,0,0,0"
                         Width="120" Cursor=""/>
             </StackPanel>
+            
+            <StackPanel Margin="10" Orientation="Horizontal">
+    <TextBlock Text="Costo por clase:" FontSize="16" VerticalAlignment="Center" Margin="0,0,30,0"/>
+    <TextBox Text="{Binding CostoPorClase, UpdateSourceTrigger=PropertyChanged}" 
+             PreviewTextInput="SoloNumeros_PreviewTextInput"
+             Style="{StaticResource TextBoxCampo}" Width="260"/>
+
+    <Button Content="Guardar"
+            ToolTip="Guardar el costo general de la inscripción"
+            Style="{StaticResource BotonNormal}"
+            Command="{Binding GuardarCostoClaseCommand}"
+            Margin="30,0,0,0"
+            Width="120" Cursor=""/>
+</StackPanel>
         </StackPanel>
     </Border>
 </UserControl>

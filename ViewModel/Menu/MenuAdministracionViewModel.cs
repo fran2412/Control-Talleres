@@ -32,6 +32,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty]
         private string costoInscripcion = "";
 
+        [ObservableProperty]
+        private string costoPorClase = "";
+
         public MenuAdministracionViewModel(IGeneracionService generacionService, IConfiguracionService configuracionService, IDialogService dialogService)
         {
             _generacionService = generacionService;
@@ -41,6 +44,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _generacionService.InicializarRegistros();
             InicializarVista();
             CostoInscripcion = _configuracionService.GetValor<int>("costo_inscripcion", 600).ToString();
+            CostoPorClase = _configuracionService.GetValor<int>("costo_clase", 150).ToString();
         }
 
 
@@ -117,6 +121,34 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _configuracionService.SetValor("costo_inscripcion", valor.ToString());
 
             _dialogService.Info("Costo de inscripción actualizado correctamente.");
+        }
+
+        [RelayCommand]
+        private void GuardarCostoClase()
+        {
+            if (!int.TryParse(CostoPorClase, out int valor))
+            {
+                // Aquí podrías usar tu IDialogService en lugar de Exception
+                throw new InvalidOperationException("El costo por clase debe ser un número entero válido.");
+            }
+
+            if (valor < 100 || valor > 300)
+            {
+                _dialogService.Alerta($"El costo por clase debe estar entre 100 y 300.");
+                return;
+            }
+
+            bool confirmacion = _dialogService.ConfirmarOkCancel($"¿Estás seguro de que deseas actualizar el costo por clase a {valor}?", "Confirmar actualización");
+
+            if (confirmacion == false)
+            {
+                return;
+            }
+
+
+            _configuracionService.SetValor("costo_clase", valor.ToString());
+
+            _dialogService.Info("Costo por clase actualizado correctamente.");
         }
         protected void InicializarVista()
         {
