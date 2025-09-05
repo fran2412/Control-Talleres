@@ -267,63 +267,101 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 var costo = Math.Round(CostoClase, 2, MidpointRounding.AwayFromZero);
                 var totalIngresado = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
 
-                var clasesCompletas = (int)Math.Min(CantidadSeleccionada, Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo)));
+                var clasesCompletas = (int)Math.Min(
+                    CantidadSeleccionada,
+                    Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo))
+                );
+
                 var sobrante = totalIngresado - (clasesCompletas * costo);
 
-                // Fechas: hoy y luego +7d
-                var fechas = GenerarFechasSemanas(DateTime.Today, Math.Max(clasesCompletas + (sobrante > 0m && clasesCompletas < CantidadSeleccionada ? 1 : 0), 1));
+                // Generar las fechas necesarias (hoy + semanas)
+                var cantidadFechas = Math.Max(
+                    clasesCompletas + (sobrante > 0m && clasesCompletas < CantidadSeleccionada ? 1 : 0),
+                    1
+                );
+
+                var fechas = GenerarFechasSemanas(DateTime.Today, cantidadFechas);
+
+                // --- Tracking para mensajes ---
+                var fechasPagadas = new List<DateTime>();
+                bool creoParcial = false;
+                decimal montoParcial = 0m;
+                DateTime? fechaParcial = null;
 
                 // --- Persistencia ---
-                // 1) Clases completamente cubiertas
+                // 1) Clases completas
                 for (int i = 0; i < clasesCompletas; i++)
                 {
                     await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         fechas[i],
-                        costo,   // pago completo de la clase
+                        costo,
                         ct);
+
+                    fechasPagadas.Add(fechas[i]);
                 }
 
-                // 2) Si hay sobrante y aún faltan clases para llegar a la cantidad deseada,
-                //    crea UNA clase adicional con abono parcial
+                // 2) Clase parcial (si hay sobrante y aún faltan)
                 if (sobrante > 0m && clasesCompletas < CantidadSeleccionada)
                 {
+                    var abono = Math.Round(sobrante, 2, MidpointRounding.AwayFromZero);
                     await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         fechas[clasesCompletas],
-                        Math.Round(sobrante, 2, MidpointRounding.AwayFromZero), // abono parcial
+                        abono,
                         ct);
+
+                    creoParcial = true;
+                    montoParcial = abono;
+                    fechaParcial = fechas[clasesCompletas];
                 }
 
-                // 3) Si no alcanza ni para una clase completa (clasesCompletas == 0) pero hay monto,
-                //    registra solo la próxima clase con abono parcial
+                // 3) Solo abono (si no alcanza ni para una clase completa)
                 if (clasesCompletas == 0 && totalIngresado > 0m)
                 {
                     await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         fechas[0],
-                        totalIngresado, // todo es abono
+                        totalIngresado,
                         ct);
+
+                    creoParcial = true;
+                    montoParcial = totalIngresado;
+                    fechaParcial = fechas[0];
                 }
 
-                // Mensaje resumen
-                if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < CantidadSeleccionada)
+                // --- Mensajes ---
+                string F(DateTime d) => d.ToString("dd/MM/yyyy");
+
+                if (fechasPagadas.Count > 0 && creoParcial)
                 {
+                    var listado = string.Join(", ", fechasPagadas.Select(F));
                     _dialogService.Info(
-                        $"Se registraron {clasesCompletas} clase(s) pagada(s) por completo y un abono de {sobrante:0.00} " +
-                        $"para la siguiente clase.",
+                        $"Se registraron {fechasPagadas.Count} clase(s) pagada(s) ({listado}) " +
+                        $"y un abono de {montoParcial:0.00} para la clase de {F(fechaParcial!.Value)}.",
                         "Clases");
                 }
-                else if (clasesCompletas > 0)
+                else if (fechasPagadas.Count == 1 && !creoParcial)
                 {
-                    _dialogService.Info($"Se registraron {clasesCompletas} clase(s) pagada(s).", "Clases");
+                    _dialogService.Info(
+                        $"Se registró la clase de {F(fechasPagadas[0])} pagada por completo.",
+                        "Clases");
                 }
-                else
+                else if (fechasPagadas.Count > 1 && !creoParcial)
                 {
-                    _dialogService.Info($"Se registró un abono de {totalIngresado:0.00} para la próxima clase.", "Clases");
+                    var listado = string.Join(", ", fechasPagadas.Select(F));
+                    _dialogService.Info(
+                        $"Se registraron {fechasPagadas.Count} clase(s) pagada(s): {listado}.",
+                        "Clases");
+                }
+                else if (creoParcial && fechasPagadas.Count == 0)
+                {
+                    _dialogService.Info(
+                        $"Se registró un abono de {montoParcial:0.00} para la clase de {F(fechaParcial!.Value)}.",
+                        "Clases");
                 }
 
                 LimpiarSeleccion();
