@@ -241,7 +241,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 MensajeValidacion = null;
 
-                // Validaciones básicas
                 if (AlumnoSeleccionado is null)
                 {
                     MensajeValidacion = "Debes seleccionar un alumno.";
@@ -266,35 +265,69 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     return;
                 }
 
-                // 1) Fechas semanales (hoy + 7d * i)
-                var fechas = Enumerable.Range(0, CantidadSeleccionada)
-                                       .Select(i => DateTime.Today.AddDays(7 * i))
-                                       .ToArray();
+                // --- Cálculos ---
+                var costo = Math.Round(CostoClase, 2, MidpointRounding.AwayFromZero);
+                var totalIngresado = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
 
-                // 2) Distribución del pago entre las N clases
-                //    (si prefieres TODO a la primera, comenta este bloque y deja tu lógica)
-                decimal total = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
-                decimal baseMonto = Math.Round(total / CantidadSeleccionada, 2, MidpointRounding.AwayFromZero);
-                decimal acumulado = 0m;
+                var clasesCompletas = (int)Math.Min(CantidadSeleccionada, Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo)));
+                var sobrante = totalIngresado - (clasesCompletas * costo);
 
-                for (int i = 0; i < CantidadSeleccionada; i++)
+                // Fechas: hoy y luego +7d
+                var fechas = GenerarFechasSemanas(DateTime.Today, Math.Max(clasesCompletas + (sobrante > 0m && clasesCompletas < CantidadSeleccionada ? 1 : 0), 1));
+
+                // --- Persistencia ---
+                // 1) Clases completamente cubiertas
+                for (int i = 0; i < clasesCompletas; i++)
                 {
-                    // Última clase: ajusta para cuadrar centavos
-                    decimal montoEstaClase = (i == CantidadSeleccionada - 1)
-                        ? total - acumulado
-                        : baseMonto;
-
-                    acumulado += montoEstaClase;
-
                     await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         fechas[i],
-                        montoEstaClase, // ⇐ pago distribuido por clase
+                        costo,   // pago completo de la clase
                         ct);
                 }
 
-                _dialogService.Info("Pago registrado correctamente.", "Clases");
+                // 2) Si hay sobrante y aún faltan clases para llegar a la cantidad deseada,
+                //    crea UNA clase adicional con abono parcial
+                if (sobrante > 0m && clasesCompletas < CantidadSeleccionada)
+                {
+                    await _claseService.RegistrarClaseAsync(
+                        AlumnoSeleccionado.AlumnoId,
+                        TallerSeleccionado.TallerId,
+                        fechas[clasesCompletas],
+                        Math.Round(sobrante, 2, MidpointRounding.AwayFromZero), // abono parcial
+                        ct);
+                }
+
+                // 3) Si no alcanza ni para una clase completa (clasesCompletas == 0) pero hay monto,
+                //    registra solo la próxima clase con abono parcial
+                if (clasesCompletas == 0 && totalIngresado > 0m)
+                {
+                    await _claseService.RegistrarClaseAsync(
+                        AlumnoSeleccionado.AlumnoId,
+                        TallerSeleccionado.TallerId,
+                        fechas[0],
+                        totalIngresado, // todo es abono
+                        ct);
+                }
+
+                // Mensaje resumen
+                if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < CantidadSeleccionada)
+                {
+                    _dialogService.Info(
+                        $"Se registraron {clasesCompletas} clase(s) pagada(s) por completo y un abono de {sobrante:0.00} " +
+                        $"para la siguiente clase.",
+                        "Clases");
+                }
+                else if (clasesCompletas > 0)
+                {
+                    _dialogService.Info($"Se registraron {clasesCompletas} clase(s) pagada(s).", "Clases");
+                }
+                else
+                {
+                    _dialogService.Info($"Se registró un abono de {totalIngresado:0.00} para la próxima clase.", "Clases");
+                }
+
                 LimpiarSeleccion();
             }
             catch (Exception ex)
@@ -378,6 +411,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     }
                 }
             }
+        }
+
+        private static DateTime[] GenerarFechasSemanas(DateTime inicio, int cantidad)
+        {
+            if (cantidad < 1) return Array.Empty<DateTime>();
+            var arr = new DateTime[cantidad];
+            for (int i = 0; i < cantidad; i++)
+                arr[i] = inicio.AddDays(7 * i);
+            return arr;
         }
 
         private static decimal R2(decimal v) =>
