@@ -213,11 +213,12 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
         public async Task<Inscripcion[]> ObtenerInscripcionesAsync(int alumnoId, CancellationToken ct = default)
         {
-            var cargos = await _escuelaContext.Inscripciones
-                .Where(c => c.AlumnoId == alumnoId && !c.Eliminado && c.Estado != EstadoInscripcion.Cancelada)
+            return await _escuelaContext.Inscripciones
+                .Include(i => i.Taller) // 🔹 Importante para que ya venga cargado
+                .Where(i => i.AlumnoId == alumnoId
+                         && !i.Eliminado
+                         && i.Estado != EstadoInscripcion.Cancelada)
                 .ToArrayAsync(ct);
-
-            return cargos;
         }
     }
 }

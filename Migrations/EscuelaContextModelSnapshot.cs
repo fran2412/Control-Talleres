@@ -180,6 +180,9 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("TEXT")
                         .HasColumnName("fecha");

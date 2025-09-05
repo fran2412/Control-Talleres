@@ -4,6 +4,7 @@ using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Cargos;
+using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
@@ -91,6 +92,7 @@ namespace ControlTalleresMVP
             services.AddScoped<IPromotorService, PromotorService>();
             services.AddScoped<ICargosService, CargoService>();
             services.AddScoped<IPagoService, PagoService>();
+            services.AddScoped<IClaseService, ClaseService>();
             services.AddTransient<IAlumnoPickerService, AlumnoPickerService>();
         }
     }

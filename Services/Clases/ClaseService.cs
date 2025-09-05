@@ -166,7 +166,7 @@ namespace ControlTalleresMVP.Services.Clases
         // ====================
         // Verificación de duplicados
         // ====================
-        async Task<bool> ExisteCargoClaseAsync(int alumnoId, int claseId, DateTime fecha, CancellationToken ct = default)
+        private async Task<bool> ExisteCargoClaseAsync(int alumnoId, int claseId, DateTime fecha, CancellationToken ct = default)
             => await _escuelaContext.Cargos.AnyAsync(i =>
                    i.AlumnoId == alumnoId
                 && i.ClaseId == claseId
