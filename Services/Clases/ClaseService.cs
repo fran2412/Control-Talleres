@@ -1,5 +1,4 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
-using ControlTalleresMVP.Migrations;
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
@@ -25,22 +24,34 @@ namespace ControlTalleresMVP.Services.Clases
         // Registrar clase y cargo
         // ====================
         public async Task<RegistrarClaseResult> RegistrarClaseAsync(
-            int alumnoId,
-            int tallerId,
-            DateTime fecha,
-            decimal montoAbono,
-            CancellationToken ct = default)
+    int alumnoId,
+    int tallerId,
+    DateTime fecha,
+    decimal montoAbono,
+    CancellationToken ct = default)
         {
-            var day = fecha.Date;
+            // 0) Resolver el día semanal del taller
+            var tallerDia = await _escuelaContext.Talleres
+                .Where(t => t.TallerId == tallerId && !t.Eliminado)
+                .Select(t => (DayOfWeek?)t.DiaSemana)
+                .FirstOrDefaultAsync(ct);
+
+            if (tallerDia is null)
+                throw new InvalidOperationException("Taller no encontrado o eliminado.");
+
+            // 1) “Siguiente o el mismo” día semanal respecto a la fecha base
+            //    Si hoy ya es el sábado (por ejemplo), ese mismo día cuenta.
+            var day = SiguienteOElMismo(fecha.Date, tallerDia.Value, incluirSiHoyCoincide: true);
+
             var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
 
             bool claseCreada = false, cargoCreado = false, pagoCreado = false;
             decimal aplicado = 0m;
             bool yaPagado = false;
 
-            // 1) Buscar o crear CLASE
+            // 2) Buscar o crear CLASE (única por Taller+Fecha)
             var clase = await _escuelaContext.Clases
-                .FirstOrDefaultAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Fecha == day, ct);
+                .FirstOrDefaultAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Fecha.Date == day, ct);
 
             if (clase is null)
             {
@@ -50,7 +61,7 @@ namespace ControlTalleresMVP.Services.Clases
                 claseCreada = true;
             }
 
-            // 2) Buscar o crear CARGO (único por alumno+clase)
+            // 3) Buscar o crear CARGO (uno por alumno+clase)
             var cargo = await _escuelaContext.Cargos
                 .FirstOrDefaultAsync(c => c.AlumnoId == alumnoId
                                        && c.ClaseId == clase.ClaseId
@@ -64,7 +75,7 @@ namespace ControlTalleresMVP.Services.Clases
                     AlumnoId = alumnoId,
                     ClaseId = clase.ClaseId,
                     Tipo = TipoCargo.Clase,
-                    Fecha = day,
+                    Fecha = day,               // ← usa la fecha “anclada” al día semanal
                     Monto = costoClase,
                     SaldoActual = costoClase,
                     Estado = EstadoCargo.Pendiente,
@@ -75,13 +86,13 @@ namespace ControlTalleresMVP.Services.Clases
                 cargoCreado = true;
             }
 
-            // 3) Aplicar ABONO (si hay)
+            // 4) Aplicar abono (si hay)
             montoAbono = Math.Round(montoAbono, 2, MidpointRounding.AwayFromZero);
             if (montoAbono > 0m)
             {
                 if (cargo.SaldoActual <= 0m)
                 {
-                    yaPagado = true; // no hacer nada más
+                    yaPagado = true;
                 }
                 else
                 {
@@ -110,7 +121,7 @@ namespace ControlTalleresMVP.Services.Clases
                         cargo.SaldoActual -= aAplicar;
                         cargo.Estado = cargo.SaldoActual == 0m
                             ? EstadoCargo.Pagado
-                            : (cargo.SaldoActual < cargo.Monto ? EstadoCargo.Pendiente : EstadoCargo.Pendiente);
+                            : EstadoCargo.Pendiente;
 
                         await _escuelaContext.SaveChangesAsync(ct);
 
@@ -129,6 +140,7 @@ namespace ControlTalleresMVP.Services.Clases
                 CargoYaPagado: yaPagado
             );
         }
+
 
         // ====================
         // Cancelar clase
@@ -320,5 +332,14 @@ namespace ControlTalleresMVP.Services.Clases
 
             return dict.Values.OrderBy(v => v.TallerId).ToArray();
         }
+
+        private static DateTime SiguienteOElMismo(DateTime desde, DayOfWeek objetivo, bool incluirSiHoyCoincide)
+        {
+            desde = desde.Date;
+            int delta = ((int)objetivo - (int)desde.DayOfWeek + 7) % 7;
+            if (delta == 0 && !incluirSiHoyCoincide) delta = 7;
+            return desde.AddDays(delta);
+        }
+
     }
 }

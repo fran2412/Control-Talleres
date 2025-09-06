@@ -306,13 +306,25 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        private static DateTime[] GenerarFechasSemanas(DateTime inicio, int cantidad)
+        private DateTime[] GenerarFechasSemanas(DateTime desde, int cantidad)
         {
-            if (cantidad < 1) return Array.Empty<DateTime>();
-            var arr = new DateTime[cantidad];
-            for (int i = 0; i < cantidad; i++) arr[i] = inicio.AddDays(7 * i);
-            return arr;
+            if (TallerSeleccionado is null || cantidad <= 0)
+                return Array.Empty<DateTime>();
+
+            var objetivo = TallerSeleccionado.DiaSemana; // DayOfWeek del taller
+            var start = desde.Date;
+
+            // Próximo (o mismo) día objetivo respecto a 'desde'
+            int delta = ((int)objetivo - (int)start.DayOfWeek + 7) % 7;
+            var primera = start.AddDays(delta); // incluye 'hoy' si coincide
+
+            var result = new DateTime[cantidad];
+            for (int i = 0; i < cantidad; i++)
+                result[i] = primera.AddDays(7 * i).Date; // a medianoche
+
+            return result;
         }
+
 
         private static decimal R2(decimal v) => Math.Round(v, 2, MidpointRounding.AwayFromZero);
         private static decimal ClampCosto(decimal v) => v < MinCostoClase ? MinCostoClase : (v > MaxCostoClase ? MaxCostoClase : v);

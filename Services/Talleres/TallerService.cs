@@ -99,6 +99,7 @@ namespace ControlTalleresMVP.Services.Talleres
             // Solo actualizas campos que quieres
             tallerExistente.Nombre = taller.Nombre;
             tallerExistente.Horario = taller.Horario;
+            tallerExistente.DiaSemana = taller.DiaSemana;
             tallerExistente.ActualizadoEn = DateTime.Now;
 
             try
@@ -123,6 +124,7 @@ namespace ControlTalleresMVP.Services.Talleres
                 {
                     u.TallerId,
                     u.Horario,
+                    u.DiaSemana,
                     u.Nombre,
                     u.CreadoEn
                 })
@@ -133,6 +135,7 @@ namespace ControlTalleresMVP.Services.Talleres
                 Id = u.TallerId,
                 Nombre = u.Nombre,
                 Horario = u.Horario,
+                DiaSemana = ConvertirDiaSemanaASpanol(u.DiaSemana),
                 CreadoEn = u.CreadoEn
             }).ToList();
         }
@@ -156,6 +159,21 @@ namespace ControlTalleresMVP.Services.Talleres
                 .AsNoTracking()
                 .Where(p => !p.Eliminado)
                 .ToList();
+        }
+
+        private static string ConvertirDiaSemanaASpanol(DayOfWeek diaSemana)
+        {
+            return diaSemana switch
+            {
+                DayOfWeek.Monday => "Lunes",
+                DayOfWeek.Tuesday => "Martes",
+                DayOfWeek.Wednesday => "Miércoles",
+                DayOfWeek.Thursday => "Jueves",
+                DayOfWeek.Friday => "Viernes",
+                DayOfWeek.Saturday => "Sábado",
+                DayOfWeek.Sunday => "Domingo",
+                _ => "Lunes"
+            };
         }
     }
 }

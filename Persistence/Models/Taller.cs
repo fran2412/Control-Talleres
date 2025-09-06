@@ -11,6 +11,7 @@ namespace ControlTalleresMVP.Persistence.Models
         public int TallerId { get; set; }
         public string Nombre { get; set; } = null!;
         public string Horario { get; set; } = null!;
+        public DayOfWeek DiaSemana { get; set; }
         public DateTime CreadoEn { get; set; }
         public DateTime ActualizadoEn { get; set; }
         public bool Eliminado { get; set; } = false;

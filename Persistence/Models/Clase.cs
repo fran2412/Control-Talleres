@@ -13,6 +13,7 @@ namespace ControlTalleresMVP.Persistence.Models
         public DateTime Fecha { get; set; }
         public EstadoClase Estado { get; set; } = EstadoClase.Pendiente;
 
+
         public DateTime CreadoEn { get; set; } = DateTime.Now;
         public DateTime ActualizadoEn { get; set; } = DateTime.Now;
         public bool Eliminado { get; set; } = false;

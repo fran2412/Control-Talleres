@@ -10,9 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -25,6 +23,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty]
         private string campoTextoHorario = "";
 
+        // NUEVO: lista para bindear el ComboBox si lo necesitas desde el VM
+        public IReadOnlyList<DayOfWeek> DiasSemana { get; } = Enum.GetValues<DayOfWeek>();
+
+        // NUEVO: día de la semana seleccionado para el registro/edición
+        [ObservableProperty]
+        private DayOfWeek diaSemanaSeleccionado = DayOfWeek.Monday;
 
         public MenuTalleresViewModel(ITallerService itemService, IDialogService dialogService)
             : base(itemService, dialogService)
@@ -59,7 +63,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 await _itemService.GuardarAsync(new Taller
                 {
                     Nombre = CampoTextoNombre.Trim(),
-                    Horario = CampoTextoHorario.Trim()
+                    Horario = CampoTextoHorario.Trim(),
+                    DiaSemana = DiaSemanaSeleccionado
                 });
 
                 LimpiarCampos();
@@ -77,11 +82,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _dialogService.Info(tallerSeleccionado!.Nombre);
         }
 
-
         protected override void LimpiarCampos()
         {
             CampoTextoNombre = "";
             CampoTextoHorario = "";
+            DiaSemanaSeleccionado = DayOfWeek.Monday; // ← NUEVO (reset)
         }
 
         public override bool Filtro(object o)
@@ -90,7 +95,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             if (string.IsNullOrWhiteSpace(FiltroRegistros)) return true;
 
             var nombreCompleto = a.Nombre ?? "";
-
             var haystack = Normalizar($"{nombreCompleto}");
 
             var tokens = FiltroRegistros

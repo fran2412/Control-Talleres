@@ -94,11 +94,27 @@ namespace ControlTalleresMVP.UI.Component.Taller
                     TallerId = tallerDto.Id,
                     Horario = tallerDto.Horario,
                     Nombre = tallerDto.Nombre,
+                    DiaSemana = ConvertirStringADiaSemana(tallerDto.DiaSemana),
                 };
 
                 new ContenedorFormTallerWindow(taller).ShowDialog();
 
             }
+        }
+
+        private static DayOfWeek ConvertirStringADiaSemana(string diaSemana)
+        {
+            return diaSemana switch
+            {
+                "Lunes" => DayOfWeek.Monday,
+                "Martes" => DayOfWeek.Tuesday,
+                "Miércoles" => DayOfWeek.Wednesday,
+                "Jueves" => DayOfWeek.Thursday,
+                "Viernes" => DayOfWeek.Friday,
+                "Sábado" => DayOfWeek.Saturday,
+                "Domingo" => DayOfWeek.Sunday,
+                _ => DayOfWeek.Monday
+            };
         }
     }
 }

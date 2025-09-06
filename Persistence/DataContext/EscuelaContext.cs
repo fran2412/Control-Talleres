@@ -1,4 +1,5 @@
 ﻿using ControlTalleresMVP.Configuraciones;
+using ControlTalleresMVP.Persistence.Converters;
 using ControlTalleresMVP.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -154,6 +155,11 @@ namespace ControlTalleresMVP.Persistence.DataContext
                 entity.Property(e => e.TallerId).HasColumnName("id_taller");
                 entity.Property(e => e.Nombre).HasColumnName("nombre");
                 entity.Property(e => e.Horario).HasColumnName("horario");
+                entity.Property(x => x.DiaSemana)
+                 .HasColumnName("dia_semana")
+                 .HasConversion(new DiaSemanaConverter())
+                 .HasMaxLength(20);
+
 
                 entity.Property(e => e.CreadoEn)
                     .HasColumnName("creado_en")

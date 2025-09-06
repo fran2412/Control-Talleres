@@ -4,8 +4,25 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ControlTalleresMVP.UI.Component.Taller"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <!-- Lista de valores del enum DayOfWeek -->
+        <ObjectDataProvider x:Key="DayOfWeekValues"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="sys:DayOfWeek"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <!-- Converter para mostrar los nombres en español -->
+        <local:DiaSemanaToTextoConverter x:Key="DiaSemanaToTexto"/>
+    </UserControl.Resources>
+    
     <Grid Background="White">
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="auto"
         BorderThickness="1,1,1,1">
@@ -43,6 +60,25 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                          Height="30" Width="260"
                          Tag="Ej. Sábados de 12:00 - 1:00"/>
                             </StackPanel>
+
+                            <StackPanel Margin="0,20,20,0">
+                                <TextBlock Text="* Día de clase" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <ComboBox
+                                ItemsSource="{Binding Source={StaticResource DayOfWeekValues}}"
+                                SelectedItem="{Binding DiaSemanaSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                SelectedValuePath="."
+                                Height="30"
+                                Width="260"
+                                Style="{StaticResource MinimalComboBoxStyle}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={StaticResource DiaSemanaToTexto}}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+
                         </WrapPanel>
                     </Grid>
                 </ScrollViewer>

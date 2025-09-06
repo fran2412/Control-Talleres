@@ -2,6 +2,7 @@
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
+using ControlTalleresMVP.UI.Component.Taller;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -52,6 +53,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             NombreTextBox.Text = _tallerOriginal.Nombre ?? "";
             HorarioTextBox.Text = _tallerOriginal.Horario ?? "";
+            DiaSemanaComboBox.SelectedItem = _tallerOriginal.DiaSemana;
         }
 
         private bool ValidarFormulario()
@@ -92,6 +94,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 TallerId = _tallerOriginal.TallerId,
                 Nombre = NombreTextBox.Text.Trim(),
                 Horario = HorarioTextBox.Text.Trim(),
+                DiaSemana = (DayOfWeek)DiaSemanaComboBox.SelectedItem,
                 CreadoEn = _tallerOriginal.CreadoEn
             };
         }

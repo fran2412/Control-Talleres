@@ -540,6 +540,12 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnName("creado_en")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<string>("DiaSemana")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("dia_semana");
+
                     b.Property<bool>("Eliminado")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")

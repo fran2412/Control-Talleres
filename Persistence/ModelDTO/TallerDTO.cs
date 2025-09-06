@@ -16,8 +16,12 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Nombre del taller")]
         public string Nombre { get; set; } = "";
 
+        [Display(Name = "Dia de clase")]
+        public string DiaSemana { get; set; } = "";
+
         [Display(Name = "Horario")]
         public string Horario { get; set; } = "";
+
 
         [Display(Name = "Fecha de alta")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]

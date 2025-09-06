@@ -4,11 +4,27 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ControlTalleresMVP.UI.Windows.FormContainer"
+        xmlns:converter="clr-namespace:ControlTalleresMVP.UI.Component.Taller"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         SizeToContent="Height"
         Title="ContenedorFormTallerWindow" Width="400">
+    <Window.Resources>
+        <!-- Lista de valores del enum DayOfWeek -->
+        <ObjectDataProvider x:Key="DayOfWeekValues"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="sys:DayOfWeek"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <!-- Converter para mostrar los nombres en español -->
+        <converter:DiaSemanaToTextoConverter x:Key="DiaSemanaToTexto"/>
+    </Window.Resources>
+    
     <Grid Background="White">
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="auto"
         BorderThickness="1,1,1,1">
@@ -43,6 +59,22 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                          ToolTip="Ingrese el horario del taller"
                                          Height="30" Width="260"
                                          Tag="Ej. Sábados de 12:00 - 1:00"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,20,20,0">
+                                <TextBlock Text="* Día de clase" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <ComboBox x:Name="DiaSemanaComboBox"
+                                ItemsSource="{Binding Source={StaticResource DayOfWeekValues}}"
+                                SelectedValuePath="."
+                                Height="30"
+                                Width="260"
+                                Style="{StaticResource MinimalComboBoxStyle}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={StaticResource DiaSemanaToTexto}}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
                             </StackPanel>
                         </WrapPanel>
                     </Grid>
