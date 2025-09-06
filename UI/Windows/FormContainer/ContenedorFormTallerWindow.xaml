@@ -10,7 +10,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         SizeToContent="Height"
-        Title="ContenedorFormTallerWindow" Width="400">
+        Title="Formulario taller" Width="400">
     <Window.Resources>
         <!-- Lista de valores del enum DayOfWeek -->
         <ObjectDataProvider x:Key="DayOfWeekValues"

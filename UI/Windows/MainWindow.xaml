@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Title="Login" Height="540" Width="520">
+        Title="Iniciar sesión" Height="540" Width="520">
 
     <Grid Background="{StaticResource BrushFondo}">
         <Rectangle HorizontalAlignment="Center" Height="400" Stroke="White" VerticalAlignment="Center" Width="350" RadiusX="38" RadiusY="38" Fill="White"/>

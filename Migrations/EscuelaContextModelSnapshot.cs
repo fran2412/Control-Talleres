@@ -477,6 +477,9 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("nombre");
 
+                    b.Property<string>("Telefono")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("PromotorId");
 
                     b.ToTable("promotores", (string)null);

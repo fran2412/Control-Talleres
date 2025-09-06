@@ -55,6 +55,7 @@ namespace ControlTalleresMVP.Services.Promotores
 
             // Solo actualizas campos que quieres
             promotorExistente.Nombre = promotor.Nombre;
+            promotorExistente.Telefono = promotor.Telefono;
             promotorExistente.ActualizadoEn = DateTime.Now;
 
             try
@@ -78,6 +79,7 @@ namespace ControlTalleresMVP.Services.Promotores
                 {
                     u.PromotorId,
                     u.Nombre,
+                    u.Telefono,
                     u.CreadoEn
                 })
                 .ToListAsync(ct);
@@ -86,6 +88,7 @@ namespace ControlTalleresMVP.Services.Promotores
             {
                 Id = u.PromotorId,
                 Nombre = u.Nombre,
+                Telefono = u.Telefono,
                 CreadoEn = u.CreadoEn
             }).ToList();
         }

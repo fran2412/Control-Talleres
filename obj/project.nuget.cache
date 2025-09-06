@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "pbif41TCXHo=",
+  "dgSpecHash": "5ot8hQox6+M=",
   "success": true,
   "projectFilePath": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\ControlTalleresMVP.csproj",
   "expectedPackageFiles": [
@@ -54,7 +54,8 @@
     "C:\\Users\\panch\\.nuget\\packages\\system.text.encoding.codepages\\6.0.0\\system.text.encoding.codepages.6.0.0.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\system.text.encodings.web\\8.0.0\\system.text.encodings.web.8.0.0.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\system.text.json\\8.0.0\\system.text.json.8.0.0.nupkg.sha512",
-    "C:\\Users\\panch\\.nuget\\packages\\system.threading.channels\\6.0.0\\system.threading.channels.6.0.0.nupkg.sha512"
+    "C:\\Users\\panch\\.nuget\\packages\\system.threading.channels\\6.0.0\\system.threading.channels.6.0.0.nupkg.sha512",
+    "C:\\Users\\panch\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.26100.57\\microsoft.windows.sdk.net.ref.10.0.26100.57.nupkg.sha512"
   ],
   "logs": []
 }

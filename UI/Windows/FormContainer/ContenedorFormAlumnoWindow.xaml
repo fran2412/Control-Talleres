@@ -8,7 +8,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         SizeToContent="Height"
-        Title="ContenedorFormAlumnoWindow" Width="400">
+        Title="Formulario alumno" Width="400">
     <Grid>
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600"
         BorderThickness="1,1,1,1">

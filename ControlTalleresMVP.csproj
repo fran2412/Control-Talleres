@@ -2,10 +2,26 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <AssemblyName>ControlTalleres</AssemblyName>
+    <ApplicationIcon>LogoSistemaTalleres.ico</ApplicationIcon>
+    <Title>ControlTalleres</Title>
+    <Authors>Francisco Emanuel López Aguiñiga</Authors>
+    <Description>Aplicación de escritorio para la administración de alumnos, maestros, inscripciones, pagos y asistencias en talleres escolares.</Description>
+    <PackageIcon>LogoSistemaTalleres.png</PackageIcon>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn />
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +31,10 @@
     <None Remove="Resources\Icons\LupaIcono.svg" />
     <None Remove="Resources\Icons\LupaNegraIcono.svg" />
     <None Remove="Resources\Icons\SedeIcono.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="LogoSistemaTalleres.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,6 +78,13 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\Downloads\LogoSistemaTalleres.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         SizeToContent="Height"
-        Title="ContenedorFormSedeWindow" Width="400">
+        Title="Formulario sede" Width="400">
     <Grid Background="White">
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="auto"
         BorderThickness="1,1,1,1">

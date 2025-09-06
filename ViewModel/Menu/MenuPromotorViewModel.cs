@@ -22,6 +22,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public override ObservableCollection<PromotorDTO> Registros
             => _itemService.RegistrosPromotores;
 
+        [ObservableProperty]
+        private string campoTextoTelefono = "";
+
         public MenuPromotorViewModel(IPromotorService itemService, IDialogService dialogService)
             : base(itemService, dialogService)
         {
@@ -49,6 +52,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 await _itemService.GuardarAsync(new Promotor
                 {
                     Nombre = CampoTextoNombre.Trim(),
+                    Telefono = string.IsNullOrWhiteSpace(CampoTextoTelefono) ? null : CampoTextoTelefono.Trim(),
                 });
 
                 LimpiarCampos();
@@ -70,7 +74,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         protected override void LimpiarCampos()
         {
             CampoTextoNombre = "";
-
+            CampoTextoTelefono = "";
         }
 
         public override bool Filtro(object o)

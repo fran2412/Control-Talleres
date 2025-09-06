@@ -93,6 +93,7 @@ namespace ControlTalleresMVP.UI.Component.Promotor
                 {
                     PromotorId = promotorDto.Id,
                     Nombre = promotorDto.Nombre,
+                    Telefono = promotorDto.Telefono,
                 };
 
                 new ContenedorFormPromotorWindow(promotor).ShowDialog();

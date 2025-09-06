@@ -10,6 +10,7 @@ namespace ControlTalleresMVP.Persistence.Models
     {
         public int PromotorId { get; set; }
         public string Nombre { get; set; } = null!;
+        public string? Telefono { get; set; }
         public DateTime CreadoEn { get; set; }
         public DateTime ActualizadoEn { get; set; }
 

@@ -44,11 +44,14 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             // Configurar validaciones usando el helper
             BaseFormHelper.ConfigurarValidacionesNombre(NombreTextBox, _dialogService);
+            TelefonoTextBox.PreviewTextInput += TelefonoTextBox_PreviewTextInput;
+            TelefonoTextBox.LostFocus += TelefonoTextBox_LostFocus;
         }
 
         private void CargarDatos()
         {
             NombreTextBox.Text = _promotorOriginal.Nombre ?? "";
+            TelefonoTextBox.Text = _promotorOriginal.Telefono ?? "";
         }
 
         private bool ValidarFormulario()
@@ -88,8 +91,19 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             {
                 PromotorId = _promotorOriginal.PromotorId,
                 Nombre = NombreTextBox.Text.Trim(),
+                Telefono = string.IsNullOrWhiteSpace(TelefonoTextBox.Text) ? null : TelefonoTextBox.Text.Trim(),
                 CreadoEn = _promotorOriginal.CreadoEn
             };
+        }
+
+        private void TelefonoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            BaseFormHelper.ValidarTelefono_PreviewTextInput(sender, e);
+        }
+
+        private void TelefonoTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            BaseFormHelper.FormatearTelefono_LostFocus(sender, e, _dialogService);
         }
     }
 }

@@ -9,7 +9,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         SizeToContent="Height"
-        Title="SeleccionarAlumnoWindow" MaxHeight="450" Width="1000">
+        Title="Seleccionar alumno" MaxHeight="450" Width="1000">
     <registros:RegistrosUsuarioUserControl x:Name="RegistrosUC"
                                            IsPickerMode="True"
                                            SelectedAlumno="{Binding SelectedAlumno, Mode=TwoWay}"/>
