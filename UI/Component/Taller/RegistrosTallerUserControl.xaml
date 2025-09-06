@@ -45,7 +45,7 @@
           ItemsSource="{Binding RegistrosView}" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn">
                     <DataGrid.Columns>
                         <!-- Columna fija de acciones -->
-                        <DataGridTemplateColumn Header="Acciones">
+                        <DataGridTemplateColumn Header="Acciones" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -63,6 +63,12 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        
+                        <!-- Columna de Fecha de Inicio -->
+                        <DataGridTextColumn Header="Fecha Inicio" Binding="{Binding FechaInicio, StringFormat=dd/MM/yyyy}" Width="120"/>
+                        
+                        <!-- Columna de Fecha de Fin -->
+                        <DataGridTextColumn Header="Fecha Fin" Binding="{Binding FechaFin, StringFormat=dd/MM/yyyy}" Width="120"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

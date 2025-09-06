@@ -160,6 +160,8 @@ namespace ControlTalleresMVP.Persistence.DataContext
                  .HasConversion(new DiaSemanaConverter())
                  .HasMaxLength(20);
 
+                entity.Property(e => e.FechaInicio).HasColumnName("fecha_inicio");
+                entity.Property(e => e.FechaFin).HasColumnName("fecha_fin");
 
                 entity.Property(e => e.CreadoEn)
                     .HasColumnName("creado_en")

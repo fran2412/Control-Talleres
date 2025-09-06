@@ -559,6 +559,14 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
 
+                    b.Property<DateTime?>("FechaFin")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("fecha_fin");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("fecha_inicio");
+
                     b.Property<string>("Horario")
                         .IsRequired()
                         .HasColumnType("TEXT")

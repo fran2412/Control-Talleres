@@ -106,6 +106,8 @@ namespace ControlTalleresMVP.Services.Talleres
             tallerExistente.Nombre = taller.Nombre;
             tallerExistente.Horario = taller.Horario;
             tallerExistente.DiaSemana = taller.DiaSemana;
+            tallerExistente.FechaInicio = taller.FechaInicio;
+            tallerExistente.FechaFin = taller.FechaFin;
             tallerExistente.ActualizadoEn = DateTime.Now;
 
             try
@@ -132,6 +134,8 @@ namespace ControlTalleresMVP.Services.Talleres
                     u.Horario,
                     u.DiaSemana,
                     u.Nombre,
+                    u.FechaInicio,
+                    u.FechaFin,
                     u.CreadoEn
                 })
                 .ToListAsync(ct);
@@ -142,6 +146,8 @@ namespace ControlTalleresMVP.Services.Talleres
                 Nombre = u.Nombre,
                 Horario = u.Horario,
                 DiaSemana = ConvertirDiaSemanaASpanol(u.DiaSemana),
+                FechaInicio = u.FechaInicio,
+                FechaFin = u.FechaFin,
                 CreadoEn = u.CreadoEn
             }).ToList();
         }

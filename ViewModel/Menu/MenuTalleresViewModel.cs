@@ -30,6 +30,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty]
         private DayOfWeek diaSemanaSeleccionado = DayOfWeek.Monday;
 
+        [ObservableProperty]
+        private DateTime fechaInicio = DateTime.Today;
+
+        [ObservableProperty]
+        private DateTime? fechaFin;
+
         public MenuTalleresViewModel(ITallerService itemService, IDialogService dialogService)
             : base(itemService, dialogService)
         {
@@ -52,6 +58,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return;
             }
 
+            if (FechaFin.HasValue && FechaFin.Value < FechaInicio)
+            {
+                _dialogService.Alerta("La fecha de fin no puede ser anterior a la fecha de inicio");
+                return;
+            }
+
             if (_dialogService.Confirmar(
                 $"¿Confirma que desea registrar el taller: {CampoTextoNombre.Trim()}?") != true)
             {
@@ -64,7 +76,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     Nombre = CampoTextoNombre.Trim(),
                     Horario = CampoTextoHorario.Trim(),
-                    DiaSemana = DiaSemanaSeleccionado
+                    DiaSemana = DiaSemanaSeleccionado,
+                    FechaInicio = FechaInicio,
+                    FechaFin = FechaFin
                 });
 
                 LimpiarCampos();
@@ -87,6 +101,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             CampoTextoNombre = "";
             CampoTextoHorario = "";
             DiaSemanaSeleccionado = DayOfWeek.Monday; // ← NUEVO (reset)
+            FechaInicio = DateTime.Today;
+            FechaFin = null;
         }
 
         public override bool Filtro(object o)

@@ -22,6 +22,13 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Horario")]
         public string Horario { get; set; } = "";
 
+        [Display(Name = "Fecha de inicio")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
+        public DateTime FechaInicio { get; set; }
+
+        [Display(Name = "Fecha de fin")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
+        public DateTime? FechaFin { get; set; }
 
         [Display(Name = "Fecha de alta")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
