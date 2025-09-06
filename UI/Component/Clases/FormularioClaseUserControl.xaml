@@ -28,6 +28,8 @@
                     <RowDefinition Height="Auto"/>
                     <!-- Monto -->
                     <RowDefinition Height="Auto"/>
+                    <!-- Notificación -->
+                    <RowDefinition Height="Auto"/>
                     <!-- Resumen -->
                     <RowDefinition Height="Auto"/>
                     <!-- Footer -->
@@ -35,7 +37,7 @@
 
                 <!-- HEADER -->
                 <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
-                    <TextBlock Text="Pago de clases (hoy)"
+                    <TextBlock Text="Pago de clases"
                            FontSize="20" FontFamily="Inter 28pt 28pt ExtraBold"
                            Foreground="#3E3E3E" DockPanel.Dock="Left"/>
                     <TextBlock Text="{Binding FechaDeHoy}"
@@ -122,8 +124,19 @@
                     </StackPanel>
                 </Grid>
 
+                <!-- NOTIFICACIÓN DE TALLERES SIN PAGAR -->
+                <Border Grid.Row="4" Background="#FFF3CD" BorderBrush="#FFEAA7" BorderThickness="1" 
+                        CornerRadius="6" Padding="12" Margin="0,0,0,8"
+                        Visibility="{Binding TieneTalleresSinPagar, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚠️" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding NotificacionTalleresSinPagar}" 
+                                   Foreground="#856404" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
                 <!-- RESUMEN -->
-                <Grid Grid.Row="4" Margin="0,0,0,8">
+                <Grid Grid.Row="5" Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
@@ -135,7 +148,7 @@
                 </Grid>
 
                 <!-- FOOTER -->
-                <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Cancelar" Command="{Binding CancelarPagoClasesCommand}"
                         Style="{StaticResource BotonNormal}" Height="40" MinWidth="120"/>
                     <Button Content="Guardar" Command="{Binding GuardarPagoClasesCommand}"

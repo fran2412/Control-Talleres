@@ -105,49 +105,82 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         [ObservableProperty] private decimal montoSugerido;
         [ObservableProperty] private string? mensajeValidacion;
+        [ObservableProperty] private string? notificacionTalleresSinPagar;
+        [ObservableProperty] private bool tieneTalleresSinPagar;
 
         [RelayCommand]
-        private async Task BuscarAlumno()
+private async Task BuscarAlumno()
+{
+    var alumno = _alumnoPicker.Pick();
+    if (alumno is null) return;
+
+    var inscripciones = await _inscripcionService.ObtenerInscripcionesAsync(alumno.AlumnoId);
+
+    // Activas (no eliminadas)
+    var activas = inscripciones.Where(i => !i.Eliminado).ToArray();
+
+    // ÚNICO caso con diálogo: sin inscripciones
+    if (activas.Length == 0)
+    {
+        _dialogService.Alerta("Este alumno no está inscrito en ningún taller.\nInscríbalo en alguno para poder registrar sus pagos a clases.");
+        return;
+    }
+
+    // Particionar por estado
+    var inscripcionesPagadas    = activas.Where(i => i.Estado == EstadoInscripcion.Pagada).ToArray();
+    var inscripcionesPendientes = activas.Where(i => i.Estado == EstadoInscripcion.Pendiente).ToArray();
+
+    // ---- Notificación (no bloquea) de inscripciones pendientes con monto ----
+    // Si existiera más de una inscripción al mismo taller, agrupamos y sumamos saldos.
+    var pendientesAgrupadas = inscripcionesPendientes
+        .Where(i => i.Taller != null)
+        .GroupBy(i => i.Taller!.Nombre)
+        .Select(g => new
         {
-            var alumno = _alumnoPicker.Pick();
-            if (alumno is null) return;
+            Taller = g.Key,
+            MontoPendiente = g.Sum(x => Math.Max(0m, x.SaldoActual)) // usa SaldoActual de tu modelo
+        })
+        .Where(x => x.MontoPendiente > 0m)
+        .OrderBy(x => x.Taller)
+        .ToList();
 
-            var inscripciones = await _inscripcionService.ObtenerInscripcionesAsync(alumno.AlumnoId);
+    if (pendientesAgrupadas.Count > 0)
+    {
+        var lista = string.Join(", ", pendientesAgrupadas.Select(p => $"{p.Taller} (${p.MontoPendiente:0.00})"));
+        NotificacionTalleresSinPagar = $"⚠️ Inscripciones pendientes: {lista}";
+        TieneTalleresSinPagar = true;
+    }
+    else
+    {
+        NotificacionTalleresSinPagar = null;
+        TieneTalleresSinPagar = false;
+    }
 
-            var talleresDisponibles = new ObservableCollection<Taller>(
-                inscripciones
-                    .Where(i => i.Taller != null)
-                    .Select(i => i.Taller!)
-                    .GroupBy(t => t.TallerId)
-                    .Select(g => g.First())
-                    .ToList()
-            );
+    // Talleres disponibles: incluye pagadas y pendientes (no bloquea pagos de clase)
+    var talleresDisponibles = new ObservableCollection<Taller>(
+        activas
+            .Where(i => i.Taller != null)
+            .Select(i => i.Taller!)
+            .GroupBy(t => t.TallerId)
+            .Select(g => g.First())
+            .OrderBy(t => t.Nombre)
+            .ToList()
+    );
 
-            if (talleresDisponibles.Count == 0)
-            {
-                _dialogService.Alerta("Este alumno no está inscrito en ningún taller.\nInscríbalo en alguno para poder registrar sus pagos a clases.");
-                return;
-            }
+    TalleresDelAlumno = talleresDisponibles;
+    AlumnoSeleccionado = alumno;
+    AlumnoNombre = alumno.Nombre;
 
-            TalleresDelAlumno = talleresDisponibles;
-            AlumnoSeleccionado = alumno;
-            AlumnoNombre = alumno.Nombre;
+    // Sugerir por defecto uno que "pueda pagar clase hoy" (opcional, no muestra diálogos)
+    var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
+    var estados = await _claseService.ObtenerEstadoPagoHoyAsync(alumno.AlumnoId, ids, DateTime.Today);
+    var disponibles = estados.Where(e => e.PuedePagar).Select(e => e.TallerId).ToHashSet();
 
-            var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
-            var estados = await _claseService.ObtenerEstadoPagoHoyAsync(alumno.AlumnoId, ids, DateTime.Today);
+    TallerSeleccionado = TalleresDelAlumno.FirstOrDefault(t => disponibles.Contains(t.TallerId))
+                       ?? TalleresDelAlumno.FirstOrDefault();
+}
 
-            var todosPagados = estados.Length > 0 && estados.All(e => e.EstaPagada);
-            if (todosPagados)
-            {
-                var lista = string.Join("\n • ", talleresDisponibles.Select(t => t.Nombre));
-                _dialogService.Alerta("El alumno ya tiene pagada la clase de HOY en todos sus talleres:\n" + $"• {lista}");
-                return;
-            }
 
-            var disponibles = estados.Where(e => e.PuedePagar).Select(e => e.TallerId).ToHashSet();
-            TallerSeleccionado = TalleresDelAlumno.FirstOrDefault(t => disponibles.Contains(t.TallerId))
-                               ?? TalleresDelAlumno.First();
-        }
 
         [RelayCommand]
         private void LimpiarSeleccion()
@@ -156,6 +189,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
             AlumnoNombre = string.Empty;
             TallerSeleccionado = null;
             TalleresDelAlumno = new();
+
+            // Limpiar notificaciones
+            NotificacionTalleresSinPagar = null;
+            TieneTalleresSinPagar = false;
 
             if (!_ajustandoCantidad)
             {
