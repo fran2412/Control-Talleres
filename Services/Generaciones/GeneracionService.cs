@@ -37,6 +37,13 @@ namespace ControlTalleresMVP.Services.Generaciones
             var generacion = await _context.Generaciones.FirstOrDefaultAsync(a => a.GeneracionId == id);
             if (generacion is null) return;
 
+            // Validar que no tenga inscripciones activas
+            var tieneInscripciones = await _context.Inscripciones
+                .AnyAsync(i => i.GeneracionId == id && !i.Eliminado, ct);
+            
+            if (tieneInscripciones)
+                throw new InvalidOperationException("No se puede eliminar una generación que tiene inscripciones activas.");
+
             generacion.Eliminado = true;
             generacion.EliminadoEn = DateTime.Now;
 

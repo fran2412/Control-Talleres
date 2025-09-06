@@ -52,6 +52,14 @@ namespace ControlTalleresMVP.Services.Inscripciones
             var generacion = await _escuelaContext.Generaciones.FirstOrDefaultAsync(g => g.GeneracionId == generacionId.GeneracionId, ct)
                              ?? throw new InvalidOperationException("Generación no encontrada.");
 
+            // Validar que la fecha de inscripción esté dentro del rango de la generación
+            var fechaInscripcion = fecha ?? DateTime.Now;
+            if (fechaInscripcion < generacion.FechaInicio)
+                throw new InvalidOperationException($"La fecha de inscripción no puede ser anterior al inicio de la generación ({generacion.FechaInicio:dd/MM/yyyy}).");
+            
+            if (generacion.FechaFin.HasValue && fechaInscripcion > generacion.FechaFin.Value)
+                throw new InvalidOperationException($"La fecha de inscripción no puede ser posterior al fin de la generación ({generacion.FechaFin.Value:dd/MM/yyyy}).");
+
             var costo = _configuracionService.GetValor<int>("costo_inscripcion", 600);
 
             if (abonoInicial < 0 || abonoInicial > costo) throw new InvalidOperationException("Abono inicial inválido.");

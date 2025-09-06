@@ -24,6 +24,9 @@ namespace ControlTalleresMVP.Services.Talleres
 
         public async Task<Taller> GuardarAsync(Taller taller, CancellationToken ct = default)
         {
+            // Validar coherencia entre día de la semana y horario
+            ValidarCoherenciaDiaHorario(taller.DiaSemana, taller.Horario);
+            
             _context.Talleres.Add(taller);
             await _context.SaveChangesAsync(ct);
             await InicializarRegistros(ct);
@@ -96,6 +99,9 @@ namespace ControlTalleresMVP.Services.Talleres
             if (tallerExistente is null)
                 throw new InvalidOperationException($"No se encontró al taller con ID {taller.TallerId}");
 
+            // Validar coherencia entre día de la semana y horario
+            ValidarCoherenciaDiaHorario(taller.DiaSemana, taller.Horario);
+            
             // Solo actualizas campos que quieres
             tallerExistente.Nombre = taller.Nombre;
             tallerExistente.Horario = taller.Horario;
@@ -174,6 +180,26 @@ namespace ControlTalleresMVP.Services.Talleres
                 DayOfWeek.Sunday => "Domingo",
                 _ => "Lunes"
             };
+        }
+
+        private static void ValidarCoherenciaDiaHorario(DayOfWeek diaSemana, string horario)
+        {
+            if (string.IsNullOrWhiteSpace(horario))
+                return;
+
+            var horarioLower = horario.ToLower();
+            var diaSemanaTexto = ConvertirDiaSemanaASpanol(diaSemana).ToLower();
+
+            // Verificar si el horario menciona un día diferente al configurado
+            var diasSemana = new[] { "lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "sabado", "domingo" };
+            var diaEnHorario = diasSemana.FirstOrDefault(dia => horarioLower.Contains(dia));
+
+            if (!string.IsNullOrEmpty(diaEnHorario) && diaEnHorario != diaSemanaTexto)
+            {
+                throw new InvalidOperationException(
+                    $"El horario menciona '{diaEnHorario}' pero el taller está configurado para '{diaSemanaTexto}'. " +
+                    "El día de la semana y el horario deben ser coherentes.");
+            }
         }
     }
 }

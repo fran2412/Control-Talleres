@@ -104,9 +104,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 throw new InvalidOperationException("El costo de inscripción debe ser un número entero válido.");
             }
 
-            if (valor < 400 || valor > 1400)
+            if (valor < 100 || valor > 2000)
             {
-                _dialogService.Alerta($"El costo de inscripción debe estar entre 400 y 1400.");
+                _dialogService.Alerta($"El costo de inscripción debe estar entre $100 y $2,000.");
                 return;
             }
 
@@ -132,9 +132,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 throw new InvalidOperationException("El costo por clase debe ser un número entero válido.");
             }
 
-            if (valor < 100 || valor > 300)
+            if (valor < 50 || valor > 500)
             {
-                _dialogService.Alerta($"El costo por clase debe estar entre 100 y 300.");
+                _dialogService.Alerta($"El costo por clase debe estar entre $50 y $500.");
+                return;
+            }
+
+            // Validar que el costo por clase no sea mayor que el costo de inscripción
+            var costoInscripcion = _configuracionService.GetValor<int>("costo_inscripcion", 600);
+            if (valor > costoInscripcion)
+            {
+                _dialogService.Alerta($"El costo por clase (${valor}) no puede ser mayor que el costo de inscripción (${costoInscripcion}).");
                 return;
             }
 

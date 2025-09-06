@@ -52,7 +52,7 @@ namespace ControlTalleresMVP.UI.Component.Sede {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleresMVP;V1.0.0.0;component/ui/component/sede/sedeusercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleresMVP;component/ui/component/sede/sedeusercontrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Sede\SedeUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

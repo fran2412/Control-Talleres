@@ -35,6 +35,13 @@ namespace ControlTalleresMVP.Services.Sedes
             var sede = await _context.Sedes.FirstOrDefaultAsync(p => p.SedeId == id);
             if (sede is null) return;
 
+            // Validar que no tenga alumnos asociados
+            var tieneAlumnos = await _context.Alumnos
+                .AnyAsync(a => a.SedeId == id && !a.Eliminado, ct);
+            
+            if (tieneAlumnos)
+                throw new InvalidOperationException("No se puede eliminar una sede que tiene alumnos registrados.");
+
             sede.Eliminado = true;
             sede.EliminadoEn = DateTime.Now;
 

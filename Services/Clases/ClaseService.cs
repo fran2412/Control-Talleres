@@ -39,9 +39,16 @@ namespace ControlTalleresMVP.Services.Clases
             if (tallerDia is null)
                 throw new InvalidOperationException("Taller no encontrado o eliminado.");
 
-            // 1) “Siguiente o el mismo” día semanal respecto a la fecha base
+            // 1) "Siguiente o el mismo" día semanal respecto a la fecha base
             //    Si hoy ya es el sábado (por ejemplo), ese mismo día cuenta.
             var day = SiguienteOElMismo(fecha.Date, tallerDia.Value, incluirSiHoyCoincide: true);
+
+            // Validar que la fecha calculada coincida con el día de la semana del taller
+            if (day.DayOfWeek != tallerDia.Value)
+            {
+                throw new InvalidOperationException(
+                    $"La fecha de la clase ({day:dd/MM/yyyy}) no coincide con el día de la semana del taller ({ConvertirDiaSemanaASpanol(tallerDia.Value)}).");
+            }
 
             var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
 
@@ -339,6 +346,21 @@ namespace ControlTalleresMVP.Services.Clases
             int delta = ((int)objetivo - (int)desde.DayOfWeek + 7) % 7;
             if (delta == 0 && !incluirSiHoyCoincide) delta = 7;
             return desde.AddDays(delta);
+        }
+
+        private static string ConvertirDiaSemanaASpanol(DayOfWeek diaSemana)
+        {
+            return diaSemana switch
+            {
+                DayOfWeek.Monday => "Lunes",
+                DayOfWeek.Tuesday => "Martes",
+                DayOfWeek.Wednesday => "Miércoles",
+                DayOfWeek.Thursday => "Jueves",
+                DayOfWeek.Friday => "Viernes",
+                DayOfWeek.Saturday => "Sábado",
+                DayOfWeek.Sunday => "Domingo",
+                _ => "Lunes"
+            };
         }
 
     }
