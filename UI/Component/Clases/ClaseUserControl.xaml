@@ -12,8 +12,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <local:FormularioClaseUserControl Grid.Row="0" Margin="40,0,40,0"/>
-            <local:RegistrosClasesUserControl Grid.Row="1" Margin="40,40,40,0"/>
+            <local:FormularioClaseUserControl x:Name="FormularioClaseUserControl" Grid.Row="0" Margin="40,0,40,0"/>
+            <local:RegistrosClasesUserControl x:Name="RegistrosClasesUserControl" Grid.Row="1" Margin="40,40,40,0"/>
         </Grid>
     </ScrollViewer>
 </UserControl>

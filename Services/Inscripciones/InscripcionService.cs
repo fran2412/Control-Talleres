@@ -6,6 +6,8 @@ using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Messaging;
+using ControlTalleresMVP.Messages;
 
 namespace ControlTalleresMVP.Services.Inscripciones
 {
@@ -163,6 +165,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
         public async Task CancelarAsync(int inscripcionId, string? motivo = null, CancellationToken ct = default)
         {
             var inscripcion = await _escuelaContext.Inscripciones
+                .Include(i => i.Cargos.Where(c => !c.Eliminado))
                 .FirstOrDefaultAsync(i => i.InscripcionId == inscripcionId, ct)
                       ?? throw new InvalidOperationException("Inscripción no encontrada.");
 
@@ -173,6 +176,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                  motivo = motivoCancelacion;
             }
 
+            // Cancelar la inscripción
             inscripcion.SaldoActual = 0;
             inscripcion.MotivoCancelacion = motivo;
             inscripcion.CanceladaEn = DateTime.Now;
@@ -181,7 +185,46 @@ namespace ControlTalleresMVP.Services.Inscripciones
             inscripcion.Estado = EstadoInscripcion.Cancelada;
             inscripcion.ActualizadoEn = DateTime.Now;
 
+            // Cancelar todos los cargos relacionados a la inscripción
+            var cargosRelacionados = inscripcion.Cargos.Where(c => !c.Eliminado).ToList();
+            var clasesACancelar = new List<int>();
+
+            foreach (var cargo in cargosRelacionados)
+            {
+                // Marcar el cargo como anulado
+                cargo.Estado = EstadoCargo.Anulado;
+                cargo.SaldoActual = 0;
+                cargo.Eliminado = true;
+                cargo.EliminadoEn = DateTime.Now;
+                cargo.ActualizadoEn = DateTime.Now;
+
+                // Si el cargo está relacionado con una clase, agregar la clase a la lista para cancelar
+                if (cargo.ClaseId.HasValue && !clasesACancelar.Contains(cargo.ClaseId.Value))
+                {
+                    clasesACancelar.Add(cargo.ClaseId.Value);
+                }
+            }
+
+            // Cancelar todas las clases relacionadas
+            if (clasesACancelar.Any())
+            {
+                var clases = await _escuelaContext.Clases
+                    .Where(c => clasesACancelar.Contains(c.ClaseId) && !c.Eliminado)
+                    .ToListAsync(ct);
+
+                foreach (var clase in clases)
+                {
+                    clase.Estado = EstadoClase.Cancelada;
+                    clase.Eliminado = true;
+                    clase.EliminadoEn = DateTime.Now;
+                    clase.ActualizadoEn = DateTime.Now;
+                }
+            }
+
             await _escuelaContext.SaveChangesAsync(ct);
+
+            // Enviar mensaje de actualización para notificar a otros componentes
+            WeakReferenceMessenger.Default.Send(new InscripcionesActualizadasMessage(inscripcion.AlumnoId));
         }
 
 

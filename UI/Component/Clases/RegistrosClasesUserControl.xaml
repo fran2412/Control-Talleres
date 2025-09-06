@@ -33,28 +33,28 @@
                     <!-- Búsqueda libre -->
                     <TextBox Grid.Column="0" Margin="0,0,10,0"
                              Style="{StaticResource TextBoxCampo}"
-                             Text="{Binding MenuClaseRegistrosVM.FiltroRegistrosClases, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Text="{Binding FiltroRegistrosClases, UpdateSourceTrigger=PropertyChanged, Delay=250}"
                              Tag="Buscar (Alumno, Taller, Estado)"
                              FontSize="16"/>
 
                     <!-- Fecha DESDE -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
                         <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <DatePicker SelectedDate="{Binding MenuClaseRegistrosVM.FechaDesdeRegistros, Mode=TwoWay}"
+                        <DatePicker SelectedDate="{Binding FechaDesdeRegistros, Mode=TwoWay}"
                                     Width="140"/>
                     </StackPanel>
 
                     <!-- Fecha HASTA -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
                         <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <DatePicker SelectedDate="{Binding MenuClaseRegistrosVM.FechaHastaRegistros, Mode=TwoWay}"
+                        <DatePicker SelectedDate="{Binding FechaHastaRegistros, Mode=TwoWay}"
                                     Width="140"/>
                     </StackPanel>
                 </Grid>
 
                 <!-- DataGrid -->
                 <DataGrid Grid.Row="1" Margin="20"
-                          ItemsSource="{Binding MenuClaseRegistrosVM.RegistrosClasesView}"
+                          ItemsSource="{Binding RegistrosClasesView}"
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
                           Style="{StaticResource DataGridRegistros}">
@@ -64,7 +64,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <Button Style="{StaticResource BotonTransparente}"
-                                                Command="{Binding DataContext.MenuClaseRegistrosVM.CancelarClaseAsyncCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Command="{Binding CancelarClaseAsyncCommand}"
                                                 CommandParameter="{Binding ClaseId}"
                                                 Cursor="Hand" Margin="6,0,6,0" ToolTip="Cancelar clase">
                                             <svgc:SvgViewbox Source="Resources/Icons/EliminarRegistro.svg" Width="28" Height="28"/>
@@ -91,9 +91,9 @@
 
                 <!-- Totales -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0,20,20">
-                    <TextBlock Text="{Binding MenuClaseRegistrosVM.TotalMontoClases, StringFormat=Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                    <TextBlock Text="{Binding MenuClaseRegistrosVM.TotalPagadoClases, StringFormat=Pagado: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                    <TextBlock Text="{Binding MenuClaseRegistrosVM.TotalSaldoClases, StringFormat=Saldo: {0:C}}"  FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TotalMontoClases, StringFormat=Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
+                    <TextBlock Text="{Binding TotalPagadoClases, StringFormat=Pagado: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
+                    <TextBlock Text="{Binding TotalSaldoClases, StringFormat=Saldo: {0:C}}"  FontSize="16" FontWeight="SemiBold"/>
                 </StackPanel>
             </Grid>
         </Border>

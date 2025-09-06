@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ControlTalleresMVP.ViewModel.Menu;
 
 namespace ControlTalleresMVP.UI.Component.Clases
 {
@@ -23,6 +24,27 @@ namespace ControlTalleresMVP.UI.Component.Clases
         public ClaseUserControl()
         {
             InitializeComponent();
+            this.DataContextChanged += ClaseUserControl_DataContextChanged;
+        }
+
+        private void ClaseUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (DataContext is MenuClaseUserControl menuClaseUserControl)
+            {
+                // Configurar DataContext para los UserControls hijos
+                var formularioControl = FindName("FormularioClaseUserControl") as FormularioClaseUserControl;
+                var registrosControl = FindName("RegistrosClasesUserControl") as RegistrosClasesUserControl;
+                
+                if (formularioControl != null)
+                {
+                    formularioControl.DataContext = menuClaseUserControl.MenuClaseCobroVM;
+                }
+                
+                if (registrosControl != null)
+                {
+                    registrosControl.DataContext = menuClaseUserControl.MenuClaseRegistrosVM;
+                }
+            }
         }
     }
 }
