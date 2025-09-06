@@ -10,7 +10,7 @@ namespace ControlTalleresMVP.Services.Clases
 {
     public interface IClaseService
     {
-        public Task RegistrarClaseAsync(
+        public Task<RegistrarClaseResult> RegistrarClaseAsync(
         int alumnoId,
         int tallerId,
         DateTime fecha,

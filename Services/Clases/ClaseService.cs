@@ -24,17 +24,21 @@ namespace ControlTalleresMVP.Services.Clases
         // ====================
         // Registrar clase y cargo
         // ====================
-        public async Task RegistrarClaseAsync(
-        int alumnoId,
-        int tallerId,
-        DateTime fecha,
-        decimal montoAbono,
-        CancellationToken ct = default)
+        public async Task<RegistrarClaseResult> RegistrarClaseAsync(
+            int alumnoId,
+            int tallerId,
+            DateTime fecha,
+            decimal montoAbono,
+            CancellationToken ct = default)
         {
             var day = fecha.Date;
             var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
 
-            // 1) Buscar o crear CLASE (taller + día)
+            bool claseCreada = false, cargoCreado = false, pagoCreado = false;
+            decimal aplicado = 0m;
+            bool yaPagado = false;
+
+            // 1) Buscar o crear CLASE
             var clase = await _escuelaContext.Clases
                 .FirstOrDefaultAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Fecha == day, ct);
 
@@ -43,9 +47,10 @@ namespace ControlTalleresMVP.Services.Clases
                 clase = new Clase { TallerId = tallerId, Fecha = day };
                 _escuelaContext.Clases.Add(clase);
                 await _escuelaContext.SaveChangesAsync(ct);
+                claseCreada = true;
             }
 
-            // 2) Buscar o crear CARGO (único por alumno+clase activo)
+            // 2) Buscar o crear CARGO (único por alumno+clase)
             var cargo = await _escuelaContext.Cargos
                 .FirstOrDefaultAsync(c => c.AlumnoId == alumnoId
                                        && c.ClaseId == clase.ClaseId
@@ -66,51 +71,63 @@ namespace ControlTalleresMVP.Services.Clases
                     Eliminado = false
                 };
                 _escuelaContext.Cargos.Add(cargo);
-
-                try { await _escuelaContext.SaveChangesAsync(ct); }
-                catch (DbUpdateException)
-                {
-                    // Concurrencia: alguien lo insertó; recupéralo
-                    cargo = await _escuelaContext.Cargos.FirstAsync(c =>
-                        c.AlumnoId == alumnoId &&
-                        c.ClaseId == clase.ClaseId &&
-                        !c.Eliminado &&
-                        c.Estado != EstadoCargo.Anulado, ct);
-                }
+                await _escuelaContext.SaveChangesAsync(ct);
+                cargoCreado = true;
             }
 
             // 3) Aplicar ABONO (si hay)
             montoAbono = Math.Round(montoAbono, 2, MidpointRounding.AwayFromZero);
             if (montoAbono > 0m)
             {
-                var aAplicar = Math.Min(montoAbono, cargo.SaldoActual);
-
-                var pago = new Pago
+                if (cargo.SaldoActual <= 0m)
                 {
-                    AlumnoId = alumnoId,
-                    Fecha = DateTime.Now,
-                    Metodo = MetodoPago.Efectivo,   // ajusta si manejas otro método en la UI
-                    MontoTotal = aAplicar
-                };
-                _escuelaContext.Pagos.Add(pago);
-                await _escuelaContext.SaveChangesAsync(ct);
-
-                var pa = new PagoAplicacion
+                    yaPagado = true; // no hacer nada más
+                }
+                else
                 {
-                    PagoId = pago.PagoId,
-                    CargoId = cargo.CargoId,
-                    MontoAplicado = aAplicar,
-                    Estado = EstadoAplicacionCargo.Vigente
-                };
-                _escuelaContext.PagoAplicaciones.Add(pa);
+                    var aAplicar = Math.Min(montoAbono, cargo.SaldoActual);
+                    if (aAplicar > 0m)
+                    {
+                        var pago = new Pago
+                        {
+                            AlumnoId = alumnoId,
+                            Fecha = DateTime.Now,
+                            Metodo = MetodoPago.Efectivo, // ajusta según tu UI
+                            MontoTotal = aAplicar
+                        };
+                        _escuelaContext.Pagos.Add(pago);
+                        await _escuelaContext.SaveChangesAsync(ct);
 
-                cargo.SaldoActual -= aAplicar;
-                cargo.Estado = cargo.SaldoActual == 0m ? EstadoCargo.Pagado
-                              : (cargo.SaldoActual < cargo.Monto ? EstadoCargo.Pendiente
-                                                                : EstadoCargo.Pendiente);
+                        var pa = new PagoAplicacion
+                        {
+                            PagoId = pago.PagoId,
+                            CargoId = cargo.CargoId,
+                            MontoAplicado = aAplicar,
+                            Estado = EstadoAplicacionCargo.Vigente
+                        };
+                        _escuelaContext.PagoAplicaciones.Add(pa);
 
-                await _escuelaContext.SaveChangesAsync(ct);
+                        cargo.SaldoActual -= aAplicar;
+                        cargo.Estado = cargo.SaldoActual == 0m
+                            ? EstadoCargo.Pagado
+                            : (cargo.SaldoActual < cargo.Monto ? EstadoCargo.Pendiente : EstadoCargo.Pendiente);
+
+                        await _escuelaContext.SaveChangesAsync(ct);
+
+                        pagoCreado = true;
+                        aplicado = aAplicar;
+                    }
+                }
             }
+
+            return new RegistrarClaseResult(
+                Fecha: day,
+                ClaseCreada: claseCreada,
+                CargoCreado: cargoCreado,
+                PagoCreado: pagoCreado,
+                MontoAplicado: aplicado,
+                CargoYaPagado: yaPagado
+            );
         }
 
         // ====================

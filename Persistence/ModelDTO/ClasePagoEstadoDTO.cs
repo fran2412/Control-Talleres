@@ -12,4 +12,13 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         bool EstaPagada,
         bool PuedePagar
     );
+
+    public record RegistrarClaseResult(
+        DateTime Fecha, 
+        bool ClaseCreada, 
+        bool CargoCreado, 
+        bool PagoCreado, 
+        decimal MontoAplicado, 
+        bool CargoYaPagado
+        );
 }

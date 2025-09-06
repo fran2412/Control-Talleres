@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Configuracion;
@@ -182,8 +183,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     "El alumno ya tiene pagada la clase de HOY en todos sus talleres:\n" +
                     $"• {lista}");
 
-                // Aún dejamos seleccionado el primero, por si quiere pagar fechas futuras
-                LimpiarSeleccion();
                 return;
             }
 
@@ -263,6 +262,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     return;
                 }
 
+
                 // --- Cálculos ---
                 var costo = Math.Round(CostoClase, 2, MidpointRounding.AwayFromZero);
                 var totalIngresado = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
@@ -290,78 +290,95 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
                 // --- Persistencia ---
                 // 1) Clases completas
+                // --- Tracking ---
+                var resultados = new List<RegistrarClaseResult>();
+
+                // 1) Clases completas
                 for (int i = 0; i < clasesCompletas; i++)
                 {
-                    await _claseService.RegistrarClaseAsync(
+                    var r = await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         fechas[i],
                         costo,
                         ct);
-
-                    fechasPagadas.Add(fechas[i]);
+                    resultados.Add(r);
                 }
 
-                // 2) Clase parcial (si hay sobrante y aún faltan)
-                if (sobrante > 0m && clasesCompletas < CantidadSeleccionada)
+                // 2) Parcial (si aplica y hubo al menos una completa)
+                if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < CantidadSeleccionada)
                 {
                     var abono = Math.Round(sobrante, 2, MidpointRounding.AwayFromZero);
-                    await _claseService.RegistrarClaseAsync(
+                    var r = await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         fechas[clasesCompletas],
                         abono,
                         ct);
-
-                    creoParcial = true;
-                    montoParcial = abono;
-                    fechaParcial = fechas[clasesCompletas];
+                    resultados.Add(r);
                 }
-
-                // 3) Solo abono (si no alcanza ni para una clase completa)
-                if (clasesCompletas == 0 && totalIngresado > 0m)
+                // 3) Solo abono (cuando no alcanza ni para una completa)
+                else if (clasesCompletas == 0 && totalIngresado > 0m)
                 {
-                    await _claseService.RegistrarClaseAsync(
+                    var r = await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         fechas[0],
                         totalIngresado,
                         ct);
-
-                    creoParcial = true;
-                    montoParcial = totalIngresado;
-                    fechaParcial = fechas[0];
+                    resultados.Add(r);
                 }
 
-                // --- Mensajes ---
+                // --- Mensajes a partir de resultados reales ---
                 string F(DateTime d) => d.ToString("dd/MM/yyyy");
 
-                if (fechasPagadas.Count > 0 && creoParcial)
+                // Si no hubo cambios, no muestres éxito
+                bool huboCambios = resultados.Any(r => r.PagoCreado || r.CargoCreado || r.ClaseCreada);
+                if (!huboCambios)
                 {
-                    var listado = string.Join(", ", fechasPagadas.Select(F));
+                    // Puedes dar una razón más clara:
+                    if (resultados.All(r => r.CargoYaPagado))
+                        _dialogService.Alerta("No se registró ningún movimiento: la(s) clase(s) ya estaban pagadas.");
+                    else
+                        _dialogService.Alerta("No se registró ningún movimiento.");
+                    return;
+                }
+
+                // Arma mensajes
+                var pagadasFull = resultados
+                    .Where(r => r.PagoCreado && r.MontoAplicado >= costo)
+                    .Select(r => r.Fecha)
+                    .OrderBy(d => d)
+                    .ToList();
+
+                var parciales = resultados
+                    .Where(r => r.PagoCreado && r.MontoAplicado > 0m && r.MontoAplicado < costo)
+                    .Select(r => new { r.Fecha, r.MontoAplicado })
+                    .OrderBy(x => x.Fecha)
+                    .ToList();
+
+                if (pagadasFull.Count > 0 && parciales.Count > 0)
+                {
+                    var listado = string.Join(", ", pagadasFull.Select(F));
+                    var p = parciales.Last();
                     _dialogService.Info(
-                        $"Se registraron {fechasPagadas.Count} clase(s) pagada(s) ({listado}) " +
-                        $"y un abono de {montoParcial:0.00} para la clase de {F(fechaParcial!.Value)}.",
+                        $"Se registraron {pagadasFull.Count} clase(s) pagada(s) ({listado}) " +
+                        $"y un abono de {p.MontoAplicado:0.00} para la clase de {F(p.Fecha)}.",
                         "Clases");
                 }
-                else if (fechasPagadas.Count == 1 && !creoParcial)
+                else if (pagadasFull.Count == 1 && parciales.Count == 0)
                 {
-                    _dialogService.Info(
-                        $"Se registró la clase de {F(fechasPagadas[0])} pagada por completo.",
-                        "Clases");
+                    _dialogService.Info($"Se registró la clase de {F(pagadasFull[0])} pagada por completo.", "Clases");
                 }
-                else if (fechasPagadas.Count > 1 && !creoParcial)
+                else if (pagadasFull.Count > 1 && parciales.Count == 0)
                 {
-                    var listado = string.Join(", ", fechasPagadas.Select(F));
-                    _dialogService.Info(
-                        $"Se registraron {fechasPagadas.Count} clase(s) pagada(s): {listado}.",
-                        "Clases");
+                    var listado = string.Join(", ", pagadasFull.Select(F));
+                    _dialogService.Info($"Se registraron {pagadasFull.Count} clase(s) pagada(s): {listado}.", "Clases");
                 }
-                else if (creoParcial && fechasPagadas.Count == 0)
+                else if (pagadasFull.Count == 0 && parciales.Count > 0)
                 {
-                    _dialogService.Info(
-                        $"Se registró un abono de {montoParcial:0.00} para la clase de {F(fechaParcial!.Value)}.",
-                        "Clases");
+                    var p = parciales.Last();
+                    _dialogService.Info($"Se registró un abono de {p.MontoAplicado:0.00} para la clase de {F(p.Fecha)}.", "Clases");
                 }
 
                 LimpiarSeleccion();
