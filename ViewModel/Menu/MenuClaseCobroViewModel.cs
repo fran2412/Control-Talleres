@@ -55,6 +55,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private string fechaDeHoy = "";
         [ObservableProperty] private string? alumnoNombre;
         [ObservableProperty] private Alumno? alumnoSeleccionado;
+        partial void OnAlumnoSeleccionadoChanged(Alumno? value)
+        {
+            ActualizarMostrarAvisoClasesPendientes();
+        }
         [ObservableProperty] private ObservableCollection<Taller> talleresDelAlumno = new();
         [ObservableProperty] private Taller? tallerSeleccionado;
         partial void OnTallerSeleccionadoChanged(Taller? value)
@@ -63,6 +67,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 RecalcularSugeridoYQuizasMonto(forceSetMonto: true);
             }
+            ActualizarMostrarAvisoClasesPendientes();
         }
 
         [ObservableProperty] private int cantidadSeleccionada = 1;
@@ -108,6 +113,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 MontoIngresado = v;
                 _ajustandoMonto = false;
             }
+            
+            // Actualizar mensaje de validación en tiempo real
+            if (value.HasValue && value > MontoSugerido && MontoSugerido > 0m)
+            {
+                MensajeValidacion = $"El monto no puede superar el sugerido ({MontoSugerido:C2}).";
+            }
+            else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
+            {
+                MensajeValidacion = null; // Limpiar mensaje si ya no aplica
+            }
         }
 
         [ObservableProperty] private decimal montoSugerido;
@@ -116,6 +131,18 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private bool tieneTalleresSinPagar;
         [ObservableProperty] private string? informacionClasesPendientes;
         [ObservableProperty] private bool mostrarControlesCantidad = true;
+        [ObservableProperty] private string? avisoClasesPendientes;
+        partial void OnAvisoClasesPendientesChanged(string? value)
+        {
+            ActualizarMostrarAvisoClasesPendientes();
+        }
+        
+        [ObservableProperty] private bool mostrarAvisoClasesPendientes;
+        
+        private void ActualizarMostrarAvisoClasesPendientes()
+        {
+            MostrarAvisoClasesPendientes = !string.IsNullOrEmpty(AvisoClasesPendientes) && AlumnoSeleccionado != null;
+        }
 
         [RelayCommand]
 private async Task BuscarAlumno()
@@ -179,6 +206,7 @@ private async Task BuscarAlumno()
     TalleresDelAlumno = talleresDisponibles;
     AlumnoSeleccionado = alumno;
     AlumnoNombre = alumno.Nombre;
+    ActualizarMostrarAvisoClasesPendientes();
 
     // Sugerir por defecto uno que "pueda pagar clase hoy" (opcional, no muestra diálogos)
     var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
@@ -197,16 +225,21 @@ private async Task BuscarAlumno()
         [RelayCommand]
         private void LimpiarSeleccion()
         {
+            // Limpiar notificaciones primero
+            NotificacionTalleresSinPagar = null;
+            TieneTalleresSinPagar = false;
+            InformacionClasesPendientes = null;
+            MostrarControlesCantidad = true;
+            AvisoClasesPendientes = null;
+            
+            // Limpiar selecciones
             AlumnoSeleccionado = null;
             AlumnoNombre = string.Empty;
             TallerSeleccionado = null;
             TalleresDelAlumno = new();
 
-            // Limpiar notificaciones
-            NotificacionTalleresSinPagar = null;
-            TieneTalleresSinPagar = false;
-            InformacionClasesPendientes = null;
-            MostrarControlesCantidad = true;
+            // Actualizar visibilidad del aviso
+            ActualizarMostrarAvisoClasesPendientes();
 
             if (!_ajustandoCantidad)
             {
@@ -237,6 +270,7 @@ private async Task BuscarAlumno()
                 if (AlumnoSeleccionado is null) { MensajeValidacion = "Debes seleccionar un alumno."; return; }
                 if (TallerSeleccionado is null) { MensajeValidacion = "Debes seleccionar un taller."; return; }
                 if (MontoIngresado is null || MontoIngresado <= 0) { MensajeValidacion = "El monto debe ser mayor a 0."; return; }
+                if (MontoIngresado > MontoSugerido) { MensajeValidacion = $"El monto no puede superar el sugerido ({MontoSugerido:C2})."; return; }
 
                 var costo = Math.Round(CostoClase, 2, MidpointRounding.AwayFromZero);
                 var totalIngresado = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
@@ -370,6 +404,10 @@ private async Task BuscarAlumno()
                         var fechasTexto = string.Join(", ", fechas);
                         InformacionClasesPendientes = $"Clases pendientes ({clasesPendientes.Length}): {fechasTexto}";
                         MostrarControlesCantidad = false; // Ocultar controles de cantidad
+                        
+                        // Mostrar aviso de que se están pagando clases no pagadas
+                        AvisoClasesPendientes = "⚠️ ATENCIÓN: Se están pagando clases que no fueron pagadas o no se terminaron de pagar anteriormente. El pago se aplicará a las clases pendientes en orden cronológico.";
+                        ActualizarMostrarAvisoClasesPendientes();
                     }
                     else
                     {
@@ -377,6 +415,8 @@ private async Task BuscarAlumno()
                         nuevoSugerido = R2(CantidadSeleccionada * CostoClase);
                         InformacionClasesPendientes = "No hay clases pendientes de pago - puede seleccionar cantidad de clases";
                         MostrarControlesCantidad = true; // Mostrar controles de cantidad
+                        AvisoClasesPendientes = null; // Limpiar aviso
+                        ActualizarMostrarAvisoClasesPendientes();
                     }
                 }
                 catch
@@ -384,6 +424,8 @@ private async Task BuscarAlumno()
                     // Si hay error, usar la lógica anterior
                     nuevoSugerido = R2(CantidadSeleccionada * CostoClase);
                     InformacionClasesPendientes = null;
+                    AvisoClasesPendientes = null;
+                    ActualizarMostrarAvisoClasesPendientes();
                 }
             }
             else
@@ -391,6 +433,8 @@ private async Task BuscarAlumno()
                 // Lógica anterior para cuando no hay taller seleccionado
                 nuevoSugerido = R2(CantidadSeleccionada * CostoClase);
                 InformacionClasesPendientes = null;
+                AvisoClasesPendientes = null;
+                ActualizarMostrarAvisoClasesPendientes();
             }
 
             if (MontoSugerido != nuevoSugerido) MontoSugerido = nuevoSugerido;

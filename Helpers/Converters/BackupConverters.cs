@@ -94,4 +94,25 @@ namespace ControlTalleresMVP.Helpers.Converters
             return false;
         }
     }
+
+    public class AvisoClasesPendientesVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // Este converter espera que se pase un objeto con dos propiedades: AvisoClasesPendientes y AlumnoSeleccionado
+            if (value is System.Collections.Generic.KeyValuePair<string, object> pair)
+            {
+                var aviso = pair.Key; // AvisoClasesPendientes
+                var alumno = pair.Value; // AlumnoSeleccionado
+                
+                return !string.IsNullOrEmpty(aviso) && alumno != null ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

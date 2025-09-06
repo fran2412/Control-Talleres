@@ -76,6 +76,7 @@
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
             <converters:NotNullConverter x:Key="NotNullConverter"/>
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:AvisoClasesPendientesVisibilityConverter x:Key="AvisoClasesPendientesVisibilityConverter"/>
         
         
             
