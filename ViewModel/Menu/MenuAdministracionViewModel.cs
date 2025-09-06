@@ -28,6 +28,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
         protected readonly IGeneracionService _generacionService;
         protected readonly IDialogService _dialogService;
         private readonly IConfiguracionService _configuracionService;
+        
+        // ViewModel para el sistema de backup
+        public MenuBackupViewModel MenuBackupVM { get; }
 
         [ObservableProperty]
         private string costoInscripcion = "";
@@ -35,11 +38,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty]
         private string costoPorClase = "";
 
-        public MenuAdministracionViewModel(IGeneracionService generacionService, IConfiguracionService configuracionService, IDialogService dialogService)
+        public MenuAdministracionViewModel(IGeneracionService generacionService, IConfiguracionService configuracionService, IDialogService dialogService, MenuBackupViewModel menuBackupVM)
         {
             _generacionService = generacionService;
             _dialogService = dialogService;
             _configuracionService = configuracionService;
+            MenuBackupVM = menuBackupVM;
 
             _generacionService.InicializarRegistros();
             InicializarVista();

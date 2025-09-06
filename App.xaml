@@ -13,6 +13,8 @@
              xmlns:promotorcomponent="clr-namespace:ControlTalleresMVP.UI.Component.Promotor"
              xmlns:administracioncomponent="clr-namespace:ControlTalleresMVP.UI.Component.Administracion"
              xmlns:clasescomponent="clr-namespace:ControlTalleresMVP.UI.Component.Clases"
+             xmlns:backupcomponent="clr-namespace:ControlTalleresMVP.UI.Component.Backup"
+             xmlns:converters="clr-namespace:ControlTalleresMVP.Helpers.Converters"
              
              >
     <Application.Resources>
@@ -64,7 +66,15 @@
                 <clasescomponent:ClaseUserControl/>
             </DataTemplate>
             
+            <DataTemplate DataType="{x:Type vmmenu:MenuBackupViewModel}">
+                <backupcomponent:MenuBackupUserControl/>
+            </DataTemplate>
+            
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+            <converters:BoolToStatusConverter x:Key="BoolToStatusConverter"/>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <converters:NotNullConverter x:Key="NotNullConverter"/>
         
         
             

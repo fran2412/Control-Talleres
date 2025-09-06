@@ -4,12 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ControlTalleresMVP.UI.Component.Administracion"
+             xmlns:backup="clr-namespace:ControlTalleresMVP.UI.Component.Backup"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
         <StackPanel Orientation="Vertical">
-            <local:RegistrosGeneracionUserControl Margin="40,0,40,0"/>
-            <local:ConfiguracionesUserControl Margin="40,40,40,0"/>
+            <local:RegistrosGeneracionUserControl Margin="40,0,40,20"/>
+            <local:ConfiguracionesUserControl Margin="40,40,40,20"/>
+            <backup:BackupUserControl Margin="40,40,40,20" DataContext="{Binding MenuBackupVM}"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

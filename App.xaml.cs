@@ -14,6 +14,7 @@ using ControlTalleresMVP.Services.Picker;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
+using ControlTalleresMVP.Services.Backup;
 using ControlTalleresMVP.UI.Windows;
 using ControlTalleresMVP.ViewModel.Menu;
 using ControlTalleresMVP.ViewModel.Navigation;
@@ -51,8 +52,22 @@ namespace ControlTalleresMVP
                 var escuelaContext = serviceProviderScope.GetRequiredService<EscuelaContext>();
 
                 escuelaContext.Database.Migrate();
+                
+                // Crear backup automático al iniciar (solo si no existe uno del día actual)
+                var backupService = serviceProviderScope.GetRequiredService<IBackupService>();
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await backupService.CreateAutomaticBackupAsync();
+                        System.Diagnostics.Debug.WriteLine("Backup automático creado al iniciar la aplicación");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error al crear backup automático: {ex.Message}");
+                    }
+                });
             }
-
 
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
@@ -81,6 +96,7 @@ namespace ControlTalleresMVP
             services.AddTransient<MenuPromotorViewModel>();
             services.AddTransient<MenuSedeViewModel>();
             services.AddTransient<MenuAdministracionViewModel>();
+            services.AddTransient<MenuBackupViewModel>();
             services.AddTransient<ShellViewModel>();
 
             //Services
@@ -97,6 +113,7 @@ namespace ControlTalleresMVP
             services.AddScoped<IPagoService, PagoService>();
             services.AddScoped<IClaseService, ClaseService>();
             services.AddTransient<IAlumnoPickerService, AlumnoPickerService>();
+            services.AddScoped<IBackupService, BackupService>();
         }
     }
 }
