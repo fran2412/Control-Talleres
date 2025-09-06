@@ -8,57 +8,95 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="500" Height="auto">
+        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="Auto">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!--TextBox de búsqueda-->
-                <TextBox Grid.Row="0" Margin="20,20,190,0"
-         HorizontalAlignment="Stretch" Style="{StaticResource TextBoxCampo}"
-         Text="{Binding FiltroRegistros, UpdateSourceTrigger=PropertyChanged, Delay=300}"
-         Tag="Buscar"
-         FontSize="18"/>
+                <!-- Barra superior: búsqueda, rango y acciones -->
+                <Grid Grid.Row="0" Margin="20,20,20,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <!-- Buscar -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Desde -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Hasta -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Aplicar -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Limpiar -->
+                    </Grid.ColumnDefinitions>
 
-                <!--Botón de búsqueda-->
-                <Button Height="50" Width="150" Style="{StaticResource BotonNormal}" HorizontalAlignment="Right" Margin="0,20,20,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <svgc:SvgViewbox Source="Resources/Icons/LupaNegraIcono.svg"
-                         Width="20" Height="20" Grid.Column="0"
-                         Margin="0,0,10,0"/>
-                        <TextBlock Text="BUSCAR" VerticalAlignment="Center"
-                   FontSize="18" 
-                   FontWeight="Regular"
-                   Grid.Column="1"
-                   Foreground="#333333"/>
-                    </Grid>
-                </Button>
+                    <!-- Búsqueda libre -->
+                    <TextBox Grid.Column="0" Margin="0,0,10,0"
+                             Style="{StaticResource TextBoxCampo}"
+                             Text="{Binding MenuInscripcionRegistrosVM.FiltroRegistrosInscripciones, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Tag="Buscar (Alumno, Taller, Estado)"
+                             FontSize="16"/>
 
-                <!--DataGrid-->
-                <DataGrid Style="{StaticResource DataGridRegistros}" Grid.Row="1" Margin="20"
-          ItemsSource="{Binding RegistrosView}" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn">
+                    <!-- Fecha DESDE -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <DatePicker SelectedDate="{Binding MenuInscripcionRegistrosVM.FechaDesdeRegistros, Mode=TwoWay}"
+                                    Width="140"/>
+                    </StackPanel>
+
+                    <!-- Fecha HASTA -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <DatePicker SelectedDate="{Binding MenuInscripcionRegistrosVM.FechaHastaRegistros, Mode=TwoWay}"
+                                    Width="140"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- DataGrid -->
+                <DataGrid Grid.Row="1" Margin="20"
+                          ItemsSource="{Binding MenuInscripcionRegistrosVM.RegistrosInscripcionesView}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          Style="{StaticResource DataGridRegistros}">
                     <DataGrid.Columns>
-                        <!-- Columna fija de acciones -->
-                        <DataGridTemplateColumn Header="Acciones">
+                        <DataGridTemplateColumn Header="Acciones" Width="95">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Style="{StaticResource BotonTransparente}" Command="{Binding DataContext.CancelarInscripcionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                    CommandParameter="{Binding Id}" Cursor="Hand" Margin="6,0,6,0">
-                                            <svgc:SvgViewbox Source="Resources\Icons\EliminarRegistro.svg" Width="35" Height="35"/>
+                                        <Button Style="{StaticResource BotonTransparente}"
+                                                Command="{Binding DataContext.MenuInscripcionRegistrosVM.CancelarInscripcionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding InscripcionId}"
+                                                Cursor="Hand" Margin="6,0,6,0" ToolTip="Cancelar inscripción">
+                                            <svgc:SvgViewbox Source="Resources/Icons/EliminarRegistro.svg" Width="28" Height="28"/>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+
+                        <!-- Columnas del DTO -->
+                        <DataGridTextColumn Header="Fecha"       Binding="{Binding FechaInscripcion, StringFormat=dd/MM/yyyy}" Width="110"/>
+                        <DataGridTextColumn Header="Taller"       Binding="{Binding TallerNombre}" Width="*"/>
+                        <DataGridTextColumn Header="Alumno"       Binding="{Binding AlumnoNombre}" Width="200"/>
+                        <DataGridTextColumn Header="Generación"   Binding="{Binding GeneracionNombre}" Width="120"/>
+                        <DataGridTextColumn Header="Estado"       Binding="{Binding EstadoTexto}" Width="110"/>
+                        <DataGridTextColumn Header="Costo"        Binding="{Binding Monto, StringFormat=C}" Width="110"/>
+                        <DataGridTextColumn Header="Pagado"       Binding="{Binding MontoPagado, StringFormat=C}" Width="110"/>
+                        <DataGridTextColumn Header="Saldo"        Binding="{Binding SaldoActual, StringFormat=C}" Width="110"/>
+                        <DataGridTextColumn Header="%"            Binding="{Binding PorcentajePagado}" Width="60"/>
+                        <DataGridTextColumn Header="#Pagos"       Binding="{Binding PagosCount}" Width="80"/>
+                        <DataGridTextColumn Header="Último Pago"  Binding="{Binding UltimoPagoFecha, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
+                        <DataGridTextColumn Header="Método"       Binding="{Binding UltimoPagoMetodo}" Width="110"/>
                     </DataGrid.Columns>
                 </DataGrid>
+
+                <!-- Totales -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0,20,20">
+                    <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoInscripciones, StringFormat=Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
+                    <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoInscripciones, StringFormat=Pagado: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
+                    <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoInscripciones, StringFormat=Saldo: {0:C}}"  FontSize="16" FontWeight="SemiBold"/>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

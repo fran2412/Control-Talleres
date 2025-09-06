@@ -27,6 +27,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public ObservableCollection<InscripcionDTO> Registros => _inscripcionService.RegistrosInscripciones;
         public ICollectionView? RegistrosView { get; set; }
 
+        public MenuInscripcionRegistrosViewModel MenuInscripcionRegistrosVM { get; }
+
         private readonly IInscripcionService _inscripcionService;
         private readonly ITallerService _tallerService;
         private readonly IConfiguracionService _configuracionService; // opcional
@@ -39,13 +41,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
             ITallerService tallerService,
             IConfiguracionService configuracionService,
             IAlumnoPickerService alumnoPicker,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            MenuInscripcionRegistrosViewModel menuInscripcionRegistrosVM)
         {
+            System.Diagnostics.Debug.WriteLine("Inicializando MenuInscripcionesViewModel");
             _inscripcionService = inscripcionService;
             _tallerService = tallerService;
             _configuracionService = configuracionService;
             _alumnoPicker = alumnoPicker;
             _dialogService = dialogService;
+            MenuInscripcionRegistrosVM = menuInscripcionRegistrosVM;
 
             TalleresDisponibles.CollectionChanged += TalleresDisponibles_CollectionChanged;
 

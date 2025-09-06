@@ -17,6 +17,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
         private readonly IDialogService _dialogService;
 
         public ObservableCollection<InscripcionDTO> RegistrosInscripciones { get; set; } = new();
+        public ObservableCollection<InscripcionRegistroDTO> RegistrosInscripcionesCompletos { get; set; } = new();
 
         public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IGeneracionService generacionService, IDialogService dialogService)
         {
@@ -227,6 +228,132 @@ namespace ControlTalleresMVP.Services.Inscripciones
                          && !i.Eliminado
                          && i.Estado != EstadoInscripcion.Cancelada)
                 .ToArrayAsync(ct);
+        }
+
+        public async Task<List<InscripcionRegistroDTO>> ObtenerInscripcionesCompletasAsync(
+            int? generacionId = null,
+            int? tallerId = null,
+            int? alumnoId = null,
+            DateTime? desde = null,
+            DateTime? hasta = null,
+            string? filtro = null,
+            CancellationToken ct = default)
+        {
+            var genActualId = generacionId ?? _generacionService.ObtenerGeneracionActual()?.GeneracionId;
+            if (genActualId == null) 
+            {
+                System.Diagnostics.Debug.WriteLine("No hay generación actual");
+                return new List<InscripcionRegistroDTO>();
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Buscando inscripciones para generación {genActualId}");
+
+            // Query base con joins necesarios
+            var q = from i in _escuelaContext.Inscripciones.AsNoTracking()
+                    where !i.Eliminado
+                       && i.GeneracionId == genActualId
+                       && (!tallerId.HasValue || i.TallerId == tallerId.Value)
+                       && (!alumnoId.HasValue || i.AlumnoId == alumnoId.Value)
+                       && (!desde.HasValue || i.Fecha >= desde.Value.Date)
+                       && (!hasta.HasValue || i.Fecha <= hasta.Value.Date)
+                    join ta in _escuelaContext.Talleres.AsNoTracking() on i.TallerId equals ta.TallerId
+                    join al in _escuelaContext.Alumnos.AsNoTracking() on i.AlumnoId equals al.AlumnoId
+                    join ge in _escuelaContext.Generaciones.AsNoTracking() on i.GeneracionId equals ge.GeneracionId
+                    join ca in _escuelaContext.Cargos.AsNoTracking() on i.InscripcionId equals ca.InscripcionId into cargos
+                    from ca in cargos.DefaultIfEmpty()
+                    join pa in _escuelaContext.PagoAplicaciones.AsNoTracking()
+                            .Include(p => p.Pago) // para fecha y método
+                        on ca.CargoId equals pa.CargoId into pagos
+                    from pa in pagos.DefaultIfEmpty()
+                    select new { i, ta, al, ge, ca, pa };
+
+            // Aplicar filtro de texto si se proporciona
+            if (!string.IsNullOrWhiteSpace(filtro))
+            {
+                var filtroLower = filtro.ToLower();
+                q = q.Where(x => x.al.Nombre.ToLower().Contains(filtroLower) ||
+                                 x.ta.Nombre.ToLower().Contains(filtroLower) ||
+                                 x.i.Estado.ToString().ToLower().Contains(filtroLower));
+            }
+
+            // Agrupamos por inscripción (una fila por inscripción)
+            var lista = await (
+                from x in q
+                group x by new
+                {
+                    x.i.InscripcionId,
+                    x.i.TallerId,
+                    x.i.AlumnoId,
+                    x.i.GeneracionId,
+                    x.i.Fecha,
+                    x.i.Costo,
+                    x.i.SaldoActual,
+                    x.i.Estado,
+                    x.i.MotivoCancelacion,
+                    x.i.CanceladaEn,
+                    TallerNombre = x.ta.Nombre,
+                    AlumnoNombre = x.al.Nombre,
+                    GeneracionNombre = x.ge.Nombre
+                }
+                into g
+                select new InscripcionRegistroDTO
+                {
+                    InscripcionId = g.Key.InscripcionId,
+                    TallerId = g.Key.TallerId,
+                    AlumnoId = g.Key.AlumnoId,
+                    GeneracionId = g.Key.GeneracionId,
+                    FechaInscripcion = g.Key.Fecha,
+                    TallerNombre = g.Key.TallerNombre,
+                    AlumnoNombre = g.Key.AlumnoNombre,
+                    GeneracionNombre = g.Key.GeneracionNombre,
+                    Monto = g.Key.Costo,
+                    SaldoActual = g.Key.SaldoActual,
+                    MontoPagado = (decimal)((g.Where(z => z.pa != null)
+                                            .Select(z => (double?)z.pa.MontoAplicado)
+                                            .Sum()) ?? 0.0), // <- SQLite REAL
+                    PorcentajePagado = g.Key.Costo > 0
+                        ? (int)Math.Round((double)((g.Key.Costo - g.Key.SaldoActual) / g.Key.Costo * 100m))
+                        : 0,
+                    EstadoInscripcion = g.Key.Estado,
+                    EstadoTexto = g.Key.Estado == EstadoInscripcion.Pagada ? "Pagada" :
+                                 g.Key.Estado == EstadoInscripcion.Pendiente ? "Pendiente" : "Cancelada",
+                    PagosCount = g.Count(z => z.pa != null),
+                    UltimoPagoFecha = g.Where(z => z.pa != null)
+                                      .Max(z => (DateTime?)z.pa.Pago.Fecha),
+                    UltimoPagoMetodo = g.Where(z => z.pa != null)
+                                       .OrderByDescending(z => z.pa.Pago.Fecha)
+                                       .Select(z => z.pa.Pago.Metodo.ToString())
+                                       .FirstOrDefault(),
+                    MotivoCancelacion = g.Key.MotivoCancelacion,
+                    CanceladaEn = g.Key.CanceladaEn
+                })
+                .OrderByDescending(r => r.FechaInscripcion)
+                .ThenBy(r => r.TallerNombre)
+                .ThenBy(r => r.AlumnoNombre)
+                .ToListAsync(ct);
+
+            // Redondeamos importes por consistencia visual
+            foreach (var r in lista)
+            {
+                r.Monto = Math.Round(r.Monto, 2, MidpointRounding.AwayFromZero);
+                r.MontoPagado = Math.Round(r.MontoPagado, 2, MidpointRounding.AwayFromZero);
+                r.SaldoActual = Math.Round(r.SaldoActual, 2, MidpointRounding.AwayFromZero);
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Encontrados {lista.Count} registros de inscripciones");
+            return lista;
+        }
+
+        public async Task InicializarRegistrosCompletos(CancellationToken ct = default)
+        {
+            var inscripciones = await ObtenerInscripcionesCompletasAsync(ct: ct);
+
+            RegistrosInscripcionesCompletos.Clear();
+
+            foreach (var inscripcion in inscripciones)
+            {
+                RegistrosInscripcionesCompletos.Add(inscripcion);
+            }
         }
     }
 }
