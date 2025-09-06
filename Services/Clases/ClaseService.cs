@@ -169,6 +169,90 @@ namespace ControlTalleresMVP.Services.Clases
             return clases;
         }
 
+        public async Task<List<ClaseFinancieraDTO>> ObtenerClasesFinancierasAsync(
+    int? alumnoId = null,
+    int? tallerId = null,
+    DateTime? desde = null,
+    DateTime? hasta = null,
+    CancellationToken ct = default)
+        {
+            var q = from ca in _escuelaContext.Cargos.AsNoTracking()
+                    where ca.ClaseId != null
+                          && !ca.Eliminado
+                          && ca.Estado != EstadoCargo.Anulado
+                          && (!alumnoId.HasValue || ca.AlumnoId == alumnoId.Value)
+                    join cl in _escuelaContext.Clases.AsNoTracking() on ca.ClaseId equals cl.ClaseId
+                    where (!tallerId.HasValue || cl.TallerId == tallerId.Value)
+                       && (!desde.HasValue || cl.Fecha >= desde.Value.Date)
+                       && (!hasta.HasValue || cl.Fecha <= hasta.Value.Date)
+                    join ta in _escuelaContext.Talleres.AsNoTracking() on cl.TallerId equals ta.TallerId
+                    join al in _escuelaContext.Alumnos.AsNoTracking() on ca.AlumnoId equals al.AlumnoId
+                    join pa in _escuelaContext.PagoAplicaciones.AsNoTracking()
+                            .Include(p => p.Pago) // para fecha y método
+                        on ca.CargoId equals pa.CargoId into pagos
+                    from pa in pagos.DefaultIfEmpty()
+                    select new { ca, cl, ta, al, pa };
+
+            // Agrupamos por cargo (una fila por clase/alumno)
+            var lista = await (
+                from x in q
+                group x by new
+                {
+                    x.ca.CargoId,
+                    x.cl.ClaseId,
+                    x.cl.Fecha,
+                    x.ta.TallerId,
+                    TallerNombre = x.ta.Nombre,
+                    x.al.AlumnoId,
+                    AlumnoNombre = x.al.Nombre,
+                    x.ca.Monto,
+                    x.ca.SaldoActual,
+                    x.ca.Estado
+                }
+                into g
+                select new ClaseFinancieraDTO
+                {
+                    CargoId        = g.Key.CargoId,
+                    ClaseId        = g.Key.ClaseId,
+                    TallerId       = g.Key.TallerId,
+                    AlumnoId       = g.Key.AlumnoId,
+                    FechaClase     = g.Key.Fecha,
+                    TallerNombre   = g.Key.TallerNombre,
+                    AlumnoNombre   = g.Key.AlumnoNombre,
+                    Monto          = g.Key.Monto,
+                    SaldoActual    = g.Key.SaldoActual,
+                    MontoPagado    = (decimal)((g.Where(z => z.pa != null)
+                                                .Select(z => (double?)z.pa.MontoAplicado)
+                                                .Sum()) ?? 0.0), // <- SQLite REAL
+                    PorcentajePagado = g.Key.Monto > 0
+                        ? (int)Math.Round((double)((g.Key.Monto - g.Key.SaldoActual) / g.Key.Monto * 100m))
+                        : 0,
+                    EstadoCargo    = g.Key.Estado,
+                    EstadoTexto    = g.Key.Estado == EstadoCargo.Pagado ? "Pagada" :
+                                     g.Key.Estado == EstadoCargo.Pendiente ? "Pendiente" : "Anulada",
+                    PagosCount     = g.Count(z => z.pa != null),
+                    UltimoPagoFecha  = g.Where(z => z.pa != null)
+                                        .Max(z => (DateTime?)z.pa.Pago.Fecha),
+                    UltimoPagoMetodo = g.Where(z => z.pa != null)
+                                        .OrderByDescending(z => z.pa.Pago.Fecha)
+                                        .Select(z => z.pa.Pago.Metodo.ToString())
+                                        .FirstOrDefault()
+                })
+                .OrderByDescending(r => r.FechaClase)
+                .ThenBy(r => r.TallerNombre)
+                .ToListAsync(ct);
+
+            // Redondeamos importes por consistencia visual
+            foreach (var r in lista)
+            {
+                r.Monto        = Math.Round(r.Monto, 2, MidpointRounding.AwayFromZero);
+                r.MontoPagado  = Math.Round(r.MontoPagado, 2, MidpointRounding.AwayFromZero);
+                r.SaldoActual  = Math.Round(r.SaldoActual, 2, MidpointRounding.AwayFromZero);
+            }
+
+            return lista;
+        }
+
         // ====================
         // Verificación de duplicados
         // ====================

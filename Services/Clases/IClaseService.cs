@@ -17,6 +17,12 @@ namespace ControlTalleresMVP.Services.Clases
         decimal montoAbono,
         CancellationToken ct = default);
 
+        Task<List<ClaseFinancieraDTO>> ObtenerClasesFinancierasAsync(
+        int? alumnoId = null,
+        int? tallerId = null,
+        DateTime? desde = null,
+        DateTime? hasta = null,
+        CancellationToken ct = default);
         Task<Clase[]> ObtenerClasesDeAlumnoAsync(int alumnoId, CancellationToken ct = default);
 
         Task CancelarAsync(int claseID, string? motivo = null, CancellationToken ct = default);

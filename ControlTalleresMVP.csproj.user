@@ -26,6 +26,9 @@
     <Compile Update="UI\Component\Clases\FormularioClaseUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UI\Component\Clases\RegistrosClasesUserControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\Component\Inicio\InicioUserControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

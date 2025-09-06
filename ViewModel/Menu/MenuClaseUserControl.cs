@@ -12,6 +12,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data; // ICollectionView
+using System.ComponentModel; // para ICollectionView events
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -51,10 +53,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
             var costoCfg = _configuracionService.GetValor<int>("costo_clase", 150);
             CostoClase = ClampCosto(R2(costoCfg));
             RecalcularSugeridoYQuizasMonto();
+
+            // ====== Inicialización del REGISTRO (grid financiero) ======
+            FechaHastaRegistros = DateTime.Today;
+            FechaDesdeRegistros = DateTime.Today.AddMonths(-1);
+            InicializarVistaRegistros();
+            _ = CargarRegistrosClasesAsync(); // primera carga
         }
 
         // ====================
-        // PROPIEDADES BINDING
+        // PROPIEDADES BINDING (COBRO)
         // ====================
 
         [ObservableProperty]
@@ -134,7 +142,35 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private string? mensajeValidacion;
 
         // ====================
-        // COMANDOS
+        // REGISTRO FINANCIERO (GRID)
+        // ====================
+
+        // Fuente para el DataGrid
+        public ObservableCollection<ClaseFinancieraDTO> RegistrosClases { get; } = new();
+        public ICollectionView? RegistrosClasesView { get; private set; }
+
+        // Filtros
+        [ObservableProperty] private DateTime? fechaDesdeRegistros;
+        [ObservableProperty] private DateTime? fechaHastaRegistros;
+
+        private string _filtroRegistrosClases = string.Empty;
+        public string FiltroRegistrosClases
+        {
+            get => _filtroRegistrosClases;
+            set
+            {
+                if (SetProperty(ref _filtroRegistrosClases, value))
+                    RegistrosClasesView?.Refresh();
+            }
+        }
+
+        // Totales del grid
+        [ObservableProperty] private decimal totalMontoClases;
+        [ObservableProperty] private decimal totalPagadoClases;
+        [ObservableProperty] private decimal totalSaldoClases;
+
+        // ====================
+        // COMANDOS (COBRO)
         // ====================
 
         [RelayCommand]
@@ -167,7 +203,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             AlumnoNombre = alumno.Nombre;
 
             // Verificar pagos de HOY
-                    var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
+            var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
             var estados = await _claseService.ObtenerEstadoPagoHoyAsync(
                 alumno.AlumnoId, ids, DateTime.Today);
 
@@ -183,6 +219,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     "El alumno ya tiene pagada la clase de HOY en todos sus talleres:\n" +
                     $"• {lista}");
 
+                // Aun así, cargamos el registro para que vea su historial
+                await CargarRegistrosClasesAsync();
                 return;
             }
 
@@ -197,9 +235,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             TallerSeleccionado = primerDisponible;
 
-            // Si quieres, puedes mostrar un mensaje NO modal (texto en pantalla),
-            // pero por tu instrucción NO mostramos nada si se puede pagar al menos uno.
-            // MensajeValidacion = null;
+            // Actualiza el grid según el alumno elegido
+            await CargarRegistrosClasesAsync();
         }
 
         [RelayCommand]
@@ -221,6 +258,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
             // Recalcula y fija al sugerido
             RecalcularSugeridoYQuizasMonto(forceSetMonto: true);
             MensajeValidacion = null;
+
+            // También limpia filtros del grid y recarga
+            _ = LimpiarFiltrosRegistrosAsync();
         }
 
         [RelayCommand]
@@ -262,7 +302,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     return;
                 }
 
-
                 // --- Cálculos ---
                 var costo = Math.Round(CostoClase, 2, MidpointRounding.AwayFromZero);
                 var totalIngresado = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
@@ -276,22 +315,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
                 // Generar las fechas necesarias (hoy + semanas)
                 var cantidadFechas = Math.Max(
-                    clasesCompletas + (sobrante > 0m && clasesCompletas < CantidadSeleccionada ? 1 : 0),
+                    clasesCompletas + (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < CantidadSeleccionada ? 1 : 0),
                     1
                 );
 
                 var fechas = GenerarFechasSemanas(DateTime.Today, cantidadFechas);
 
-                // --- Tracking para mensajes ---
-                var fechasPagadas = new List<DateTime>();
-                bool creoParcial = false;
-                decimal montoParcial = 0m;
-                DateTime? fechaParcial = null;
-
-                // --- Persistencia ---
-                // 1) Clases completas
                 // --- Tracking ---
-                var resultados = new List<RegistrarClaseResult>();
+                var resultados = new System.Collections.Generic.List<RegistrarClaseResult>();
 
                 // 1) Clases completas
                 for (int i = 0; i < clasesCompletas; i++)
@@ -332,19 +363,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 // --- Mensajes a partir de resultados reales ---
                 string F(DateTime d) => d.ToString("dd/MM/yyyy");
 
-                // Si no hubo cambios, no muestres éxito
                 bool huboCambios = resultados.Any(r => r.PagoCreado || r.CargoCreado || r.ClaseCreada);
                 if (!huboCambios)
                 {
-                    // Puedes dar una razón más clara:
-                    if (resultados.All(r => r.CargoYaPagado))
+                    if (resultados.Count > 0 && resultados.All(r => r.CargoYaPagado))
                         _dialogService.Alerta("No se registró ningún movimiento: la(s) clase(s) ya estaban pagadas.");
                     else
                         _dialogService.Alerta("No se registró ningún movimiento.");
                     return;
                 }
 
-                // Arma mensajes
                 var pagadasFull = resultados
                     .Where(r => r.PagoCreado && r.MontoAplicado >= costo)
                     .Select(r => r.Fecha)
@@ -381,6 +409,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     _dialogService.Info($"Se registró un abono de {p.MontoAplicado:0.00} para la clase de {F(p.Fecha)}.", "Clases");
                 }
 
+                // Recarga el grid con los últimos cambios
+                await CargarRegistrosClasesAsync();
+
                 LimpiarSeleccion();
             }
             catch (Exception ex)
@@ -392,7 +423,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [RelayCommand]
         private void CancelarPagoClases()
         {
-            // Asumiendo que Confirmar devuelve bool
             if (_dialogService.Confirmar("¿Está seguro de cancelar el registro del pago?", "Clases"))
             {
                 LimpiarSeleccion();
@@ -401,7 +431,74 @@ namespace ControlTalleresMVP.ViewModel.Menu
         }
 
         // ====================
-        // Helpers
+        // COMANDOS (REGISTRO / GRID)
+        // ====================
+
+        [RelayCommand]
+        private async Task BuscarAlumnoRegistrosAsync()
+        {
+            var alumno = _alumnoPicker.Pick();
+            if (alumno is null) return;
+
+            AlumnoSeleccionado = alumno; // reutilizamos la misma selección
+            AlumnoNombre = alumno.Nombre;
+            await CargarRegistrosClasesAsync();
+        }
+
+        [RelayCommand]
+        private async Task LimpiarFiltrosRegistrosAsync()
+        {
+            // No tocamos la selección del alumno del flujo de cobro
+            FechaHastaRegistros = DateTime.Today;
+            FechaDesdeRegistros = DateTime.Today.AddMonths(-1);
+            FiltroRegistrosClases = string.Empty;
+
+            await CargarRegistrosClasesAsync();
+        }
+
+        [RelayCommand]
+        private async Task CargarRegistrosClasesAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                var datos = await _claseService.ObtenerClasesFinancierasAsync(
+                    alumnoId: AlumnoSeleccionado?.AlumnoId,   // si hay alumno seleccionado, filtra
+                    tallerId: null,
+                    desde: FechaDesdeRegistros,
+                    hasta: FechaHastaRegistros,
+                    ct: ct);
+
+                RegistrosClases.Clear();
+                foreach (var r in datos)
+                    RegistrosClases.Add(r);
+
+                RecalcularTotalesRegistrosDesdeVista();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("No fue posible cargar el registro de clases.\n" + ex.Message);
+            }
+        }
+
+        [RelayCommand]
+        private async Task CancelarClaseAsync(int claseId)
+        {
+            if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta clase?")) return;
+
+            try
+            {
+                await _claseService.CancelarAsync(claseId);
+                await CargarRegistrosClasesAsync();
+                _dialogService.Info("Clase cancelada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("No se pudo cancelar la clase.\n" + ex.Message);
+            }
+        }
+
+        // ====================
+        // Helpers (validación, grid, cálculo)
         // ====================
 
         private (bool ok, string? msg) Validar()
@@ -449,7 +546,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
             else
             {
-                // Si existe monto pero con más de 2 decimales o negativo, normaliza
+                // Normaliza
                 if (MontoIngresado.HasValue)
                 {
                     var norm = MontoIngresado.Value;
@@ -466,6 +563,64 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
+        // ==== Vista del grid ====
+        private void InicializarVistaRegistros()
+        {
+            RegistrosClasesView = CollectionViewSource.GetDefaultView(RegistrosClases);
+            RegistrosClasesView.Filter = FiltroRegistrosPredicate;
+            RegistrosClasesView.CurrentChanged += (_, __) => RecalcularTotalesRegistrosDesdeVista();
+        }
+
+        private bool FiltroRegistrosPredicate(object o)
+        {
+            if (o is not ClaseFinancieraDTO dto) return false;
+
+            // Filtro de texto (Alumno, Taller, Estado)
+            if (!string.IsNullOrWhiteSpace(FiltroRegistrosClases))
+            {
+                var f = FiltroRegistrosClases.Trim();
+                if (!((dto.AlumnoNombre?.Contains(f, StringComparison.OrdinalIgnoreCase) == true)
+                    || (dto.TallerNombre?.Contains(f, StringComparison.OrdinalIgnoreCase) == true)
+                    || dto.EstadoTexto.Contains(f, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return false;
+                }
+            }
+
+            // Rango de fechas (opcional)
+            if (FechaDesdeRegistros.HasValue && dto.FechaClase.Date < FechaDesdeRegistros.Value.Date)
+                return false;
+            if (FechaHastaRegistros.HasValue && dto.FechaClase.Date > FechaHastaRegistros.Value.Date)
+                return false;
+
+            // Si hay AlumnoSeleccionado, normalmente la carga ya viene filtrada por servicio,
+            // pero si quieres filtrar en cliente, descomenta:
+            // if (AlumnoSeleccionado != null && dto.AlumnoId != AlumnoSeleccionado.AlumnoId) return false;
+
+            return true;
+        }
+
+        private void RecalcularTotalesRegistrosDesdeVista()
+        {
+            if (RegistrosClasesView is null) return;
+
+            decimal monto = 0, pagado = 0, saldo = 0;
+            foreach (var item in RegistrosClasesView)
+            {
+                if (item is ClaseFinancieraDTO r)
+                {
+                    monto += r.Monto;
+                    pagado += r.MontoPagado;
+                    saldo += r.SaldoActual;
+                }
+            }
+
+            TotalMontoClases = monto;
+            TotalPagadoClases = pagado;
+            TotalSaldoClases = saldo;
+        }
+
+        // ==== Utilidades ====
         private static DateTime[] GenerarFechasSemanas(DateTime inicio, int cantidad)
         {
             if (cantidad < 1) return Array.Empty<DateTime>();

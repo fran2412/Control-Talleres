@@ -85,6 +85,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             AlumnoSeleccionadoId = alumno.AlumnoId;
             CampoTextoNombre = alumno.Nombre;
         }
+
         [RelayCommand]
         private void CancelarRegistrarItem()
         {

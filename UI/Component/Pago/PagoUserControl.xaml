@@ -6,11 +6,13 @@
              xmlns:local="clr-namespace:ControlTalleresMVP.UI.Component.Pago"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="White">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <local:FormularioPagoUserControl Grid.Row="0" Margin="40,0,40,0"/>
-    </Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <local:FormularioPagoUserControl Grid.Row="0" Margin="40,0,40,0"/>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
