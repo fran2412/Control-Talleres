@@ -87,8 +87,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             // Suscríbete a los cambios de inscripciones
             WeakReferenceMessenger.Default.Register<InscripcionesActualizadasMessage>(this, async (_, m) =>
             {
-                if (alumnoSeleccionadoId is null || alumnoSeleccionadoId == m.AlumnoId)
-                    await CargarRegistrosInscripcionesAsync();
+                // Siempre recargar los registros cuando se actualiza una inscripción
+                await CargarRegistrosInscripcionesAsync();
             });
 
             _ = CargarRegistrosInscripcionesAsync();

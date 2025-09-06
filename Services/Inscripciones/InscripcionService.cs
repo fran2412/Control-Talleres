@@ -153,6 +153,10 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
                 await transaccion.CommitAsync(ct);
                 await InicializarRegistros(ct);
+                
+                // Enviar mensaje de actualización para notificar a otros componentes
+                WeakReferenceMessenger.Default.Send(new InscripcionesActualizadasMessage(alumnoId));
+                
                 return inscripcion;
             }
             catch
