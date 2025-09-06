@@ -3,6 +3,8 @@ using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
+using ControlTalleresMVP.Messages;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControlTalleresMVP.Services.Clases
@@ -164,11 +166,32 @@ namespace ControlTalleresMVP.Services.Clases
                 if (String.IsNullOrWhiteSpace(motivoCancelacion)) motivoCancelacion = "No especificado";
                 motivo = motivoCancelacion;
             }
+
+            // Marcar la clase como eliminada
             clase.Eliminado = true;
             clase.EliminadoEn = DateTime.Now;
             clase.ActualizadoEn = DateTime.Now;
 
+            // Cancelar todos los cargos relacionados a esta clase
+            var cargos = await _escuelaContext.Cargos
+                .Where(c => c.ClaseId == claseID && !c.Eliminado)
+                .ToListAsync(ct);
+
+            foreach (var cargo in cargos)
+            {
+                cargo.Eliminado = true;
+                cargo.Estado = EstadoCargo.Anulado;
+                cargo.ActualizadoEn = DateTime.Now;
+            }
+
             await _escuelaContext.SaveChangesAsync(ct);
+
+            // Enviar mensaje de actualización para cada alumno afectado
+            var alumnosAfectados = cargos.Select(c => c.AlumnoId).Distinct();
+            foreach (var alumnoId in alumnosAfectados)
+            {
+                WeakReferenceMessenger.Default.Send(new ClasesActualizadasMessage(alumnoId));
+            }
         }
 
         // ====================

@@ -29,21 +29,38 @@ namespace ControlTalleresMVP.UI.Component.Clases
 
         private void ClaseUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("ClaseUserControl_DataContextChanged - DataContext cambiado");
+            
             if (DataContext is MenuClaseUserControl menuClaseUserControl)
             {
+                System.Diagnostics.Debug.WriteLine("ClaseUserControl_DataContextChanged - MenuClaseUserControl detectado");
+                
                 // Configurar DataContext para los UserControls hijos
                 var formularioControl = FindName("FormularioClaseUserControl") as FormularioClaseUserControl;
                 var registrosControl = FindName("RegistrosClasesUserControl") as RegistrosClasesUserControl;
                 
                 if (formularioControl != null)
                 {
+                    System.Diagnostics.Debug.WriteLine("ClaseUserControl_DataContextChanged - Configurando FormularioClaseUserControl");
                     formularioControl.DataContext = menuClaseUserControl.MenuClaseCobroVM;
                 }
                 
                 if (registrosControl != null)
                 {
+                    System.Diagnostics.Debug.WriteLine("ClaseUserControl_DataContextChanged - Configurando RegistrosClasesUserControl");
+                    System.Diagnostics.Debug.WriteLine($"ClaseUserControl_DataContextChanged - MenuClaseRegistrosVM: {menuClaseUserControl.MenuClaseRegistrosVM != null}");
                     registrosControl.DataContext = menuClaseUserControl.MenuClaseRegistrosVM;
+                    
+                    // Verificar que el comando existe
+                    if (menuClaseUserControl.MenuClaseRegistrosVM != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ClaseUserControl_DataContextChanged - CancelarClaseAsyncCommand existe: {menuClaseUserControl.MenuClaseRegistrosVM.CancelarClaseAsyncCommand != null}");
+                    }
                 }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"ClaseUserControl_DataContextChanged - DataContext no es MenuClaseUserControl: {DataContext?.GetType().Name}");
             }
         }
     }

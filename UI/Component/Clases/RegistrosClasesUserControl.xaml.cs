@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ControlTalleresMVP.ViewModel.Menu;
 
 namespace ControlTalleresMVP.UI.Component.Clases
 {
@@ -25,6 +26,7 @@ namespace ControlTalleresMVP.UI.Component.Clases
         {
             InitializeComponent();
         }
+
 
         private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {

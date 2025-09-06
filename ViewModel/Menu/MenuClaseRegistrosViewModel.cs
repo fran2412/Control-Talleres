@@ -74,6 +74,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _alumnoPicker = alumnoPicker;
             _dialogService = dialogService;
 
+            // Inicializar comando
+            CancelarClaseAsyncCommand = new AsyncRelayCommand<int>(CancelarClaseAsync);
+
             FechaHastaRegistros = DateTime.Today.AddDays(7);
             FechaDesdeRegistros = DateTime.Today.AddMonths(-1);
 
@@ -114,19 +117,30 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        [RelayCommand]
+        public IAsyncRelayCommand<int> CancelarClaseAsyncCommand { get; }
+
         private async Task CancelarClaseAsync(int claseId)
         {
-            if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta clase?")) return;
+            System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Comando ejecutado para claseId: {claseId}");
+            
+            if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta clase?")) 
+            {
+                System.Diagnostics.Debug.WriteLine("CancelarClaseAsync - Usuario canceló la operación");
+                return;
+            }
 
             try
             {
+                System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Cancelando clase {claseId}");
                 await _claseService.CancelarAsync(claseId);
+                System.Diagnostics.Debug.WriteLine("CancelarClaseAsync - Clase cancelada, recargando registros");
                 await CargarRegistrosClasesAsync();
                 _dialogService.Info("Clase cancelada correctamente.");
+                System.Diagnostics.Debug.WriteLine("CancelarClaseAsync - Proceso completado exitosamente");
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Error: {ex.Message}");
                 _dialogService.Error("No se pudo cancelar la clase.\n" + ex.Message);
             }
         }
