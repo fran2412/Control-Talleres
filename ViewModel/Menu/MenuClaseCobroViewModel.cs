@@ -114,10 +114,18 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 _ajustandoMonto = false;
             }
             
-            // Actualizar mensaje de validación en tiempo real
-            if (value.HasValue && value > MontoSugerido && MontoSugerido > 0m)
+            // Actualizar mensaje de validación en tiempo real solo si hay clases pendientes
+            if (value.HasValue && MontoSugerido > 0m && !MostrarControlesCantidad)
             {
-                MensajeValidacion = $"El monto no puede superar el sugerido ({MontoSugerido:C2}).";
+                // Solo validar límite cuando hay clases pendientes (controles de cantidad ocultos)
+                if (value > MontoSugerido)
+                {
+                    MensajeValidacion = $"El monto no puede superar el necesario para pagar todas las clases pendientes ({MontoSugerido:C2}).";
+                }
+                else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
+                {
+                    MensajeValidacion = null; // Limpiar mensaje si ya no aplica
+                }
             }
             else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
             {
@@ -270,7 +278,6 @@ private async Task BuscarAlumno()
                 if (AlumnoSeleccionado is null) { MensajeValidacion = "Debes seleccionar un alumno."; return; }
                 if (TallerSeleccionado is null) { MensajeValidacion = "Debes seleccionar un taller."; return; }
                 if (MontoIngresado is null || MontoIngresado <= 0) { MensajeValidacion = "El monto debe ser mayor a 0."; return; }
-                if (MontoIngresado > MontoSugerido) { MensajeValidacion = $"El monto no puede superar el sugerido ({MontoSugerido:C2})."; return; }
 
                 var costo = Math.Round(CostoClase, 2, MidpointRounding.AwayFromZero);
                 var totalIngresado = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
@@ -282,7 +289,15 @@ private async Task BuscarAlumno()
 
                 if (clasesPendientes.Length > 0)
                 {
-                    // HAY clases pendientes: aplicar pago a las clases pendientes en orden cronológico
+                    // HAY clases pendientes: validar que no se exceda el monto sugerido
+                    var montoMaximo = R2(clasesPendientes.Length * CostoClase);
+                    if (totalIngresado > montoMaximo) 
+                    { 
+                        MensajeValidacion = $"El monto no puede superar el necesario para pagar todas las clases pendientes ({montoMaximo:C2})."; 
+                        return; 
+                    }
+                    
+                    // Aplicar pago a las clases pendientes en orden cronológico
                     var montoRestante = totalIngresado;
                     for (int i = 0; i < clasesPendientes.Length && montoRestante > 0; i++)
                     {
