@@ -10,7 +10,8 @@ namespace ControlTalleresMVP.Persistence.Models
     {
         public int TallerId { get; set; }
         public string Nombre { get; set; } = null!;
-        public string Horario { get; set; } = null!;
+        public TimeSpan HorarioInicio { get; set; }
+        public TimeSpan HorarioFin { get; set; }
         public DayOfWeek DiaSemana { get; set; }
         public DateTime FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }

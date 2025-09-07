@@ -567,10 +567,13 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("fecha_inicio");
 
-                    b.Property<string>("Horario")
-                        .IsRequired()
+                    b.Property<TimeSpan>("HorarioFin")
                         .HasColumnType("TEXT")
-                        .HasColumnName("horario");
+                        .HasColumnName("horario_fin");
+
+                    b.Property<TimeSpan>("HorarioInicio")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("horario_inicio");
 
                     b.Property<string>("Nombre")
                         .IsRequired()

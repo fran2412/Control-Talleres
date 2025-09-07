@@ -21,7 +21,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
             => _itemService.RegistrosTalleres;
 
         [ObservableProperty]
-        private string campoTextoHorario = "";
+        private TimeSpan horarioInicio = new TimeSpan(9, 0, 0); // 9:00 AM por defecto
+
+        [ObservableProperty]
+        private TimeSpan horarioFin = new TimeSpan(11, 0, 0); // 11:00 AM por defecto
 
         // NUEVO: lista para bindear el ComboBox si lo necesitas desde el VM
         public IReadOnlyList<DayOfWeek> DiasSemana { get; } = Enum.GetValues<DayOfWeek>();
@@ -52,9 +55,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(CampoTextoHorario))
+            if (HorarioFin <= HorarioInicio)
             {
-                _dialogService.Alerta("El horario del taller es obligatorio");
+                _dialogService.Alerta("El horario de fin debe ser posterior al horario de inicio");
                 return;
             }
 
@@ -75,7 +78,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 await _itemService.GuardarAsync(new Taller
                 {
                     Nombre = CampoTextoNombre.Trim(),
-                    Horario = CampoTextoHorario.Trim(),
+                    HorarioInicio = HorarioInicio,
+                    HorarioFin = HorarioFin,
                     DiaSemana = DiaSemanaSeleccionado,
                     FechaInicio = FechaInicio,
                     FechaFin = FechaFin
@@ -99,7 +103,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
         protected override void LimpiarCampos()
         {
             CampoTextoNombre = "";
-            CampoTextoHorario = "";
+            HorarioInicio = new TimeSpan(9, 0, 0);
+            HorarioFin = new TimeSpan(11, 0, 0);
             DiaSemanaSeleccionado = DayOfWeek.Monday; // ← NUEVO (reset)
             FechaInicio = DateTime.Today;
             FechaFin = null;

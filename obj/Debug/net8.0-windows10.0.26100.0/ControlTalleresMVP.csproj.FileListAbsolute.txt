@@ -3,14 +3,19 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\ControlTalleres.runtimeconfig.json
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\ControlTalleres.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\ControlTalleres.pdb
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\ClosedXML.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\CommunityToolkit.Mvvm.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\CsvHelper.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\DocumentFormat.OpenXml.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\EFCore.NamingConventions.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\ExcelNumberFormat.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Xceed.Wpf.AvalonDock.Themes.Aero.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Xceed.Wpf.AvalonDock.Themes.Metro.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Xceed.Wpf.AvalonDock.Themes.VS2010.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Xceed.Wpf.AvalonDock.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Xceed.Wpf.Toolkit.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Humanizer.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Irony.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Microsoft.CodeAnalysis.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Microsoft.CodeAnalysis.CSharp.dll
@@ -40,6 +45,7 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SharpVectors.Model.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SharpVectors.Rendering.Wpf.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SharpVectors.Runtime.Wpf.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SixLabors.Fonts.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SQLitePCLRaw.batteries_v2.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SQLitePCLRaw.core.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SQLitePCLRaw.provider.e_sqlite3.dll
@@ -49,6 +55,7 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\System.Composition.Runtime.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\System.Composition.TypedParts.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\System.IO.Pipelines.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\XLParser.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\cs-CZ\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\de\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\es\Xceed.Wpf.AvalonDock.resources.dll
@@ -237,10 +244,3 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlTalleres.pdb
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlTalleresMVP.genruntimeconfig.cache
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ref\ControlTalleres.dll
-C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\ClosedXML.dll
-C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\CsvHelper.dll
-C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\DocumentFormat.OpenXml.dll
-C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\ExcelNumberFormat.dll
-C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\Irony.dll
-C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\SixLabors.Fonts.dll
-C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\bin\Debug\net8.0-windows10.0.26100.0\XLParser.dll

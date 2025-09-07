@@ -24,8 +24,11 @@ namespace ControlTalleresMVP.Services.Talleres
 
         public async Task<Taller> GuardarAsync(Taller taller, CancellationToken ct = default)
         {
-            // Validar coherencia entre día de la semana y horario
-            ValidarCoherenciaDiaHorario(taller.DiaSemana, taller.Horario);
+            // Validar que el horario de fin sea posterior al de inicio
+            if (taller.HorarioFin <= taller.HorarioInicio)
+            {
+                throw new InvalidOperationException("El horario de fin debe ser posterior al horario de inicio");
+            }
             
             _context.Talleres.Add(taller);
             await _context.SaveChangesAsync(ct);
@@ -99,12 +102,16 @@ namespace ControlTalleresMVP.Services.Talleres
             if (tallerExistente is null)
                 throw new InvalidOperationException($"No se encontró al taller con ID {taller.TallerId}");
 
-            // Validar coherencia entre día de la semana y horario
-            ValidarCoherenciaDiaHorario(taller.DiaSemana, taller.Horario);
+            // Validar que el horario de fin sea posterior al de inicio
+            if (taller.HorarioFin <= taller.HorarioInicio)
+            {
+                throw new InvalidOperationException("El horario de fin debe ser posterior al horario de inicio");
+            }
             
             // Solo actualizas campos que quieres
             tallerExistente.Nombre = taller.Nombre;
-            tallerExistente.Horario = taller.Horario;
+            tallerExistente.HorarioInicio = taller.HorarioInicio;
+            tallerExistente.HorarioFin = taller.HorarioFin;
             tallerExistente.DiaSemana = taller.DiaSemana;
             tallerExistente.FechaInicio = taller.FechaInicio;
             tallerExistente.FechaFin = taller.FechaFin;
@@ -131,7 +138,8 @@ namespace ControlTalleresMVP.Services.Talleres
                 .Select(u => new
                 {
                     u.TallerId,
-                    u.Horario,
+                    u.HorarioInicio,
+                    u.HorarioFin,
                     u.DiaSemana,
                     u.Nombre,
                     u.FechaInicio,
@@ -144,7 +152,8 @@ namespace ControlTalleresMVP.Services.Talleres
             {
                 Id = u.TallerId,
                 Nombre = u.Nombre,
-                Horario = u.Horario,
+                HorarioInicio = u.HorarioInicio,
+                HorarioFin = u.HorarioFin,
                 DiaSemana = ConvertirDiaSemanaASpanol(u.DiaSemana),
                 FechaInicio = u.FechaInicio,
                 FechaFin = u.FechaFin,
@@ -188,24 +197,5 @@ namespace ControlTalleresMVP.Services.Talleres
             };
         }
 
-        private static void ValidarCoherenciaDiaHorario(DayOfWeek diaSemana, string horario)
-        {
-            if (string.IsNullOrWhiteSpace(horario))
-                return;
-
-            var horarioLower = horario.ToLower();
-            var diaSemanaTexto = ConvertirDiaSemanaASpanol(diaSemana).ToLower();
-
-            // Verificar si el horario menciona un día diferente al configurado
-            var diasSemana = new[] { "lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "sabado", "domingo" };
-            var diaEnHorario = diasSemana.FirstOrDefault(dia => horarioLower.Contains(dia));
-
-            if (!string.IsNullOrEmpty(diaEnHorario) && diaEnHorario != diaSemanaTexto)
-            {
-                throw new InvalidOperationException(
-                    $"El horario menciona '{diaEnHorario}' pero el taller está configurado para '{diaSemanaTexto}'. " +
-                    "El día de la semana y el horario deben ser coherentes.");
-            }
-        }
     }
 }

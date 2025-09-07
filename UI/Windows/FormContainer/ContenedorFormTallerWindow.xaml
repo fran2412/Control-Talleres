@@ -53,12 +53,25 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                             </StackPanel>
 
                             <StackPanel Margin="0,20,20,0">
-                                <TextBlock Text="* Horario del taller" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
-                                <TextBox x:Name="HorarioTextBox"  
-                                         Style="{StaticResource TextBoxCampo}" 
-                                         ToolTip="Ingrese el horario del taller"
+                                <TextBlock Text="* Horario de inicio (24h)" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <TextBox x:Name="HorarioInicioTextBox" 
+                                         Style="{StaticResource TextBoxCampo}"
+                                         LostFocus="HorarioInicioTextBox_LostFocus"
+                                         GotFocus="HorarioInicioTextBox_GotFocus"
+                                         ToolTip="Ingrese la hora de inicio (formato 24h). Ejemplos: 9, 9:30, 9AM, 14:30, 2:30PM"
                                          Height="30" Width="260"
-                                         Tag="Ej. Sábados de 12:00 - 1:00"/>
+                                         Tag="Ej. 9:00"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,20,20,0">
+                                <TextBlock Text="* Horario de fin (24h)" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <TextBox x:Name="HorarioFinTextBox" 
+                                         Style="{StaticResource TextBoxCampo}"
+                                         LostFocus="HorarioFinTextBox_LostFocus"
+                                         GotFocus="HorarioFinTextBox_GotFocus"
+                                         ToolTip="Ingrese la hora de fin (formato 24h). Ejemplos: 11, 11:30, 11AM, 15:30, 3:30PM"
+                                         Height="30" Width="260"
+                                         Tag="Ej. 11:00"/>
                             </StackPanel>
 
                             <StackPanel Margin="0,20,20,0">

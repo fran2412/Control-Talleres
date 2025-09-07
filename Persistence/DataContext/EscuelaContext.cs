@@ -154,7 +154,8 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(e => e.TallerId).HasColumnName("id_taller");
                 entity.Property(e => e.Nombre).HasColumnName("nombre");
-                entity.Property(e => e.Horario).HasColumnName("horario");
+                entity.Property(e => e.HorarioInicio).HasColumnName("horario_inicio");
+                entity.Property(e => e.HorarioFin).HasColumnName("horario_fin");
                 entity.Property(x => x.DiaSemana)
                  .HasColumnName("dia_semana")
                  .HasConversion(new DiaSemanaConverter())
