@@ -25,15 +25,14 @@ namespace ControlTalleresMVP.Services.Cargos
 
         public async Task<DestinoCargoDTO[]> ObtenerCargosPendientesActualesAsync(int alumnoId, CancellationToken ct = default)
         {
-            // Todos los cargos con saldo > 0 del alumno (sin importar si son inscripción o clase)
-            // Si quieres excluir inscripciones canceladas, agrega filtro por navegación si la tienes (i.Eliminado == false).
+            // Todos los cargos con saldo > 0 del alumno (incluyendo alumnos dados de baja)
+            // Los pagos deben mostrarse incluso si el alumno está dado de baja
             var generacion = _generacionService.ObtenerGeneracionActual();
             if (generacion == null) throw new ArgumentException(nameof(generacion));
 
             var query = _escuelaContext.Cargos
                 .AsNoTracking()
                 .Where(c => c.AlumnoId == alumnoId
-                            && !c.Eliminado
                             && c.SaldoActual > 0
                             && c.Estado != EstadoCargo.Anulado
                             && (c.InscripcionId == null
@@ -64,7 +63,7 @@ namespace ControlTalleresMVP.Services.Cargos
         public async Task<Cargo[]> ObtenerCargosAsync(int alumnoId, CancellationToken ct = default)
         {
             var cargos = await _escuelaContext.Cargos
-                .Where(c => c.AlumnoId == alumnoId && !c.Eliminado && c.Estado != EstadoCargo.Anulado)
+                .Where(c => c.AlumnoId == alumnoId && c.Estado != EstadoCargo.Anulado)
                 .ToArrayAsync(ct);
 
             return cargos;

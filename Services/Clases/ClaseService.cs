@@ -3,6 +3,7 @@ using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
+using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Messages;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,14 @@ namespace ControlTalleresMVP.Services.Clases
         private readonly EscuelaContext _escuelaContext;
         private readonly IConfiguracionService _configuracionService;
         private readonly IDialogService _dialogService;
+        private readonly IGeneracionService _generacionService;
 
-        public ClaseService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IDialogService dialogService)
+        public ClaseService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IDialogService dialogService, IGeneracionService generacionService)
         {
             _escuelaContext = escuelaContext;
             _configuracionService = configuracionService;
             _dialogService = dialogService;
+            _generacionService = generacionService;
         }
 
         // ====================
@@ -323,7 +326,6 @@ namespace ControlTalleresMVP.Services.Clases
                     on clases.ClaseId equals cargos.ClaseId into caGroup
                 from cargos in caGroup
                     .Where(c => c.AlumnoId == alumnoId
-                                && !c.Eliminado
                                 && c.Estado != EstadoCargo.Anulado)
                     .DefaultIfEmpty()
                 group cargos by clases.TallerId into g
@@ -370,12 +372,172 @@ namespace ControlTalleresMVP.Services.Clases
                 .Where(c => c.AlumnoId == alumnoId
                             && c.ClaseId != null
                             && c.Clase!.TallerId == tallerId
-                            && !c.Eliminado
                             && c.Estado == EstadoCargo.Pagado)
                 .Select(c => c.Clase!)
                 .ToArrayAsync(ct);
 
             return clases;
+        }
+
+        public async Task<EstadoPagoAlumnoDTO[]> ObtenerEstadoPagoAlumnosAsync(
+            int? tallerId = null,
+            int? alumnoId = null,
+            CancellationToken ct = default)
+        {
+            var hoy = DateTime.Today;
+            var generacion = _generacionService.ObtenerGeneracionActual();
+            if (generacion == null) return Array.Empty<EstadoPagoAlumnoDTO>();
+
+            // Obtener costo de clase desde configuración
+            var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+
+            // Obtener talleres con sus fechas de inicio y fin
+            var talleresQuery = _escuelaContext.Talleres
+                .AsNoTracking()
+                .Where(t => !t.Eliminado && (tallerId == null || t.TallerId == tallerId))
+                .Select(t => new
+                {
+                    t.TallerId,
+                    t.Nombre,
+                    t.FechaInicio,
+                    t.FechaFin,
+                    t.DiaSemana
+                });
+
+            var talleres = await talleresQuery.ToListAsync(ct);
+            var resultados = new List<EstadoPagoAlumnoDTO>();
+
+            foreach (var taller in talleres)
+            {
+                // Calcular fechas de clases hasta hoy o fecha fin
+                var fechaFin = taller.FechaFin?.Date ?? hoy;
+                var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
+                
+                // Generar fechas de clases desde FechaInicio hasta fechaLimite
+                var fechasClases = GenerarFechasClases(taller.FechaInicio, fechaLimite, taller.DiaSemana);
+                
+                if (fechasClases.Count == 0) continue;
+
+                // Obtener alumnos inscritos en este taller
+                var alumnosQuery = _escuelaContext.Inscripciones
+                    .AsNoTracking()
+                    .Where(i => i.TallerId == taller.TallerId
+                                && i.GeneracionId == generacion.GeneracionId
+                                && !i.Eliminado
+                                && i.Estado != EstadoInscripcion.Cancelada
+                                && (alumnoId == null || i.AlumnoId == alumnoId))
+                    .Select(i => new { i.AlumnoId, i.Alumno!.Nombre });
+
+                var alumnos = await alumnosQuery.ToListAsync(ct);
+
+                foreach (var alumno in alumnos)
+                {
+                    // Obtener clases pagadas de este alumno en este taller
+                    var clasesPagadas = await _escuelaContext.Cargos
+                        .AsNoTracking()
+                        .Where(c => c.AlumnoId == alumno.AlumnoId
+                                    && c.ClaseId != null
+                                    && c.Clase!.TallerId == taller.TallerId
+                                    && c.Estado == EstadoCargo.Pagado)
+                        .Select(c => new { c.Clase!.Fecha, c.Monto })
+                        .ToListAsync(ct);
+
+                    // Obtener clases pendientes de este alumno en este taller
+                    var clasesPendientes = await _escuelaContext.Cargos
+                        .AsNoTracking()
+                        .Where(c => c.AlumnoId == alumno.AlumnoId
+                                    && c.ClaseId != null
+                                    && c.Clase!.TallerId == taller.TallerId
+                                    && c.Estado == EstadoCargo.Pendiente
+                                    && c.SaldoActual > 0)
+                        .Select(c => new { c.Clase!.Fecha, c.SaldoActual })
+                        .ToListAsync(ct);
+
+                    // Calcular estadísticas
+                    var clasesPagadasCount = clasesPagadas.Count;
+                    var clasesPendientesCount = clasesPendientes.Count;
+                    var clasesTotales = fechasClases.Count;
+                    var montoPagado = clasesPagadas.Sum(c => c.Monto);
+                    var montoPendiente = clasesPendientes.Sum(c => c.SaldoActual);
+                    var montoTotal = clasesTotales * costoClase;
+                    var todasLasClasesPagadas = clasesPagadasCount == clasesTotales && clasesPendientesCount == 0;
+
+                    // Determinar estado del pago
+                    string estadoPago;
+                    if (todasLasClasesPagadas)
+                    {
+                        estadoPago = "✅ Todas las clases pagadas";
+                    }
+                    else if (clasesPagadasCount > 0)
+                    {
+                        estadoPago = $"⚠️ Parcialmente pagado ({clasesPagadasCount}/{clasesTotales})";
+                    }
+                    else
+                    {
+                        estadoPago = "❌ Sin pagos";
+                    }
+
+                    // Si el taller tiene fecha fin y ya terminó, ajustar el estado
+                    if (taller.FechaFin.HasValue && hoy > taller.FechaFin.Value)
+                    {
+                        if (todasLasClasesPagadas)
+                        {
+                            estadoPago = "✅ Completado - Todas las clases pagadas";
+                        }
+                        else
+                        {
+                            estadoPago = $"❌ Incompleto - Faltan {clasesPendientesCount} clases";
+                        }
+                    }
+
+                    var resultado = new EstadoPagoAlumnoDTO
+                    {
+                        AlumnoId = alumno.AlumnoId,
+                        NombreAlumno = alumno.Nombre,
+                        TallerId = taller.TallerId,
+                        NombreTaller = taller.Nombre,
+                        FechaInicio = taller.FechaInicio,
+                        FechaFin = taller.FechaFin,
+                        ClasesTotales = clasesTotales,
+                        ClasesPagadas = clasesPagadasCount,
+                        ClasesPendientes = clasesPendientesCount,
+                        MontoTotal = montoTotal,
+                        MontoPagado = montoPagado,
+                        MontoPendiente = montoPendiente,
+                        TodasLasClasesPagadas = todasLasClasesPagadas,
+                        EstadoPago = estadoPago,
+                        FechaUltimaClase = fechasClases.LastOrDefault(),
+                        FechaHoy = hoy
+                    };
+
+                    resultados.Add(resultado);
+                }
+            }
+
+            return resultados.OrderBy(r => r.NombreTaller)
+                            .ThenBy(r => r.NombreAlumno)
+                            .ToArray();
+        }
+
+        private List<DateTime> GenerarFechasClases(DateTime fechaInicio, DateTime fechaLimite, DayOfWeek diaSemana)
+        {
+            var fechas = new List<DateTime>();
+            var fechaActual = fechaInicio.Date;
+            
+            // Encontrar el primer día de la semana del taller
+            while (fechaActual.DayOfWeek != diaSemana)
+            {
+                fechaActual = fechaActual.AddDays(1);
+            }
+
+            // Generar fechas de clases hasta la fecha límite
+            while (fechaActual <= fechaLimite)
+            {
+                fechas.Add(fechaActual);
+                fechaActual = fechaActual.AddDays(7);
+            }
+
+            return fechas;
         }
 
         private static DateTime SiguienteOElMismo(DateTime desde, DayOfWeek objetivo, bool incluirSiHoyCoincide)

@@ -26,5 +26,10 @@ namespace ControlTalleresMVP.UI.Windows
             InitializeComponent();
             DataContext = App.ServiceProvider!.GetRequiredService<ShellViewModel>();
         }
+
+        private void TestButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("¡El botón de prueba funciona! El problema no es de visibilidad.");
+        }
     }
 }

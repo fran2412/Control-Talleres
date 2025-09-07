@@ -284,7 +284,7 @@ private async Task BuscarAlumno()
 
                 // Obtener clases pendientes de pago desde la fecha de inicio del taller
                 var clasesPendientes = await ObtenerClasesPendientesPagoAsync(AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId);
-                
+
                 var resultados = new System.Collections.Generic.List<RegistrarClaseResult>();
 
                 if (clasesPendientes.Length > 0)
@@ -310,32 +310,90 @@ private async Task BuscarAlumno()
                 }
                 else
                 {
-                    // NO hay clases pendientes: usar lógica original (seleccionar cantidad de clases)
+                    // NO hay clases pendientes: aplicar reglas según fecha de fin del taller
                     if (CantidadSeleccionada < 1) { MensajeValidacion = "La cantidad de clases debe ser al menos 1."; return; }
 
-                    var clasesCompletas = (int)Math.Min(CantidadSeleccionada, Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo)));
-                    var sobrante = totalIngresado - (clasesCompletas * costo);
-                    var cantidadFechas = Math.Max(clasesCompletas + (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < CantidadSeleccionada ? 1 : 0), 1);
-                    var fechas = GenerarFechasSemanas(DateTime.Today, cantidadFechas);
+                    // Verificar si el taller tiene fecha de fin
+                    var fechaFin = TallerSeleccionado.FechaFin?.Date;
+                    var hoy = DateTime.Today;
+                    
+                    if (fechaFin.HasValue)
+                    {
+                        // CON fecha de fin: permitir pagos en conjunto hasta la fecha de fin
+                        if (hoy > fechaFin.Value)
+                        {
+                            MensajeValidacion = "El taller ya terminó. No se pueden registrar pagos para clases futuras.";
+                            return;
+                        }
+                        
+                        // Generar fechas respetando la fecha de fin
+                        var fechas = GenerarFechasSemanas(hoy, CantidadSeleccionada);
+                        if (fechas.Length == 0)
+                        {
+                            MensajeValidacion = "No se pueden generar clases futuras dentro del período del taller.";
+                            return;
+                        }
+                        
+                        // Validar que el monto no exceda las clases disponibles
+                        var montoMaximo = R2(fechas.Length * CostoClase);
+                        if (totalIngresado > montoMaximo)
+                        {
+                            MensajeValidacion = $"El monto no puede superar el necesario para pagar {fechas.Length} clases disponibles ({montoMaximo:C2}).";
+                            return;
+                        }
+                        
+                        // Procesar pagos para las fechas generadas
+                        var clasesCompletas = (int)Math.Min(fechas.Length, Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo)));
+                        var sobrante = totalIngresado - (clasesCompletas * costo);
+                        
+                        for (int i = 0; i < clasesCompletas; i++)
+                {
+                    var r = await _claseService.RegistrarClaseAsync(
+                        AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[i], costo, ct);
+                    resultados.Add(r);
+                }
 
-                    for (int i = 0; i < clasesCompletas; i++)
-                    {
-                        var r = await _claseService.RegistrarClaseAsync(
-                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[i], costo, ct);
-                        resultados.Add(r);
+                        if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < fechas.Length)
+                {
+                    var abono = Math.Round(sobrante, 2, MidpointRounding.AwayFromZero);
+                    var r = await _claseService.RegistrarClaseAsync(
+                        AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[clasesCompletas], abono, ct);
+                    resultados.Add(r);
+                }
+                else if (clasesCompletas == 0 && totalIngresado > 0m)
+                {
+                    var r = await _claseService.RegistrarClaseAsync(
+                        AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[0], totalIngresado, ct);
+                    resultados.Add(r);
+                        }
                     }
-
-                    if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < CantidadSeleccionada)
+                    else
                     {
-                        var abono = Math.Round(sobrante, 2, MidpointRounding.AwayFromZero);
+                        // SIN fecha de fin: solo permitir pagos unitarios el mismo día
+                        var fechaHoy = GenerarFechasSemanas(hoy, 1);
+                        if (fechaHoy.Length == 0)
+                        {
+                            MensajeValidacion = "No hay clase programada para hoy en este taller.";
+                            return;
+                        }
+                        
+                        // Solo permitir pago de 1 clase (la de hoy)
+                        if (CantidadSeleccionada > 1)
+                        {
+                            MensajeValidacion = "Este taller no tiene fecha de fin definida. Solo se puede pagar la clase del día actual.";
+                            return;
+                        }
+                        
+                        // Validar monto para una sola clase
+                        if (totalIngresado > costo)
+                        {
+                            MensajeValidacion = $"Solo se puede pagar la clase de hoy. El monto máximo es {costo:C2}.";
+                            return;
+                        }
+                        
+                        // Registrar pago para la clase de hoy
                         var r = await _claseService.RegistrarClaseAsync(
-                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[clasesCompletas], abono, ct);
-                        resultados.Add(r);
-                    }
-                    else if (clasesCompletas == 0 && totalIngresado > 0m)
-                    {
-                        var r = await _claseService.RegistrarClaseAsync(
-                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[0], totalIngresado, ct);
+                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaHoy[0], totalIngresado, ct);
                         resultados.Add(r);
                     }
                 }
@@ -426,11 +484,58 @@ private async Task BuscarAlumno()
                     }
                     else
                     {
-                        // NO hay clases pendientes: usar lógica original (cantidad seleccionada)
-                        nuevoSugerido = R2(CantidadSeleccionada * CostoClase);
-                        InformacionClasesPendientes = "No hay clases pendientes de pago - puede seleccionar cantidad de clases";
-                        MostrarControlesCantidad = true; // Mostrar controles de cantidad
-                        AvisoClasesPendientes = null; // Limpiar aviso
+                        // NO hay clases pendientes: aplicar reglas según fecha de fin del taller
+                        var fechaFin = TallerSeleccionado.FechaFin?.Date;
+                        var hoy = DateTime.Today;
+                        
+                        if (fechaFin.HasValue)
+                        {
+                            // CON fecha de fin: permitir pagos en conjunto hasta la fecha de fin
+                            if (hoy <= fechaFin.Value)
+                            {
+                                // Generar fechas disponibles respetando la fecha de fin
+                                var fechasDisponibles = GenerarFechasSemanas(hoy, CantidadSeleccionada);
+                                if (fechasDisponibles.Length > 0)
+                                {
+                                    nuevoSugerido = R2(fechasDisponibles.Length * CostoClase);
+                                    InformacionClasesPendientes = $"Clases futuras disponibles ({fechasDisponibles.Length}): {string.Join(", ", fechasDisponibles.Select(f => f.ToString("dd/MM/yyyy")))}";
+                                }
+                                else
+                                {
+                                    nuevoSugerido = 0;
+                                    InformacionClasesPendientes = "No hay clases futuras disponibles dentro del período del taller.";
+                                }
+                            }
+                            else
+                            {
+                                nuevoSugerido = 0;
+                                InformacionClasesPendientes = "El taller ya terminó. No se pueden registrar pagos para clases futuras.";
+                            }
+                            MostrarControlesCantidad = true; // Mostrar controles de cantidad
+                            AvisoClasesPendientes = null; // Limpiar aviso
+                        }
+                        else
+                        {
+                            // SIN fecha de fin: solo permitir pago unitario del día actual
+                            var fechaHoy = GenerarFechasSemanas(hoy, 1);
+                            if (fechaHoy.Length > 0)
+                            {
+                                nuevoSugerido = R2(CostoClase);
+                                InformacionClasesPendientes = "Taller sin fecha de fin - solo se puede pagar la clase del día actual";
+                                // Limitar cantidad a 1
+                                if (CantidadSeleccionada > 1)
+                                {
+                                    CantidadSeleccionada = 1;
+                                }
+                            }
+                            else
+                            {
+                                nuevoSugerido = 0;
+                                InformacionClasesPendientes = "No hay clase programada para hoy en este taller.";
+                            }
+                            MostrarControlesCantidad = false; // Ocultar controles de cantidad
+                            AvisoClasesPendientes = "⚠️ ATENCIÓN: Este taller no tiene fecha de fin definida. Solo se puede pagar la clase del día actual.";
+                        }
                         ActualizarMostrarAvisoClasesPendientes();
                     }
                 }
@@ -484,16 +589,27 @@ private async Task BuscarAlumno()
 
             var objetivo = TallerSeleccionado.DiaSemana; // DayOfWeek del taller
             var start = desde.Date;
+            var fechaFin = TallerSeleccionado.FechaFin?.Date;
 
             // Próximo (o mismo) día objetivo respecto a 'desde'
             int delta = ((int)objetivo - (int)start.DayOfWeek + 7) % 7;
             var primera = start.AddDays(delta); // incluye 'hoy' si coincide
 
-            var result = new DateTime[cantidad];
+            var clases = new List<DateTime>();
+            var fechaActual = primera;
+            
+            // Generar clases hasta la cantidad solicitada o hasta la fecha de fin (si existe)
             for (int i = 0; i < cantidad; i++)
-                result[i] = primera.AddDays(7 * i).Date; // a medianoche
+            {
+                // Si hay fecha de fin, verificar que no la excedamos
+                if (fechaFin.HasValue && fechaActual > fechaFin.Value)
+                    break;
+                    
+                clases.Add(fechaActual.Date);
+                fechaActual = fechaActual.AddDays(7);
+            }
 
-            return result;
+            return clases.ToArray();
         }
 
         private DateTime[] GenerarFechasDesdeInicioTaller(int cantidad)

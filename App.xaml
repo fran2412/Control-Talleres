@@ -14,6 +14,7 @@
              xmlns:administracioncomponent="clr-namespace:ControlTalleresMVP.UI.Component.Administracion"
              xmlns:clasescomponent="clr-namespace:ControlTalleresMVP.UI.Component.Clases"
              xmlns:backupcomponent="clr-namespace:ControlTalleresMVP.UI.Component.Backup"
+             xmlns:reportescomponent="clr-namespace:ControlTalleresMVP.UI.Component.Reportes"
              xmlns:converters="clr-namespace:ControlTalleresMVP.Helpers.Converters"
              
              >
@@ -68,6 +69,10 @@
             
             <DataTemplate DataType="{x:Type vmmenu:MenuBackupViewModel}">
                 <backupcomponent:MenuBackupUserControl/>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type vmmenu:MenuReporteEstadoPagosViewModel}">
+                <reportescomponent:MenuReporteEstadoPagosUserControl/>
             </DataTemplate>
             
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>

@@ -68,7 +68,8 @@ namespace ControlTalleresMVP.UI.Component.Sede {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/sede/formulariosedeusercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri(("/ControlTalleres;V1.0.0.0;component/ui/component/sede/formulariosedeusercontrol.x" +
+                    "aml"), System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Sede\FormularioSedeUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
