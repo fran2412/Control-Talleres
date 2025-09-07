@@ -460,13 +460,21 @@ namespace ControlTalleresMVP.Services.Clases
                     var montoPagado = clasesPagadas.Sum(c => c.Monto);
                     var montoPendiente = clasesPendientes.Sum(c => c.SaldoActual);
                     var montoTotal = clasesTotales * costoClase;
-                    var todasLasClasesPagadas = clasesPagadasCount == clasesTotales && clasesPendientesCount == 0;
+                    
+                    // Verificar si se pagaron al menos todas las clases que se deben
+                    var todasLasClasesPagadas = clasesPagadasCount >= clasesTotales && clasesPendientesCount == 0;
+                    // Verificar si se pagó más de lo debido
+                    var pagoExcedido = clasesPagadasCount > clasesTotales;
 
                     // Determinar estado del pago
                     string estadoPago;
-                    if (todasLasClasesPagadas)
+                    if (todasLasClasesPagadas && !pagoExcedido)
                     {
                         estadoPago = "✅ Todas las clases pagadas";
+                    }
+                    else if (todasLasClasesPagadas && pagoExcedido)
+                    {
+                        estadoPago = "✅ Todas las clases pagadas (con exceso)";
                     }
                     else if (clasesPagadasCount > 0)
                     {
@@ -480,9 +488,13 @@ namespace ControlTalleresMVP.Services.Clases
                     // Si el taller tiene fecha fin y ya terminó, ajustar el estado
                     if (taller.FechaFin.HasValue && hoy > taller.FechaFin.Value)
                     {
-                        if (todasLasClasesPagadas)
+                        if (todasLasClasesPagadas && !pagoExcedido)
                         {
                             estadoPago = "✅ Completado - Todas las clases pagadas";
+                        }
+                        else if (todasLasClasesPagadas && pagoExcedido)
+                        {
+                            estadoPago = "✅ Completado - Todas las clases pagadas (con exceso)";
                         }
                         else
                         {

@@ -85,7 +85,14 @@
                     <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoReportes}" Height="40">
                         <WrapPanel Width="180" Margin="11,0,0,0">
                             <svgc:SvgViewbox Source="Resources\Icons\PagoIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
-                            <TextBlock Text="Reportes" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
+                            <TextBlock Text="Reportes Pagos" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
+                        </WrapPanel>
+                    </Button>
+
+                    <Button Style="{DynamicResource MenuItemButton}" Command="{Binding GoReporteInscripciones}" Height="40">
+                        <WrapPanel Width="180" Margin="11,0,0,0">
+                            <svgc:SvgViewbox Source="Resources\Icons\InscripcionIcono.svg" Width="35" Height="35" Margin="0,0,5,0"/>
+                            <TextBlock Text="Reportes Inscripciones" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Left" Foreground="White"/>
                         </WrapPanel>
                     </Button>
 

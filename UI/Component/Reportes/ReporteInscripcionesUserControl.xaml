@@ -1,0 +1,292 @@
+<UserControl x:Class="ControlTalleresMVP.UI.Component.Reportes.ReporteInscripcionesUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:ControlTalleresMVP.Helpers.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1200">
+    
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:NotNullConverter x:Key="NotNullConverter"/>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- TÍTULO -->
+        <TextBlock Grid.Row="0" Text="{Binding TituloEncabezado}" 
+                   FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+        <!-- CONTROLES DE FILTRO -->
+        <Border Grid.Row="1" Background="#F5F5F5" BorderBrush="#DDD" BorderThickness="1" 
+                CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <StackPanel>
+                <TextBlock Text="Filtros" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,15"/>
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Primera fila de filtros -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Selección de Generación -->
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <TextBlock Text="Generación:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding Generaciones}" 
+                                      SelectedItem="{Binding GeneracionSeleccionada}"
+                                      DisplayMemberPath="Nombre"
+                                      Width="250" Height="35"/>
+                        </StackPanel>
+
+                        <!-- Selección de Taller -->
+                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                            <TextBlock Text="Taller:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding Talleres}" 
+                                      SelectedItem="{Binding TallerSeleccionado}"
+                                      DisplayMemberPath="Nombre"
+                                      Width="250" Height="35"/>
+                        </StackPanel>
+
+                        <!-- Selección de Promotor -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Promotor:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding Promotores}" 
+                                      SelectedItem="{Binding PromotorSeleccionado}"
+                                      DisplayMemberPath="Nombre"
+                                      Width="250" Height="35"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Segunda fila de filtros -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Fecha Desde -->
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <TextBlock Text="Desde:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <DatePicker SelectedDate="{Binding FechaDesde}" Width="150" Height="35"/>
+                        </StackPanel>
+
+                        <!-- Fecha Hasta -->
+                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                            <TextBlock Text="Hasta:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <DatePicker SelectedDate="{Binding FechaHasta}" Width="150" Height="35"/>
+                        </StackPanel>
+
+                        <!-- Botones -->
+                        <Button Grid.Column="2" Content="Filtrar" 
+                                Command="{Binding FiltrarCommand}"
+                                Width="100" Height="35" Margin="5,0"
+                                Background="#007ACC" Foreground="White"/>
+                        
+                        <Button Grid.Column="3" Content="Limpiar" 
+                                Command="{Binding LimpiarFiltrosCommand}"
+                                Width="100" Height="35" Margin="5,0"
+                                Background="#6C757D" Foreground="White"/>
+                        
+                        <Button Grid.Column="4" Content="Exportar" 
+                                Command="{Binding ExportarCommand}"
+                                Width="100" Height="35" Margin="5,0"
+                                Background="#28A745" Foreground="White"/>
+                    </Grid>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- ESTADÍSTICAS BÁSICAS -->
+        <Border Grid.Row="2" Background="#E8F4FD" BorderBrush="#B3D9FF" BorderThickness="1" 
+                CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Inscripciones -->
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding TotalInscripciones}" FontSize="24" FontWeight="Bold" 
+                               Foreground="#007ACC" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Registros de Inscripción" FontSize="12" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Activas -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding InscripcionesActivas}" FontSize="24" FontWeight="Bold" 
+                               Foreground="#28A745" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Activas" FontSize="12" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Pagadas -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding InscripcionesPagadas}" FontSize="24" FontWeight="Bold" 
+                               Foreground="#6F42C1" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Pagadas" FontSize="12" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Canceladas -->
+                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding InscripcionesCanceladas}" FontSize="24" FontWeight="Bold" 
+                               Foreground="#DC3545" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Canceladas" FontSize="12" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ESTADÍSTICAS DETALLADAS -->
+        <Border Grid.Row="3" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1" 
+                CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Text="Estadísticas Detalladas" FontWeight="SemiBold" FontSize="16" 
+                           Margin="0,0,0,15" Foreground="#495057"/>
+                
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Monto Recaudado -->
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="5">
+                        <TextBlock Text="{Binding MontoTotalRecaudado, StringFormat=C2}" FontSize="18" FontWeight="Bold" 
+                                   Foreground="#28A745" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Recaudado" FontSize="11" HorizontalAlignment="Center" 
+                                   Foreground="#6C757D" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Monto Pendiente -->
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="5">
+                        <TextBlock Text="{Binding MontoTotalPendiente, StringFormat=C2}" FontSize="18" FontWeight="Bold" 
+                                   Foreground="#DC3545" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Pendiente" FontSize="11" HorizontalAlignment="Center" 
+                                   Foreground="#6C757D" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Promedio por Inscripción -->
+                    <StackPanel Grid.Column="2" HorizontalAlignment="Center" Margin="5">
+                        <TextBlock Text="{Binding Estadisticas.PromedioCostoInscripcionFormateado}" FontSize="18" FontWeight="Bold" 
+                                   Foreground="#007ACC" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Promedio/Inscripción" FontSize="11" HorizontalAlignment="Center" 
+                                   Foreground="#6C757D" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+
+                    <!-- Monto Total -->
+                    <StackPanel Grid.Column="3" HorizontalAlignment="Center" Margin="5">
+                        <TextBlock Text="{Binding Estadisticas.MontoTotalInscripciones, StringFormat=C2}" FontSize="18" FontWeight="Bold" 
+                                   Foreground="#6F42C1" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Monto Total" FontSize="11" HorizontalAlignment="Center" 
+                                   Foreground="#6C757D" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- TABLA DE DATOS -->
+        <DataGrid Grid.Row="4" ItemsSource="{Binding Inscripciones}" 
+                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                  AlternatingRowBackground="#F8F9FA" RowHeaderWidth="0"
+                  Margin="0,0,0,15">
+            
+            <DataGrid.Columns>
+                <!-- Alumno -->
+                <DataGridTextColumn Header="Alumno" Binding="{Binding NombreAlumno}" 
+                                    Width="150" IsReadOnly="True"/>
+                
+                <!-- Taller -->
+                <DataGridTextColumn Header="Taller" Binding="{Binding NombreTaller}" 
+                                    Width="180" IsReadOnly="True"/>
+                
+                <!-- Sede -->
+                <DataGridTextColumn Header="Sede" Binding="{Binding NombreSede}" 
+                                    Width="120" IsReadOnly="True"/>
+                
+                <!-- Promotor -->
+                <DataGridTextColumn Header="Promotor" Binding="{Binding NombrePromotor}" 
+                                    Width="120" IsReadOnly="True"/>
+                
+                <!-- Fecha Inscripción -->
+                <DataGridTextColumn Header="Fecha Inscripción" Binding="{Binding FechaInscripcion, StringFormat=dd/MM/yyyy}" 
+                                    Width="120" IsReadOnly="True"/>
+                
+                <!-- Día de la Semana -->
+                <DataGridTextColumn Header="Día" Binding="{Binding DiaSemana}" 
+                                    Width="80" IsReadOnly="True"/>
+                
+                <!-- Costo -->
+                <DataGridTextColumn Header="Costo" Binding="{Binding Costo, StringFormat=C2}" 
+                                    Width="80" IsReadOnly="True"/>
+                
+                <!-- Saldo -->
+                <DataGridTextColumn Header="Saldo" Binding="{Binding SaldoActual, StringFormat=C2}" 
+                                    Width="80" IsReadOnly="True"/>
+                
+                <!-- Estado -->
+                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" 
+                                    Width="100" IsReadOnly="True"/>
+                
+                <!-- Progreso -->
+                <DataGridTextColumn Header="Progreso" Binding="{Binding ProgresoPorcentaje, StringFormat={}{0:F1}%}" 
+                                    Width="80" IsReadOnly="True"/>
+                
+                <!-- Días Transcurridos -->
+                <DataGridTextColumn Header="Días Trans." Binding="{Binding DiasTranscurridos}" 
+                                    Width="90" IsReadOnly="True"/>
+                
+                <!-- Días Restantes -->
+                <DataGridTextColumn Header="Días Rest." Binding="{Binding DiasRestantes}" 
+                                    Width="90" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- MENSAJE DE ESTADO -->
+        <Border Grid.Row="5" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1" 
+                CornerRadius="6" Padding="10" 
+                Visibility="{Binding MensajeEstado, Converter={StaticResource NotNullConverter}}">
+            <TextBlock Text="{Binding MensajeEstado}" FontStyle="Italic" 
+                       Foreground="#6C757D" HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- INDICADOR DE CARGA -->
+        <Border Grid.Row="0" Grid.RowSpan="6" Background="#80000000" 
+                Visibility="{Binding Cargando, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Cargando..." FontSize="18" Foreground="White" 
+                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

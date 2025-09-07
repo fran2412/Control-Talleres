@@ -75,6 +75,10 @@
                 <reportescomponent:MenuReporteEstadoPagosUserControl/>
             </DataTemplate>
             
+            <DataTemplate DataType="{x:Type vmmenu:MenuReporteInscripcionesViewModel}">
+                <reportescomponent:MenuReporteInscripcionesUserControl/>
+            </DataTemplate>
+            
             <helpers:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
             <converters:BoolToStatusConverter x:Key="BoolToStatusConverter"/>
             <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>

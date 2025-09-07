@@ -83,21 +83,21 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding TotalAlumnos}" FontSize="24" FontWeight="Bold" 
                                Foreground="#007ACC" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Total Alumnos" FontSize="12" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Registros de Pago" FontSize="12" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Completos -->
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding AlumnosCompletos}" FontSize="24" FontWeight="Bold" 
                                Foreground="#28A745" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Completos" FontSize="12" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Pagos Completos" FontSize="12" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Parciales -->
                 <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding AlumnosParciales}" FontSize="24" FontWeight="Bold" 
                                Foreground="#FFC107" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Parciales" FontSize="12" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Pagos Parciales" FontSize="12" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Sin Pagos -->

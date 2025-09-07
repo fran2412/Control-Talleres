@@ -99,6 +99,7 @@ namespace ControlTalleresMVP
             services.AddTransient<MenuBackupViewModel>();
             services.AddTransient<ReporteEstadoPagosViewModel>();
             services.AddTransient<MenuReporteEstadoPagosViewModel>();
+            services.AddTransient<MenuReporteInscripcionesViewModel>();
             services.AddTransient<ShellViewModel>();
 
             //Services
@@ -114,6 +115,7 @@ namespace ControlTalleresMVP
             services.AddScoped<ICargosService, CargoService>();
             services.AddScoped<IPagoService, PagoService>();
             services.AddScoped<IClaseService, ClaseService>();
+            services.AddScoped<IInscripcionReporteService, InscripcionReporteService>();
             services.AddTransient<IAlumnoPickerService, AlumnoPickerService>();
             services.AddScoped<IBackupService, BackupService>();
         }

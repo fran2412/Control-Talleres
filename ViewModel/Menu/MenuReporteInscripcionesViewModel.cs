@@ -1,0 +1,196 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using ControlTalleresMVP.Persistence.ModelDTO;
+using ControlTalleresMVP.Services.Inscripciones;
+using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Promotores;
+using ControlTalleresMVP.Services.Talleres;
+using ControlTalleresMVP.Services.Generaciones;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ControlTalleresMVP.ViewModel.Menu
+{
+    public partial class MenuReporteInscripcionesViewModel : ObservableObject
+    {
+        private readonly IInscripcionReporteService _inscripcionReporteService;
+        private readonly ITallerService _tallerService;
+        private readonly ISedeService _sedeService;
+        private readonly IPromotorService _promotorService;
+        private readonly IGeneracionService _generacionService;
+
+        [ObservableProperty] private ObservableCollection<InscripcionReporteDTO> inscripciones = new();
+        [ObservableProperty] private ObservableCollection<TallerDTO> talleres = new();
+        [ObservableProperty] private ObservableCollection<PromotorDTO> promotores = new();
+        [ObservableProperty] private ObservableCollection<GeneracionDTO> generaciones = new();
+        
+        [ObservableProperty] private TallerDTO? tallerSeleccionado;
+        [ObservableProperty] private PromotorDTO? promotorSeleccionado;
+        [ObservableProperty] private GeneracionDTO? generacionSeleccionada;
+        [ObservableProperty] private DateTime fechaDesde = DateTime.Today.AddMonths(-1);
+        [ObservableProperty] private DateTime fechaHasta = DateTime.Today.AddDays(1); // Siempre hasta la fecha actual
+        
+        [ObservableProperty] private bool cargando = false;
+        [ObservableProperty] private string? mensajeEstado;
+        [ObservableProperty] private InscripcionEstadisticasDTO estadisticas = new();
+
+        public string TituloEncabezado { get; set; } = "Reporte de Inscripciones";
+
+        public MenuReporteInscripcionesViewModel(
+            IInscripcionReporteService inscripcionReporteService,
+            ITallerService tallerService,
+            ISedeService sedeService,
+            IPromotorService promotorService,
+            IGeneracionService generacionService)
+        {
+            _inscripcionReporteService = inscripcionReporteService;
+            _tallerService = tallerService;
+            _sedeService = sedeService;
+            _promotorService = promotorService;
+            _generacionService = generacionService;
+
+            // Cargar datos automáticamente al inicializar
+            _ = Task.Run(async () => await CargarDatosAsync());
+        }
+
+        private async Task CargarDatosAsync()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Cargando datos...";
+
+                // Cargar listas de filtros
+                var talleresList = await _tallerService.ObtenerTalleresParaGridAsync();
+                Talleres = new ObservableCollection<TallerDTO>(talleresList);
+
+                var promotoresList = await _promotorService.ObtenerPromotoresParaGridAsync();
+                Promotores = new ObservableCollection<PromotorDTO>(promotoresList);
+
+                // Cargar generaciones
+                var generacionesList = await _generacionService.ObtenerGeneracionesParaGridAsync();
+                Generaciones = new ObservableCollection<GeneracionDTO>(generacionesList);
+
+                // Establecer la generación actual como predeterminada
+                var generacionActual = _generacionService.ObtenerGeneracionActual();
+                if (generacionActual != null)
+                {
+                    GeneracionSeleccionada = Generaciones.FirstOrDefault(g => g.Id == generacionActual.GeneracionId);
+                }
+
+                // Cargar inscripciones y estadísticas
+                await CargarInscripcionesAsync();
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al cargar datos: {ex.Message}";
+            }
+            finally
+            {
+                Cargando = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task FiltrarAsync()
+        {
+            await CargarInscripcionesAsync();
+        }
+
+        [RelayCommand]
+        public async Task LimpiarFiltrosAsync()
+        {
+            TallerSeleccionado = null;
+            PromotorSeleccionado = null;
+            GeneracionSeleccionada = null;
+            FechaDesde = DateTime.Today.AddMonths(-1);
+            FechaHasta = DateTime.Today; // Siempre hasta la fecha actual
+            
+            await CargarInscripcionesAsync();
+        }
+
+        [RelayCommand]
+        public async Task ExportarAsync()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Exportando datos...";
+                
+                // Aquí se implementaría la exportación a Excel/PDF
+                // Por ahora solo mostramos un mensaje
+                MensajeEstado = "Funcionalidad de exportación en desarrollo";
+                
+                await Task.Delay(1000); // Simular proceso
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al exportar: {ex.Message}";
+            }
+            finally
+            {
+                Cargando = false;
+            }
+        }
+
+        private async Task CargarInscripcionesAsync()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Cargando inscripciones...";
+
+                var inscripcionesList = await _inscripcionReporteService.ObtenerInscripcionesReporteAsync(
+                    TallerSeleccionado?.Id,
+                    PromotorSeleccionado?.Id,
+                    GeneracionSeleccionada?.Id,
+                    FechaDesde,
+                    FechaHasta); // Ya está limitado a fecha actual en el servicio
+
+                Inscripciones = new ObservableCollection<InscripcionReporteDTO>(inscripcionesList);
+
+                // Cargar estadísticas
+                var estadisticasData = await _inscripcionReporteService.ObtenerEstadisticasInscripcionesAsync(
+                    TallerSeleccionado?.Id,
+                    GeneracionSeleccionada?.Id,
+                    FechaDesde,
+                    FechaHasta);
+
+                Estadisticas = estadisticasData;
+
+                MensajeEstado = $"Mostrando {Inscripciones.Count} inscripciones";
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al cargar inscripciones: {ex.Message}";
+            }
+            finally
+            {
+                Cargando = false;
+            }
+        }
+
+        // Propiedades calculadas para estadísticas rápidas
+        public int TotalInscripciones => Inscripciones.Count;
+        public int InscripcionesActivas => Inscripciones.Count(i => i.Estado == "Pendiente");
+        public int InscripcionesCanceladas => Inscripciones.Count(i => i.Estado == "Cancelada");
+        public int InscripcionesPagadas => Inscripciones.Count(i => i.Estado == "Pagada");
+        public decimal MontoTotalInscripciones => Inscripciones.Sum(i => i.Costo);
+        public decimal MontoTotalRecaudado => Inscripciones.Sum(i => i.Costo - i.SaldoActual);
+        public decimal MontoTotalPendiente => Inscripciones.Sum(i => i.SaldoActual);
+
+        // Método para actualizar estadísticas cuando cambia la colección
+        partial void OnInscripcionesChanged(ObservableCollection<InscripcionReporteDTO> value)
+        {
+            OnPropertyChanged(nameof(TotalInscripciones));
+            OnPropertyChanged(nameof(InscripcionesActivas));
+            OnPropertyChanged(nameof(InscripcionesCanceladas));
+            OnPropertyChanged(nameof(InscripcionesPagadas));
+            OnPropertyChanged(nameof(MontoTotalInscripciones));
+            OnPropertyChanged(nameof(MontoTotalRecaudado));
+            OnPropertyChanged(nameof(MontoTotalPendiente));
+        }
+    }
+}

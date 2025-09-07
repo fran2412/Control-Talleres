@@ -16,5 +16,6 @@ namespace ControlTalleresMVP.Services.Generaciones
         public Task NuevaGeneracion(CancellationToken ct = default);
         public Generacion? ObtenerGeneracionActual();
         public Task InicializarRegistros(CancellationToken ct = default);
+        public Task<List<GeneracionDTO>> ObtenerGeneracionesParaGridAsync(CancellationToken ct = default);
     }
 }
