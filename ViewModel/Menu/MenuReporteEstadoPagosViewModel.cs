@@ -4,6 +4,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Talleres;
+using ControlTalleresMVP.Services.Exportacion;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private readonly IClaseService _claseService;
         private readonly ITallerService _tallerService;
         private readonly IGeneracionService _generacionService;
+        private readonly IExportacionService _exportacionService;
 
         [ObservableProperty] private ObservableCollection<EstadoPagoAlumnoDTO> estadosPago = new();
         [ObservableProperty] private ObservableCollection<TallerDTO> talleres = new();
@@ -28,11 +30,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public MenuReporteEstadoPagosViewModel(
             IClaseService claseService,
             ITallerService tallerService,
-            IGeneracionService generacionService)
+            IGeneracionService generacionService,
+            IExportacionService exportacionService)
         {
             _claseService = claseService;
             _tallerService = tallerService;
             _generacionService = generacionService;
+            _exportacionService = exportacionService;
 
             // Cargar datos automáticamente al inicializar
             _ = Task.Run(async () => await CargarDatosAsync());
@@ -170,6 +174,61 @@ namespace ControlTalleresMVP.ViewModel.Menu
             OnPropertyChanged(nameof(MontoPendienteFormateado));
             OnPropertyChanged(nameof(PorcentajeRecaudacionFormateado));
             OnPropertyChanged(nameof(PromedioPagoPorAlumnoFormateado));
+        }
+
+        [RelayCommand]
+        public async Task ExportarAsync()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Exportando datos...";
+
+                if (!EstadosPago.Any())
+                {
+                    MensajeEstado = "No hay datos para exportar";
+                    return;
+                }
+
+                // Exportar como CSV por defecto
+                var rutaArchivo = await _exportacionService.ExportarEstadoPagosAsync(EstadosPago, "csv");
+                MensajeEstado = $"Archivo exportado exitosamente: {System.IO.Path.GetFileName(rutaArchivo)}";
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al exportar: {ex.Message}";
+            }
+            finally
+            {
+                Cargando = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task ExportarExcelAsync()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Exportando a Excel...";
+
+                if (!EstadosPago.Any())
+                {
+                    MensajeEstado = "No hay datos para exportar";
+                    return;
+                }
+
+                var rutaArchivo = await _exportacionService.ExportarEstadoPagosAsync(EstadosPago, "xlsx");
+                MensajeEstado = $"Archivo Excel exportado exitosamente: {System.IO.Path.GetFileName(rutaArchivo)}";
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al exportar: {ex.Message}";
+            }
+            finally
+            {
+                Cargando = false;
+            }
         }
     }
 }

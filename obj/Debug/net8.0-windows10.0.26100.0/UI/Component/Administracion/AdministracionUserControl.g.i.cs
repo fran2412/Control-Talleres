@@ -54,8 +54,8 @@ namespace ControlTalleresMVP.UI.Component.Administracion {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/administracion/administracionusercontrol." +
-                    "xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/component/administracion/administracionuse" +
+                    "rcontrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Administracion\AdministracionUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

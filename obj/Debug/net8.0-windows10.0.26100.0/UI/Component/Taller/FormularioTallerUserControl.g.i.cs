@@ -93,7 +93,8 @@ namespace ControlTalleresMVP.UI.Component.Taller {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/taller/formulariotallerusercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/component/taller/formulariotallerusercontr" +
+                    "ol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Taller\FormularioTallerUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

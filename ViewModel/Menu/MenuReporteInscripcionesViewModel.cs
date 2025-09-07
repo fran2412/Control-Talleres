@@ -6,6 +6,7 @@ using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Talleres;
 using ControlTalleresMVP.Services.Generaciones;
+using ControlTalleresMVP.Services.Exportacion;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private readonly ISedeService _sedeService;
         private readonly IPromotorService _promotorService;
         private readonly IGeneracionService _generacionService;
+        private readonly IExportacionService _exportacionService;
 
         [ObservableProperty] private ObservableCollection<InscripcionReporteDTO> inscripciones = new();
         [ObservableProperty] private ObservableCollection<TallerDTO> talleres = new();
@@ -43,13 +45,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
             ITallerService tallerService,
             ISedeService sedeService,
             IPromotorService promotorService,
-            IGeneracionService generacionService)
+            IGeneracionService generacionService,
+            IExportacionService exportacionService)
         {
             _inscripcionReporteService = inscripcionReporteService;
             _tallerService = tallerService;
             _sedeService = sedeService;
             _promotorService = promotorService;
             _generacionService = generacionService;
+            _exportacionService = exportacionService;
 
             // Cargar datos automáticamente al inicializar
             _ = Task.Run(async () => await CargarDatosAsync());
@@ -118,12 +122,43 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 Cargando = true;
                 MensajeEstado = "Exportando datos...";
-                
-                // Aquí se implementaría la exportación a Excel/PDF
-                // Por ahora solo mostramos un mensaje
-                MensajeEstado = "Funcionalidad de exportación en desarrollo";
-                
-                await Task.Delay(1000); // Simular proceso
+
+                if (!Inscripciones.Any())
+                {
+                    MensajeEstado = "No hay datos para exportar";
+                    return;
+                }
+
+                // Exportar como CSV por defecto
+                var rutaArchivo = await _exportacionService.ExportarInscripcionesAsync(Inscripciones, "csv");
+                MensajeEstado = $"Archivo exportado exitosamente: {System.IO.Path.GetFileName(rutaArchivo)}";
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al exportar: {ex.Message}";
+            }
+            finally
+            {
+                Cargando = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task ExportarExcelAsync()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Exportando a Excel...";
+
+                if (!Inscripciones.Any())
+                {
+                    MensajeEstado = "No hay datos para exportar";
+                    return;
+                }
+
+                var rutaArchivo = await _exportacionService.ExportarInscripcionesAsync(Inscripciones, "xlsx");
+                MensajeEstado = $"Archivo Excel exportado exitosamente: {System.IO.Path.GetFileName(rutaArchivo)}";
             }
             catch (Exception ex)
             {

@@ -82,6 +82,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- Fecha Desde -->
@@ -107,10 +108,15 @@
                                 Width="100" Height="35" Margin="5,0"
                                 Background="#6C757D" Foreground="White"/>
                         
-                        <Button Grid.Column="4" Content="Exportar" 
+                        <Button Grid.Column="4" Content="Exportar CSV" 
                                 Command="{Binding ExportarCommand}"
-                                Width="100" Height="35" Margin="5,0"
-                                Background="#28A745" Foreground="White"/>
+                                Width="120" Height="35" Margin="5,0"
+                                Background="#17A2B8" Foreground="White"/>
+                        
+                        <Button Grid.Column="5" Content="Exportar Excel" 
+                                Command="{Binding ExportarExcelCommand}"
+                                Width="120" Height="35" Margin="5,0"
+                                Background="#FD7E14" Foreground="White"/>
                     </Grid>
                 </Grid>
             </StackPanel>

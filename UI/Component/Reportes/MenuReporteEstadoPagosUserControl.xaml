@@ -64,6 +64,25 @@
                             Width="100" Height="35" Margin="5,0"
                             Background="#6C757D" Foreground="White"/>
                 </Grid>
+                
+                <!-- Segunda fila de botones de exportación -->
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button Grid.Column="1" Content="Exportar CSV" 
+                            Command="{Binding ExportarCommand}"
+                            Width="120" Height="35" Margin="5,0"
+                            Background="#17A2B8" Foreground="White"/>
+                    
+                    <Button Grid.Column="2" Content="Exportar Excel" 
+                            Command="{Binding ExportarExcelCommand}"
+                            Width="120" Height="35" Margin="5,0"
+                            Background="#FD7E14" Foreground="White"/>
+                </Grid>
             </StackPanel>
         </Border>
 
