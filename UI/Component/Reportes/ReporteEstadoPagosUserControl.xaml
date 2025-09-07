@@ -12,7 +12,8 @@
         <converters:NotNullConverter x:Key="NotNullConverter"/>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -323,4 +324,5 @@
             </StackPanel>
         </Border>
     </Grid>
+            </ScrollViewer>
 </UserControl>

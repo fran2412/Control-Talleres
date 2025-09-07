@@ -7,6 +7,12 @@
              mc:Ignorable="d" 
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
              d:DesignHeight="450" d:DesignWidth="800">
+    
+    <UserControl.Resources>
+        <local:TimeSpanConverter x:Key="TimeSpanConverter"/>
+        <local:DiaSemanaToTextoConverter x:Key="DiaSemanaToTextoConverter"/>
+        <local:NullableDateTimeConverter x:Key="NullableDateTimeConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="500" Height="auto">
             <Grid>
@@ -66,11 +72,11 @@
                         
                         <!-- Columnas manuales -->
                         <DataGridTextColumn Header="Nombre del taller" Binding="{Binding Nombre}" Width="*"/>
-                        <DataGridTextColumn Header="Día de clase" Binding="{Binding DiaSemana}" Width="120"/>
-                        <DataGridTextColumn Header="Horario de inicio" Binding="{Binding HorarioInicio, StringFormat=HH:mm}" Width="120"/>
-                        <DataGridTextColumn Header="Horario de fin" Binding="{Binding HorarioFin, StringFormat=HH:mm}" Width="120"/>
+                        <DataGridTextColumn Header="Día de clase" Binding="{Binding DiaSemana, Converter={StaticResource DiaSemanaToTextoConverter}}" Width="120"/>
+                        <DataGridTextColumn Header="Horario de inicio" Binding="{Binding HorarioInicio, Converter={StaticResource TimeSpanConverter}}" Width="120"/>
+                        <DataGridTextColumn Header="Horario de fin" Binding="{Binding HorarioFin, Converter={StaticResource TimeSpanConverter}}" Width="120"/>
                         <DataGridTextColumn Header="Fecha de inicio" Binding="{Binding FechaInicio, StringFormat=dd/MM/yyyy}" Width="120"/>
-                        <DataGridTextColumn Header="Fecha de fin" Binding="{Binding FechaFin, StringFormat=dd/MM/yyyy}" Width="120"/>
+                        <DataGridTextColumn Header="Fecha de fin" Binding="{Binding FechaFin, Converter={StaticResource NullableDateTimeConverter}}" Width="120"/>
                         <DataGridTextColumn Header="Fecha de alta" Binding="{Binding CreadoEn, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                     </DataGrid.Columns>
                 </DataGrid>

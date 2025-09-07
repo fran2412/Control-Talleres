@@ -54,6 +54,8 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             HorarioInicioTextBox.Text = FormatearHora(_tallerOriginal.HorarioInicio);
             HorarioFinTextBox.Text = FormatearHora(_tallerOriginal.HorarioFin);
             DiaSemanaComboBox.SelectedItem = _tallerOriginal.DiaSemana;
+            FechaInicioDatePicker.SelectedDate = _tallerOriginal.FechaInicio;
+            FechaFinDatePicker.SelectedDate = _tallerOriginal.FechaFin;
         }
 
         private string FormatearHora(TimeSpan hora)
@@ -223,6 +225,19 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 return false;
             }
             
+            if (FechaInicioDatePicker.SelectedDate == null)
+            {
+                _dialogService.Alerta("Debe seleccionar una fecha de inicio");
+                return false;
+            }
+            
+            if (FechaFinDatePicker.SelectedDate.HasValue && 
+                FechaFinDatePicker.SelectedDate.Value <= FechaInicioDatePicker.SelectedDate.Value)
+            {
+                _dialogService.Alerta("La fecha de fin debe ser posterior a la fecha de inicio");
+                return false;
+            }
+            
             return true;
         }
 
@@ -328,8 +343,8 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 HorarioInicio = ParsearHora(HorarioInicioTextBox.Text) ?? TimeSpan.Zero,
                 HorarioFin = ParsearHora(HorarioFinTextBox.Text) ?? TimeSpan.Zero,
                 DiaSemana = (DayOfWeek)DiaSemanaComboBox.SelectedItem,
-                FechaInicio = _tallerOriginal.FechaInicio,
-                FechaFin = _tallerOriginal.FechaFin,
+                FechaInicio = FechaInicioDatePicker.SelectedDate ?? DateTime.Today,
+                FechaFin = FechaFinDatePicker.SelectedDate,
                 CreadoEn = _tallerOriginal.CreadoEn
             };
         }

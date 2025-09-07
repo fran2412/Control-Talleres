@@ -12,7 +12,8 @@
         <converters:NotNullConverter x:Key="NotNullConverter"/>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -30,94 +31,65 @@
         <Border Grid.Row="1" Background="#F5F5F5" BorderBrush="#DDD" BorderThickness="1" 
                 CornerRadius="8" Padding="15" Margin="0,0,0,15">
             <StackPanel>
-                <TextBlock Text="Filtros" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,15"/>
-                
+                <TextBlock Text="Filtros" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Primera fila de filtros -->
-                    <Grid Grid.Row="0" Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Selección de Generación -->
-                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                            <TextBlock Text="Generación:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <ComboBox ItemsSource="{Binding Generaciones}" 
-                                      SelectedItem="{Binding GeneracionSeleccionada}"
-                                      DisplayMemberPath="Nombre"
-                                      Width="250" Height="35"/>
-                        </StackPanel>
+                    <!-- Selección de Generación -->
+                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                        <TextBlock Text="Generación:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding Generaciones}" 
+                                  SelectedItem="{Binding GeneracionSeleccionada}"
+                                  DisplayMemberPath="Nombre"
+                                  Width="250" Height="35"/>
+                    </StackPanel>
 
-                        <!-- Selección de Taller -->
-                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
-                            <TextBlock Text="Taller:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <ComboBox ItemsSource="{Binding Talleres}" 
-                                      SelectedItem="{Binding TallerSeleccionado}"
-                                      DisplayMemberPath="Nombre"
-                                      Width="250" Height="35"/>
-                        </StackPanel>
+                    <!-- Selección de Taller -->
+                    <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                        <TextBlock Text="Taller:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding Talleres}" 
+                                  SelectedItem="{Binding TallerSeleccionado}"
+                                  DisplayMemberPath="Nombre"
+                                  Width="250" Height="35"/>
+                    </StackPanel>
 
-                        <!-- Selección de Promotor -->
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Promotor:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <ComboBox ItemsSource="{Binding Promotores}" 
-                                      SelectedItem="{Binding PromotorSeleccionado}"
-                                      DisplayMemberPath="Nombre"
-                                      Width="250" Height="35"/>
-                        </StackPanel>
-                    </Grid>
+                    <!-- Selección de Promotor -->
+                    <StackPanel Grid.Column="2" Margin="0,0,15,0">
+                        <TextBlock Text="Promotor:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding Promotores}" 
+                                  SelectedItem="{Binding PromotorSeleccionado}"
+                                  DisplayMemberPath="Nombre"
+                                  Width="250" Height="35"/>
+                    </StackPanel>
 
-                    <!-- Segunda fila de filtros -->
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                    <!-- Botones -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <Button Content="Filtrar" 
+                            Command="{Binding FiltrarCommand}"
+                            Width="100" Height="35" Margin="5,0"
+                            Background="#007ACC" Foreground="White"/>
 
-                        <!-- Fecha Desde -->
-                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                            <TextBlock Text="Desde:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <DatePicker SelectedDate="{Binding FechaDesde}" Width="150" Height="35"/>
-                        </StackPanel>
+                        <Button Content="Limpiar" 
+                            Command="{Binding LimpiarFiltrosCommand}"
+                            Width="100" Height="35" Margin="5,0"
+                            Background="#6C757D" Foreground="White"/>
 
-                        <!-- Fecha Hasta -->
-                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
-                            <TextBlock Text="Hasta:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <DatePicker SelectedDate="{Binding FechaHasta}" Width="150" Height="35"/>
-                        </StackPanel>
+                        <Button Content="Exportar CSV" 
+                            Command="{Binding ExportarCommand}"
+                            Width="120" Height="35" Margin="5,0"
+                            Background="#17A2B8" Foreground="White"/>
 
-                        <!-- Botones -->
-                        <Button Grid.Column="2" Content="Filtrar" 
-                                Command="{Binding FiltrarCommand}"
-                                Width="100" Height="35" Margin="5,0"
-                                Background="#007ACC" Foreground="White"/>
-                        
-                        <Button Grid.Column="3" Content="Limpiar" 
-                                Command="{Binding LimpiarFiltrosCommand}"
-                                Width="100" Height="35" Margin="5,0"
-                                Background="#6C757D" Foreground="White"/>
-                        
-                        <Button Grid.Column="4" Content="Exportar CSV" 
-                                Command="{Binding ExportarCommand}"
-                                Width="120" Height="35" Margin="5,0"
-                                Background="#17A2B8" Foreground="White"/>
-                        
-                        <Button Grid.Column="5" Content="Exportar Excel" 
-                                Command="{Binding ExportarExcelCommand}"
-                                Width="120" Height="35" Margin="5,0"
-                                Background="#FD7E14" Foreground="White"/>
-                    </Grid>
+                        <Button Content="Exportar Excel" 
+                            Command="{Binding ExportarExcelCommand}"
+                            Width="120" Height="35" Margin="5,0"
+                            Background="#FD7E14" Foreground="White"/>
+                    </StackPanel>
                 </Grid>
             </StackPanel>
         </Border>
@@ -295,4 +267,5 @@
             </StackPanel>
         </Border>
     </Grid>
+            </ScrollViewer>
 </UserControl>
