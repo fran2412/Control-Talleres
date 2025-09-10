@@ -54,7 +54,15 @@ namespace ControlTalleresMVP
 
                 escuelaContext.Database.Migrate();
                 
-                // Crear backup automático al iniciar (solo si no existe uno del día actual)
+            }
+
+            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+        
+            using (var scope = ServiceProvider.CreateScope()){
+                var serviceProviderScope = scope.ServiceProvider;
+                var escuelaContext = serviceProviderScope.GetRequiredService<EscuelaContext>();
+
                 var backupService = serviceProviderScope.GetRequiredService<IBackupService>();
                 _ = Task.Run(async () =>
                 {
@@ -68,10 +76,8 @@ namespace ControlTalleresMVP
                         System.Diagnostics.Debug.WriteLine($"Error al crear backup automático: {ex.Message}");
                     }
                 });
-            }
 
-            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+            }
         }
         private void ConfigureServices(IServiceCollection services)
         {

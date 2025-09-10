@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="2000" d:DesignWidth="1500">
     <Grid>
-        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="Auto">
+        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" Height="Auto">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

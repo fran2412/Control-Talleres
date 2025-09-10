@@ -45,7 +45,21 @@ namespace ControlTalleresMVP.Services.Backup
                 // Verificar que el backup se creó correctamente
                 if (File.Exists(backupPath))
                 {
-                    System.Diagnostics.Debug.WriteLine($"Backup creado exitosamente: {backupPath}");
+                    var backupSize = new FileInfo(backupPath).Length;
+                    const long MINIMUM_BACKUP_SIZE = 50 * 1024; // 50 KB
+                    
+                    if (backupSize < MINIMUM_BACKUP_SIZE)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Backup demasiado pequeño ({backupSize} bytes). Cerrando aplicación para aplicar WAL.");
+                        
+                        // Eliminar backup inválido
+                        File.Delete(backupPath);
+                        
+                        // Cerrar la aplicación para forzar aplicación del WAL
+                        Environment.Exit(1);
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"Backup creado exitosamente: {backupPath} ({backupSize} bytes)");
                     return backupPath;
                 }
                 else
