@@ -64,7 +64,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 IsCreatingBackup = true;
                 
                 var backupPath = string.IsNullOrWhiteSpace(BackupName) 
-                    ? await _backupService.CreateAutomaticBackupAsync()
+                    ? await _backupService.CreateBackupAsync("Respaldo_Manual")
                     : await _backupService.CreateBackupAsync(BackupName);
 
                 _dialogService.Info($"Backup creado exitosamente:\n{Path.GetFileName(backupPath)}");
