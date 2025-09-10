@@ -34,9 +34,10 @@ namespace ControlTalleresMVP.Services.Backup
             {
                 // Generar nombre del backup
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var fechaFormateada = DateTime.Now.ToString("dd-MM-yyyy_HH");
                 var fileName = backupName != null 
-                    ? $"{backupName}_{timestamp}.db"
-                    : $"backup_{timestamp}.db";
+                    ? $"{backupName}.db"
+                    : $"Respaldo_Manual_{fechaFormateada}.db";
                 
                 var backupPath = Path.Combine(_backupDirectory, fileName);
 
@@ -80,12 +81,13 @@ namespace ControlTalleresMVP.Services.Backup
             try
             {
                 var today = DateTime.Now.ToString("yyyyMMdd");
-                var backupName = $"auto_{today}";
+                var fechaFormateada = DateTime.Now.ToString("dd-MM-yyyy_HH");
+                var backupName = $"Respaldo_Automatico_{fechaFormateada}";
                 
                 // Verificar si ya existe un backup automático del día actual
                 var existingBackups = await GetAvailableBackupsAsync();
                 var todayBackup = existingBackups.FirstOrDefault(b => 
-                    b.FileName.StartsWith($"auto_{today}") && 
+                    b.FileName.StartsWith($"Respaldo_Automatico_{DateTime.Now.ToString("dd-MM-yyyy")}") && 
                     b.CreatedDate.Date == DateTime.Now.Date);
                 
                 if (todayBackup != null)
@@ -145,7 +147,8 @@ namespace ControlTalleresMVP.Services.Backup
                     TryDeleteIfExists(dbPath + "-journal");
 
                     // 3) Respaldo de seguridad para rollback
-                    preRestore = await CreateBackupAsync("pre_restore", ct);
+                    var fechaRestore = DateTime.Now.ToString("dd-MM-yyyy_HH");
+                    preRestore = await CreateBackupAsync($"Respaldo_Antes_Restauracion_{fechaRestore}", ct);
                     System.Diagnostics.Debug.WriteLine($"Backup de seguridad creado: {preRestore}");
 
                     // 4) Copiar el backup a un archivo temporal en el MISMO directorio (misma unidad)
