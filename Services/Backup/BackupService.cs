@@ -52,13 +52,13 @@ namespace ControlTalleresMVP.Services.Backup
                     
                     if (backupSize < MINIMUM_BACKUP_SIZE)
                     {
-                        System.Diagnostics.Debug.WriteLine($"⚠️ Backup demasiado pequeño ({backupSize} bytes). Cerrando aplicación para aplicar WAL.");
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Backup demasiado pequeño ({backupSize} bytes). Reiniciando aplicación para aplicar WAL.");
                         
                         // Eliminar backup inválido
                         File.Delete(backupPath);
                         
-                        // Cerrar la aplicación para forzar aplicación del WAL
-                        Environment.Exit(1);
+                        // Reiniciar la aplicación para forzar aplicación del WAL
+                        RestartApplication();
                     }
                     
                     System.Diagnostics.Debug.WriteLine($"Backup creado exitosamente: {backupPath} ({backupSize} bytes)");
@@ -424,6 +424,49 @@ namespace ControlTalleresMVP.Services.Backup
             catch
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Reinicia la aplicación para aplicar el WAL y crear un backup válido
+        /// </summary>
+        private void RestartApplication()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔄 Iniciando reinicio de la aplicación...");
+                
+                // Obtener la ruta del ejecutable actual
+                var currentExecutable = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                var executablePath = currentExecutable.Replace(".dll", ".exe");
+                
+                // Si no existe el .exe, usar el .dll
+                if (!File.Exists(executablePath))
+                {
+                    executablePath = currentExecutable;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Ejecutando: {executablePath}");
+                
+                // Iniciar una nueva instancia de la aplicación
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = executablePath,
+                    UseShellExecute = true,
+                    WorkingDirectory = Path.GetDirectoryName(executablePath)
+                };
+                
+                System.Diagnostics.Process.Start(startInfo);
+                
+                // Cerrar la aplicación actual
+                System.Diagnostics.Debug.WriteLine("✅ Nueva instancia iniciada, cerrando aplicación actual...");
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al reiniciar la aplicación: {ex.Message}");
+                // Si falla el reinicio, cerrar normalmente
+                Environment.Exit(1);
             }
         }
 
