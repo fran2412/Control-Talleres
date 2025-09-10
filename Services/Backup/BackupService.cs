@@ -30,6 +30,11 @@ namespace ControlTalleresMVP.Services.Backup
 
         public async Task<string> CreateBackupAsync(string? backupName = null, CancellationToken ct = default)
         {
+            return await CreateBackupAsync(backupName, true, ct);
+        }
+
+        public async Task<string> CreateBackupAsync(string? backupName, bool optimizeDatabase, CancellationToken ct = default)
+        {
             try
             {
                 // Generar nombre del backup
@@ -37,9 +42,15 @@ namespace ControlTalleresMVP.Services.Backup
                 var fechaFormateada = DateTime.Now.ToString("dd-MM-yyyy_HH");
                 var fileName = backupName != null 
                     ? $"{backupName}.db"
-                    : $"Respaldo_Manual_{fechaFormateada}.db";
+                    : $"Copia_Seguridad_Manual_{fechaFormateada}.db";
                 
                 var backupPath = Path.Combine(_backupDirectory, fileName);
+
+                // Ejecutar PRAGMA solo si se solicita optimización (backups manuales)
+                if (optimizeDatabase)
+                {
+                    await OptimizeDatabaseForBackupAsync(ct);
+                }
 
                 // Crear backup copiando el archivo de la base de datos
                 await Task.Run(() => File.Copy(AppPaths.DbPath, backupPath, true), ct);
@@ -82,12 +93,12 @@ namespace ControlTalleresMVP.Services.Backup
             {
                 var today = DateTime.Now.ToString("yyyyMMdd");
                 var fechaFormateada = DateTime.Now.ToString("dd-MM-yyyy_HH");
-                var backupName = $"Respaldo_Automatico_{fechaFormateada}";
+                var backupName = $"Copia_Seguridad_Automatica_{fechaFormateada}";
                 
                 // Verificar si ya existe un backup automático del día actual
                 var existingBackups = await GetAvailableBackupsAsync();
                 var todayBackup = existingBackups.FirstOrDefault(b => 
-                    b.FileName.StartsWith($"Respaldo_Automatico_{DateTime.Now.ToString("dd-MM-yyyy")}") && 
+                    b.FileName.StartsWith($"Copia_Seguridad_Automatica_{DateTime.Now.ToString("dd-MM-yyyy")}") && 
                     b.CreatedDate.Date == DateTime.Now.Date);
                 
                 if (todayBackup != null)
@@ -146,9 +157,9 @@ namespace ControlTalleresMVP.Services.Backup
                     TryDeleteIfExists(dbPath + "-shm");
                     TryDeleteIfExists(dbPath + "-journal");
 
-                    // 3) Respaldo de seguridad para rollback
+                    // 3) Respaldo de seguridad para rollback (sin optimización para evitar conflictos)
                     var fechaRestore = DateTime.Now.ToString("dd-MM-yyyy_HH");
-                    preRestore = await CreateBackupAsync($"Respaldo_Antes_Restauracion_{fechaRestore}", ct);
+                    preRestore = await CreateBackupAsync($"Copia_Seguridad_Pre_Restauracion_{fechaRestore}", false, ct);
                     System.Diagnostics.Debug.WriteLine($"Backup de seguridad creado: {preRestore}");
 
                     // 4) Copiar el backup a un archivo temporal en el MISMO directorio (misma unidad)
@@ -430,6 +441,27 @@ namespace ControlTalleresMVP.Services.Backup
             catch
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Fuerza el checkpoint del WAL para que los archivos auxiliares reflejen los cambios en el .db
+        /// </summary>
+        private async Task OptimizeDatabaseForBackupAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🔄 Aplicando cambios del WAL al archivo principal...");
+                
+                // Forzar checkpoint del WAL para incluir todos los cambios pendientes
+                await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(FULL)", ct);
+                
+                System.Diagnostics.Debug.WriteLine("✅ Cambios del WAL aplicados al archivo principal");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"⚠️ Error al aplicar cambios del WAL: {ex.Message}");
+                // No lanzar excepción, continuar con el backup
             }
         }
 
