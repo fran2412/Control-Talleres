@@ -193,6 +193,11 @@ namespace ControlTalleresMVP.Services.Backup
                     }
 
                     System.Diagnostics.Debug.WriteLine($"Base de datos restaurada exitosamente desde: {backupPath}");
+                    
+                    // Reiniciar la aplicación después de la restauración exitosa
+                    System.Diagnostics.Debug.WriteLine("🔄 Reiniciando aplicación después de restauración exitosa...");
+                    RestartApplication();
+                    
                     return true;
                 }
                 catch (OperationCanceledException) 
@@ -294,7 +299,8 @@ namespace ControlTalleresMVP.Services.Backup
                     backups.Add(backupInfo);
                 }
 
-                return backups;
+                // Ordenar por fecha de creación (más recientes primero) para el DataGrid
+                return backups.OrderByDescending(b => b.CreatedDate).ToList();
             }
             catch (Exception ex)
             {
