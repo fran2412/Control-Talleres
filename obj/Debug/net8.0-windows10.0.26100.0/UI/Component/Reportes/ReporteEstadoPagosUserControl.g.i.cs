@@ -53,8 +53,8 @@ namespace ControlTalleresMVP.UI.Component.Reportes {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/component/reportes/reporteestadopagosuserc" +
-                    "ontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/reportes/reporteestadopagosusercontrol.xa" +
+                    "ml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Reportes\ReporteEstadoPagosUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

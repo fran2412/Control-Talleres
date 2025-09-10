@@ -29,12 +29,19 @@ namespace ControlTalleresMVP.Services.Inscripciones
             var hoy = DateTime.Today;
             var hastaFiltro = hasta ?? hoy; // Si no se especifica hasta, usar fecha actual
             
+            // Ajustar las fechas para incluir todo el día
+            var desdeFiltro = desde?.Date ?? DateTime.MinValue;
+            var hastaFiltroCompleto = hastaFiltro.Date.AddDays(1).AddTicks(-1); // Hasta el final del día
+            
+            // Log de depuración para entender los filtros aplicados
+            System.Diagnostics.Debug.WriteLine($"Filtros aplicados - TallerId: {tallerId}, PromotorId: {promotorId}, GeneracionId: {generacionId}, Desde: {desdeFiltro}, Hasta: {hastaFiltroCompleto}");
+            
             var query = from i in _escuelaContext.Inscripciones.AsNoTracking()
                         where !i.Eliminado
                               && (tallerId == null || i.TallerId == tallerId)
                               && (generacionId == null || i.GeneracionId == generacionId)
-                              && (desde == null || i.Fecha >= desde.Value.Date)
-                              && i.Fecha <= hastaFiltro.Date // Siempre filtrar hasta la fecha actual o la especificada
+                              && (desde == null || i.Fecha >= desdeFiltro)
+                              && i.Fecha <= hastaFiltroCompleto // Incluir todo el día especificado
                         join a in _escuelaContext.Alumnos.AsNoTracking() on i.AlumnoId equals a.AlumnoId
                         join t in _escuelaContext.Talleres.AsNoTracking() on i.TallerId equals t.TallerId
                         join p in _escuelaContext.Promotores.AsNoTracking() on a.PromotorId equals p.PromotorId
@@ -57,7 +64,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                             FechaFinTaller = t.FechaFin,
                             NombreGeneracion = g.Nombre,
                             DiasTranscurridos = (DateTime.Today - i.Fecha).Days,
-                            DiasRestantes = t.FechaFin.HasValue ? (t.FechaFin.Value - DateTime.Today).Days : null,
+                            DiasRestantes = t.FechaFin.HasValue ? (t.FechaFin.Value - DateTime.Today).Days : (int?)null,
                             ProgresoPorcentaje = CalcularProgreso(i.Fecha, t.FechaInicio, t.FechaFin)
                         };
 
@@ -70,7 +77,9 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     .FirstOrDefault());
             }
 
-            return await query.OrderByDescending(x => x.FechaInscripcion).ToArrayAsync(ct);
+            var resultados = await query.OrderByDescending(x => x.FechaInscripcion).ToArrayAsync(ct);
+            System.Diagnostics.Debug.WriteLine($"Total de inscripciones encontradas: {resultados.Length}");
+            return resultados;
         }
 
         public async Task<InscripcionEstadisticasDTO> ObtenerEstadisticasInscripcionesAsync(

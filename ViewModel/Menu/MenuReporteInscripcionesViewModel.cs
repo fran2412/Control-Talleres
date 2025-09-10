@@ -32,7 +32,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private PromotorDTO? promotorSeleccionado;
         [ObservableProperty] private GeneracionDTO? generacionSeleccionada;
         [ObservableProperty] private DateTime fechaDesde = DateTime.Today.AddMonths(-1);
-        [ObservableProperty] private DateTime fechaHasta = DateTime.Today.AddDays(1); // Siempre hasta la fecha actual
+        [ObservableProperty] private DateTime fechaHasta = DateTime.Today; // Incluye todo el día actual
         
         [ObservableProperty] private bool cargando = false;
         [ObservableProperty] private string? mensajeEstado;
@@ -226,6 +226,31 @@ namespace ControlTalleresMVP.ViewModel.Menu
             OnPropertyChanged(nameof(MontoTotalInscripciones));
             OnPropertyChanged(nameof(MontoTotalRecaudado));
             OnPropertyChanged(nameof(MontoTotalPendiente));
+        }
+
+        // Métodos para actualizar automáticamente cuando cambian las fechas
+        partial void OnFechaDesdeChanged(DateTime value)
+        {
+            // Si la fecha desde es mayor que la fecha hasta, ajustar la fecha hasta
+            if (value > FechaHasta)
+            {
+                FechaHasta = value;
+            }
+            
+            // Recargar datos automáticamente
+            _ = Task.Run(async () => await CargarInscripcionesAsync());
+        }
+
+        partial void OnFechaHastaChanged(DateTime value)
+        {
+            // Si la fecha hasta es menor que la fecha desde, ajustar la fecha desde
+            if (value < FechaDesde)
+            {
+                FechaDesde = value;
+            }
+            
+            // Recargar datos automáticamente
+            _ = Task.Run(async () => await CargarInscripcionesAsync());
         }
     }
 }

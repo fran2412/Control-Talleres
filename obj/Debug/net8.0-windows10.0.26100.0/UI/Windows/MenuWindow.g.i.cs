@@ -54,7 +54,7 @@ namespace ControlTalleresMVP.UI.Windows {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/windows/menuwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/windows/menuwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\UI\Windows\MenuWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
