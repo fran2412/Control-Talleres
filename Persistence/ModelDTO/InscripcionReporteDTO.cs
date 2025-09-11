@@ -33,6 +33,13 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Estado")]
         public string Estado { get; set; } = "";
         
+        [Display(Name = "Estado de Pago")]
+        public string EstadoPago { get; set; } = "";
+        
+        [Display(Name = "Monto Pagado")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        public decimal MontoPagado { get; set; }
+        
         [Display(Name = "Día de la Semana")]
         public string DiaSemana { get; set; } = "";
         

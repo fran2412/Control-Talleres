@@ -13,6 +13,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             int? generacionId = null,
             DateTime? desde = null,
             DateTime? hasta = null,
+            bool incluirTalleresEliminados = false,
             CancellationToken ct = default);
 
         Task<InscripcionEstadisticasDTO> ObtenerEstadisticasInscripcionesAsync(
@@ -20,6 +21,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             int? generacionId = null,
             DateTime? desde = null,
             DateTime? hasta = null,
+            bool incluirTalleresEliminados = false,
             CancellationToken ct = default);
     }
 }

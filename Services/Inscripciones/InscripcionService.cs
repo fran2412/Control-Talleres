@@ -180,8 +180,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                  motivo = motivoCancelacion;
             }
 
-            // Cancelar la inscripción
-            inscripcion.SaldoActual = 0;
+            // Cancelar la inscripción (mantener SaldoActual original)
             inscripcion.MotivoCancelacion = motivo;
             inscripcion.CanceladaEn = DateTime.Now;
             inscripcion.Eliminado = true;

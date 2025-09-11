@@ -99,13 +99,14 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- Segunda fila: Filtros de fecha -->
+                    <!-- Segunda fila: Filtros de fecha y opciones -->
                     <Grid Grid.Row="1" Margin="0,15,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- Fecha Desde -->
@@ -125,12 +126,20 @@
                         </StackPanel>
 
                         <!-- Información de rango de fechas -->
-                        <StackPanel Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Margin="15,0,0,0">
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="15,0,0,0">
                             <TextBlock Text="💡 Tip: Selecciona un rango de fechas para filtrar las inscripciones" 
                                        FontStyle="Italic" 
                                        Foreground="#6C757D" 
                                        FontSize="12"
                                        TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <!-- Checkbox para incluir talleres eliminados -->
+                        <StackPanel Grid.Column="3" Margin="15,0,0,0" VerticalAlignment="Center">
+                            <CheckBox Content="Incluir talleres eliminados" 
+                                      IsChecked="{Binding IncluirTalleresEliminados}"
+                                      FontWeight="SemiBold"
+                                      Foreground="#495057"/>
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -274,9 +283,13 @@
                 <DataGridTextColumn Header="Saldo" Binding="{Binding SaldoActual, StringFormat=C2}" 
                                     Width="80" IsReadOnly="True"/>
                 
-                <!-- Estado -->
-                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" 
-                                    Width="100" IsReadOnly="True"/>
+                <!-- Monto Pagado -->
+                <DataGridTextColumn Header="Pagado" Binding="{Binding MontoPagado, StringFormat=C2}" 
+                                    Width="80" IsReadOnly="True"/>
+                
+                <!-- Estado de Pago -->
+                <DataGridTextColumn Header="Estado de Pago" Binding="{Binding EstadoPago}" 
+                                    Width="180" IsReadOnly="True"/>
                 
                 <!-- Progreso -->
                 <DataGridTextColumn Header="Progreso" Binding="{Binding ProgresoPorcentaje, StringFormat={}{0:F1}%}" 

@@ -391,17 +391,18 @@ namespace ControlTalleresMVP.Services.Clases
             // Obtener costo de clase desde configuración
             var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
 
-            // Obtener talleres con sus fechas de inicio y fin
+            // Obtener talleres con sus fechas de inicio y fin (incluyendo eliminados)
             var talleresQuery = _escuelaContext.Talleres
                 .AsNoTracking()
-                .Where(t => !t.Eliminado && (tallerId == null || t.TallerId == tallerId))
+                .Where(t => tallerId == null || t.TallerId == tallerId)
                 .Select(t => new
                 {
                     t.TallerId,
                     t.Nombre,
                     t.FechaInicio,
                     t.FechaFin,
-                    t.DiaSemana
+                    t.DiaSemana,
+                    t.Eliminado
                 });
 
             var talleres = await talleresQuery.ToListAsync(ct);
@@ -418,57 +419,104 @@ namespace ControlTalleresMVP.Services.Clases
                 
                 if (fechasClases.Count == 0) continue;
 
-                // Obtener alumnos inscritos en este taller
+                // Obtener alumnos inscritos en este taller (incluyendo cancelados si el taller está eliminado)
                 var alumnosQuery = _escuelaContext.Inscripciones
                     .AsNoTracking()
                     .Where(i => i.TallerId == taller.TallerId
                                 && i.GeneracionId == generacion.GeneracionId
                                 && !i.Eliminado
-                                && i.Estado != EstadoInscripcion.Cancelada
+                                && (taller.Eliminado || i.Estado != EstadoInscripcion.Cancelada)
                                 && (alumnoId == null || i.AlumnoId == alumnoId))
-                    .Select(i => new { i.AlumnoId, i.Alumno!.Nombre });
+                    .Select(i => new { i.AlumnoId, i.Alumno!.Nombre, i.Estado, i.SaldoActual });
 
                 var alumnos = await alumnosQuery.ToListAsync(ct);
 
                 foreach (var alumno in alumnos)
                 {
-                    // Obtener clases pagadas de este alumno en este taller
-                    var clasesPagadas = await _escuelaContext.Cargos
+                    // Verificar si la inscripción está cancelada
+                    var inscripcionCancelada = alumno.Estado == EstadoInscripcion.Cancelada;
+                    
+                    // Obtener todos los cargos de clases de este alumno en este taller
+                    var cargosClases = await _escuelaContext.Cargos
                         .AsNoTracking()
                         .Where(c => c.AlumnoId == alumno.AlumnoId
                                     && c.ClaseId != null
                                     && c.Clase!.TallerId == taller.TallerId
-                                    && c.Estado == EstadoCargo.Pagado)
-                        .Select(c => new { c.Clase!.Fecha, c.Monto })
+                                    && (taller.Eliminado || c.Estado != EstadoCargo.Anulado))
+                        .Select(c => new { 
+                            c.Clase!.Fecha, 
+                            c.Monto, 
+                            c.SaldoActual,
+                            c.Estado,
+                            MontoPagado = c.Monto - c.SaldoActual
+                        })
                         .ToListAsync(ct);
 
-                    // Obtener clases pendientes de este alumno en este taller
-                    var clasesPendientes = await _escuelaContext.Cargos
-                        .AsNoTracking()
-                        .Where(c => c.AlumnoId == alumno.AlumnoId
-                                    && c.ClaseId != null
-                                    && c.Clase!.TallerId == taller.TallerId
-                                    && c.Estado == EstadoCargo.Pendiente
-                                    && c.SaldoActual > 0)
-                        .Select(c => new { c.Clase!.Fecha, c.SaldoActual })
-                        .ToListAsync(ct);
+                    // Para inscripciones canceladas, no considerar cargos en cálculos de pagos
+                    // pero sí mostrar la información histórica
+                    var clasesPagadas = inscripcionCancelada 
+                        ? cargosClases.Where(c => false).ToList() // No hay clases pagadas si la inscripción está cancelada
+                        : taller.Eliminado 
+                            ? cargosClases.Where(c => c.MontoPagado > 0 && c.Estado != EstadoCargo.Anulado).ToList()
+                            : cargosClases.Where(c => c.MontoPagado > 0).ToList();
+                    
+                    var clasesPendientes = inscripcionCancelada 
+                        ? cargosClases.Where(c => false).ToList() // No hay clases pendientes si la inscripción está cancelada
+                        : taller.Eliminado 
+                            ? cargosClases.Where(c => c.SaldoActual > 0 && c.Estado != EstadoCargo.Anulado).ToList()
+                            : cargosClases.Where(c => c.SaldoActual > 0).ToList();
 
                     // Calcular estadísticas
                     var clasesPagadasCount = clasesPagadas.Count;
                     var clasesPendientesCount = clasesPendientes.Count;
                     var clasesTotales = fechasClases.Count;
-                    var montoPagado = clasesPagadas.Sum(c => c.Monto);
-                    var montoPendiente = clasesPendientes.Sum(c => c.SaldoActual);
+                    
+                    // Calcular monto pagado
+                    var montoPagado = inscripcionCancelada 
+                        ? 0 // No hay pagos si la inscripción está cancelada
+                        : clasesPagadas.Sum(c => c.MontoPagado);
+                    
+                    // Calcular monto pendiente
+                    var montoPendiente = inscripcionCancelada 
+                        ? 0 // No hay deuda pendiente si la inscripción está cancelada
+                        : taller.Eliminado ? 0 : clasesPendientes.Sum(c => c.SaldoActual);
+                    
                     var montoTotal = clasesTotales * costoClase;
                     
+                    // Calcular clases completamente pagadas vs parcialmente pagadas
+                    // Si el taller está eliminado, no considerar cargos anulados como completamente pagados
+                    var clasesCompletamentePagadas = taller.Eliminado 
+                        ? cargosClases.Count(c => c.SaldoActual == 0 && c.Estado != EstadoCargo.Anulado)
+                        : cargosClases.Count(c => c.SaldoActual == 0);
+                    var clasesParcialmentePagadas = cargosClases.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
+                    var clasesSinPagos = cargosClases.Count(c => c.MontoPagado == 0);
+                    
                     // Verificar si se pagaron al menos todas las clases que se deben
-                    var todasLasClasesPagadas = clasesPagadasCount >= clasesTotales && clasesPendientesCount == 0;
+                    var todasLasClasesPagadas = clasesCompletamentePagadas >= clasesTotales && clasesPendientesCount == 0;
                     // Verificar si se pagó más de lo debido
-                    var pagoExcedido = clasesPagadasCount > clasesTotales;
+                    var pagoExcedido = clasesCompletamentePagadas > clasesTotales;
 
                     // Determinar estado del pago
                     string estadoPago;
-                    if (todasLasClasesPagadas && !pagoExcedido)
+                    if (inscripcionCancelada)
+                    {
+                        // Para inscripciones canceladas, mostrar estado específico
+                        estadoPago = "🚫 Inscripción cancelada";
+                    }
+                    else if (taller.Eliminado)
+                    {
+                        // Para talleres eliminados, mostrar solo lo que realmente pagó
+                        if (montoPagado > 0)
+                        {
+                            var porcentajePagado = montoTotal > 0 ? (montoPagado / montoTotal) * 100 : 0;
+                            estadoPago = $"⚠️ Taller eliminado - Pagó {montoPagado:C2} ({porcentajePagado:F1}%)";
+                        }
+                        else
+                        {
+                            estadoPago = "❌ Taller eliminado - Sin pagos";
+                        }
+                    }
+                    else if (todasLasClasesPagadas && !pagoExcedido)
                     {
                         estadoPago = "✅ Todas las clases pagadas";
                     }
@@ -476,17 +524,25 @@ namespace ControlTalleresMVP.Services.Clases
                     {
                         estadoPago = "✅ Todas las clases pagadas (con exceso)";
                     }
-                    else if (clasesPagadasCount > 0)
+                    else if (clasesCompletamentePagadas > 0 || clasesParcialmentePagadas > 0)
                     {
-                        estadoPago = $"⚠️ Parcialmente pagado ({clasesPagadasCount}/{clasesTotales})";
+                        var totalConPagos = clasesCompletamentePagadas + clasesParcialmentePagadas;
+                        if (clasesParcialmentePagadas > 0)
+                        {
+                            estadoPago = $"⚠️ Parcialmente pagado ({clasesCompletamentePagadas} completas, {clasesParcialmentePagadas} parciales de {clasesTotales})";
+                        }
+                        else
+                        {
+                            estadoPago = $"⚠️ Parcialmente pagado ({clasesCompletamentePagadas}/{clasesTotales})";
+                        }
                     }
                     else
                     {
                         estadoPago = "❌ Sin pagos";
                     }
 
-                    // Si el taller tiene fecha fin y ya terminó, ajustar el estado
-                    if (taller.FechaFin.HasValue && hoy > taller.FechaFin.Value)
+                    // Si el taller tiene fecha fin y ya terminó, ajustar el estado (solo si no está eliminado)
+                    if (!taller.Eliminado && taller.FechaFin.HasValue && hoy > taller.FechaFin.Value)
                     {
                         if (todasLasClasesPagadas && !pagoExcedido)
                         {
@@ -507,7 +563,7 @@ namespace ControlTalleresMVP.Services.Clases
                         AlumnoId = alumno.AlumnoId,
                         NombreAlumno = alumno.Nombre,
                         TallerId = taller.TallerId,
-                        NombreTaller = taller.Nombre,
+                        NombreTaller = taller.Eliminado ? $"{taller.Nombre} (Eliminado)" : taller.Nombre,
                         FechaInicio = taller.FechaInicio,
                         FechaFin = taller.FechaFin,
                         ClasesTotales = clasesTotales,

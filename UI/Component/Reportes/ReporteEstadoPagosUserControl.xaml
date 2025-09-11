@@ -302,7 +302,7 @@
                 
                 <!-- Estado -->
                 <DataGridTextColumn Header="Estado" Binding="{Binding EstadoPago}" 
-                                    Width="200" IsReadOnly="True"/>
+                                    Width="*" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
 

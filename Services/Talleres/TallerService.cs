@@ -72,13 +72,13 @@ namespace ControlTalleresMVP.Services.Talleres
                 c.ActualizadoEn = now;
             }
 
-            // 5) Cancelar inscripciones y dejar saldo en 0 (sin reembolsos)
+            // 5) Cancelar inscripciones (mantener SaldoActual original)
             foreach (var i in inscripciones)
             {
                 i.Estado = EstadoInscripcion.Cancelada;
                 i.CanceladaEn = now;
                 i.MotivoCancelacion = "Taller eliminado";
-                i.SaldoActual = 0m;
+                // Mantener SaldoActual original - no se perdona la deuda en la inscripción
                 i.ActualizadoEn = now;
                 // i.Eliminado = true;
                 // i.EliminadoEn = now;

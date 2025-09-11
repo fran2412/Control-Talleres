@@ -37,6 +37,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private bool cargando = false;
         [ObservableProperty] private string? mensajeEstado;
         [ObservableProperty] private InscripcionEstadisticasDTO estadisticas = new();
+        [ObservableProperty] private bool incluirTalleresEliminados = false;
 
         public string TituloEncabezado { get; set; } = "Reporte de Inscripciones";
 
@@ -182,7 +183,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     PromotorSeleccionado?.Id,
                     GeneracionSeleccionada?.Id,
                     FechaDesde,
-                    FechaHasta); // Ya está limitado a fecha actual en el servicio
+                    FechaHasta,
+                    IncluirTalleresEliminados); // Ya está limitado a fecha actual en el servicio
 
                 Inscripciones = new ObservableCollection<InscripcionReporteDTO>(inscripcionesList);
 
@@ -191,7 +193,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     TallerSeleccionado?.Id,
                     GeneracionSeleccionada?.Id,
                     FechaDesde,
-                    FechaHasta);
+                    FechaHasta,
+                    IncluirTalleresEliminados);
 
                 Estadisticas = estadisticasData;
 
@@ -250,6 +253,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
             
             // Recargar datos automáticamente
+            _ = Task.Run(async () => await CargarInscripcionesAsync());
+        }
+
+        // Método para manejar el cambio del checkbox de talleres eliminados
+        partial void OnIncluirTalleresEliminadosChanged(bool value)
+        {
+            // Recargar datos cuando cambie el filtro
             _ = Task.Run(async () => await CargarInscripcionesAsync());
         }
     }

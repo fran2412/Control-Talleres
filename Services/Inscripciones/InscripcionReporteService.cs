@@ -24,6 +24,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             int? generacionId = null,
             DateTime? desde = null,
             DateTime? hasta = null,
+            bool incluirTalleresEliminados = false,
             CancellationToken ct = default)
         {
             var hoy = DateTime.Today;
@@ -44,6 +45,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                               && i.Fecha <= hastaFiltroCompleto // Incluir todo el día especificado
                         join a in _escuelaContext.Alumnos.AsNoTracking() on i.AlumnoId equals a.AlumnoId
                         join t in _escuelaContext.Talleres.AsNoTracking() on i.TallerId equals t.TallerId
+                        where incluirTalleresEliminados || !t.Eliminado
                         join p in _escuelaContext.Promotores.AsNoTracking() on a.PromotorId equals p.PromotorId
                         join g in _escuelaContext.Generaciones.AsNoTracking() on i.GeneracionId equals g.GeneracionId
                         join s in _escuelaContext.Sedes.AsNoTracking() on a.SedeId equals s.SedeId into sedeGroup
@@ -52,19 +54,21 @@ namespace ControlTalleresMVP.Services.Inscripciones
                         {
                             InscripcionId = i.InscripcionId,
                             NombreAlumno = a.Nombre,
-                            NombreTaller = t.Nombre,
+                            NombreTaller = t.Eliminado ? $"{t.Nombre} (Eliminado)" : t.Nombre,
                             NombreSede = s != null ? s.Nombre : "Sin Sede",
                             NombrePromotor = p.Nombre,
                             FechaInscripcion = i.Fecha,
                             Costo = i.Costo,
                             SaldoActual = i.SaldoActual,
                             Estado = i.Estado.ToString(),
+                            EstadoPago = CalcularEstadoPago(i.Costo, i.SaldoActual),
+                            MontoPagado = i.Costo - i.SaldoActual,
                             DiaSemana = t.DiaSemana.ToString(),
                             FechaInicioTaller = t.FechaInicio,
                             FechaFinTaller = t.FechaFin,
                             NombreGeneracion = g.Nombre,
                             DiasTranscurridos = (DateTime.Today - i.Fecha).Days,
-                            DiasRestantes = t.FechaFin.HasValue ? (t.FechaFin.Value - DateTime.Today).Days : (int?)null,
+                            DiasRestantes = t.FechaFin.HasValue ? (t.FechaFin.Value - DateTime.Today).Days : null,
                             ProgresoPorcentaje = CalcularProgreso(i.Fecha, t.FechaInicio, t.FechaFin)
                         };
 
@@ -87,9 +91,10 @@ namespace ControlTalleresMVP.Services.Inscripciones
             int? generacionId = null,
             DateTime? desde = null,
             DateTime? hasta = null,
+            bool incluirTalleresEliminados = false,
             CancellationToken ct = default)
         {
-            var inscripciones = await ObtenerInscripcionesReporteAsync(tallerId, null, generacionId, desde, hasta, ct);
+            var inscripciones = await ObtenerInscripcionesReporteAsync(tallerId, null, generacionId, desde, hasta, incluirTalleresEliminados, ct);
 
             var estadisticas = new InscripcionEstadisticasDTO
             {
@@ -151,6 +156,25 @@ namespace ControlTalleresMVP.Services.Inscripciones
             
             var progreso = (decimal)diasTranscurridos / diasTotales * 100;
             return Math.Max(0, Math.Min(100, progreso));
+        }
+
+        private static string CalcularEstadoPago(decimal costo, decimal saldoActual)
+        {
+            var montoPagado = costo - saldoActual;
+            var porcentajePagado = costo > 0 ? (montoPagado / costo) * 100 : 0;
+
+            if (saldoActual <= 0)
+            {
+                return "✅ Completamente pagado";
+            }
+            else if (montoPagado > 0)
+            {
+                return $"⚠️ Parcialmente pagado ({porcentajePagado:F1}%)";
+            }
+            else
+            {
+                return "❌ Sin pagos";
+            }
         }
     }
 }
