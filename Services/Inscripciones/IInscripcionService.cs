@@ -30,6 +30,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             DateTime? desde = null,
             DateTime? hasta = null,
             string? filtro = null,
+            bool incluirTalleresEliminados = false,
             CancellationToken ct = default);
     }
 }

@@ -5,8 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ControlTalleresMVP.UI.Component.Inscripcion"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+             xmlns:converters="clr-namespace:ControlTalleresMVP.Helpers.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="Auto">
             <Grid>
@@ -51,6 +56,14 @@
                         <DatePicker SelectedDate="{Binding MenuInscripcionRegistrosVM.FechaHastaRegistros, Mode=TwoWay}"
                                     Width="140"/>
                     </StackPanel>
+
+                    <!-- Checkbox para incluir talleres eliminados -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <CheckBox Content="Incluir talleres eliminados" 
+                                  IsChecked="{Binding MenuInscripcionRegistrosVM.IncluirTalleresEliminados, Mode=TwoWay}"
+                                  FontWeight="SemiBold"
+                                  Foreground="#495057"/>
+                    </StackPanel>
                 </Grid>
 
                 <!-- DataGrid -->
@@ -92,10 +105,23 @@
                 </DataGrid>
 
                 <!-- Totales -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0,20,20">
-                    <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoInscripciones, StringFormat=Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                    <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoInscripciones, StringFormat=Pagado: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                    <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoInscripciones, StringFormat=Saldo: {0:C}}"  FontSize="16" FontWeight="SemiBold"/>
+                <StackPanel Grid.Row="2" Margin="20,0,20,20">
+                    <!-- Totales principales (talleres activos) -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoInscripciones, StringFormat=Monto Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoInscripciones, StringFormat=Recaudado: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoInscripciones, StringFormat=Pendiente: {0:C}}"  FontSize="16" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    
+                    <!-- Totales incluyendo eliminados (solo cuando el filtro está activo) -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" 
+                                Visibility="{Binding MenuInscripcionRegistrosVM.IncluirTalleresEliminados, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="Incluyendo eliminados:" FontSize="12" FontWeight="SemiBold" 
+                                   Foreground="#6C757D" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoConEliminados, StringFormat=Total: {0:C}}"  FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#6C757D"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoConEliminados, StringFormat=Recaudado: {0:C}}" FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#6C757D"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoConEliminados, StringFormat=No Cobrado: {0:C}}"  FontSize="14" FontWeight="SemiBold" Foreground="#DC3545"/>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>

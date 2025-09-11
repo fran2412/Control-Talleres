@@ -283,6 +283,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             DateTime? desde = null,
             DateTime? hasta = null,
             string? filtro = null,
+            bool incluirTalleresEliminados = false,
             CancellationToken ct = default)
         {
             var genActualId = generacionId ?? _generacionService.ObtenerGeneracionActual()?.GeneracionId;
@@ -322,6 +323,12 @@ namespace ControlTalleresMVP.Services.Inscripciones
                                  x.i.Estado.ToString().ToLower().Contains(filtroLower));
             }
 
+            // Aplicar filtro de talleres eliminados
+            if (!incluirTalleresEliminados)
+            {
+                q = q.Where(x => !x.ta.Eliminado);
+            }
+
             // Agrupamos por inscripción (una fila por inscripción)
             var lista = await (
                 from x in q
@@ -338,6 +345,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     x.i.MotivoCancelacion,
                     x.i.CanceladaEn,
                     TallerNombre = x.ta.Nombre,
+                    TallerEliminado = x.ta.Eliminado,
                     AlumnoNombre = x.al.Nombre,
                     GeneracionNombre = x.ge.Nombre
                 }
@@ -350,6 +358,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     GeneracionId = g.Key.GeneracionId,
                     FechaInscripcion = g.Key.Fecha,
                     TallerNombre = g.Key.TallerNombre,
+                    TallerEliminado = g.Key.TallerEliminado,
                     AlumnoNombre = g.Key.AlumnoNombre,
                     GeneracionNombre = g.Key.GeneracionNombre,
                     Monto = g.Key.Costo,

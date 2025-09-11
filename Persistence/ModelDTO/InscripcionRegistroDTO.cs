@@ -20,6 +20,9 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Taller")]
         public string TallerNombre { get; set; } = string.Empty;
 
+        [ScaffoldColumn(false)]
+        public bool TallerEliminado { get; set; }
+
         [Display(Name = "Alumno")]
         public string AlumnoNombre { get; set; } = string.Empty;
 

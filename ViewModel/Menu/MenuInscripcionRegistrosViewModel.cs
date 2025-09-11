@@ -41,6 +41,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private decimal totalMontoInscripciones;
         [ObservableProperty] private decimal totalPagadoInscripciones;
         [ObservableProperty] private decimal totalSaldoInscripciones;
+        [ObservableProperty] private bool incluirTalleresEliminados = false;
+
+        // Totales que incluyen talleres eliminados (para comparación)
+        [ObservableProperty] private decimal totalMontoConEliminados;
+        [ObservableProperty] private decimal totalPagadoConEliminados;
+        [ObservableProperty] private decimal totalSaldoConEliminados;
 
         partial void OnFechaDesdeRegistrosChanged(DateTime? value)
         {
@@ -51,6 +57,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
         partial void OnFechaHastaRegistrosChanged(DateTime? value)
         {
             NormalizarRangoFechas();
+            _ = CargarRegistrosInscripcionesAsync();
+        }
+
+        partial void OnIncluirTalleresEliminadosChanged(bool value)
+        {
             _ = CargarRegistrosInscripcionesAsync();
         }
 
@@ -104,6 +115,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     desde: FechaDesdeRegistros,
                     hasta: FechaHastaRegistros,
                     filtro: FiltroRegistrosInscripciones,
+                    incluirTalleresEliminados: IncluirTalleresEliminados,
                     ct: ct);
 
                 RegistrosInscripciones.Clear();
@@ -166,18 +178,36 @@ namespace ControlTalleresMVP.ViewModel.Menu
             if (RegistrosInscripcionesView is null) return;
 
             decimal monto = 0, pagado = 0, saldo = 0;
+            decimal montoConEliminados = 0, pagadoConEliminados = 0, saldoConEliminados = 0;
+            
             foreach (var item in RegistrosInscripcionesView)
             {
                 if (item is InscripcionRegistroDTO r)
                 {
-                    monto += r.Monto;
-                    pagado += r.MontoPagado;
-                    saldo += r.SaldoActual;
+                    // Totales que incluyen todo (eliminados y activos)
+                    montoConEliminados += r.Monto;
+                    pagadoConEliminados += r.MontoPagado;
+                    saldoConEliminados += r.SaldoActual;
+                    
+                    // Totales solo de talleres activos
+                    if (!r.TallerEliminado)
+                    {
+                        monto += r.Monto;
+                        pagado += r.MontoPagado;
+                        saldo += r.SaldoActual;
+                    }
                 }
             }
+            
+            // Totales filtrados (solo talleres activos)
             TotalMontoInscripciones = monto;
             TotalPagadoInscripciones = pagado;
             TotalSaldoInscripciones = saldo;
+            
+            // Totales completos (incluyendo eliminados)
+            TotalMontoConEliminados = montoConEliminados;
+            TotalPagadoConEliminados = pagadoConEliminados;
+            TotalSaldoConEliminados = saldoConEliminados;
         }
     }
 }
