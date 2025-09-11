@@ -61,26 +61,33 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [RelayCommand]
         private async Task BuscarAlumnoAsync()
         {
-            var seleccionado = _alumnoPicker.Pick();
-            if (seleccionado is null)
+            try
             {
-                return;
+                var seleccionado = _alumnoPicker.Pick();
+                if (seleccionado is null)
+                {
+                    return;
+                }
+
+                var cargos = await _cargosService.ObtenerCargosPendientesActualesAsync(seleccionado.AlumnoId);
+
+                if (cargos.Length == 0)
+                {
+                    _dialog.Alerta("Este alumno no tiene cargos pendientes.");
+                    return;
+                }
+
+                CargarCargos(cargos);
+
+                AlumnoId = seleccionado.AlumnoId;
+                AlumnoNombre = seleccionado.Nombre;
+
+                RecalcularResumen();
             }
-
-            var cargos = await _cargosService.ObtenerCargosPendientesActualesAsync(seleccionado.AlumnoId);
-
-            if (cargos.Length == 0)
+            catch (Exception ex)
             {
-                _dialog.Alerta("Este alumno no tiene cargos pendientes.");
-                return;
+                _dialog.Error($"Error al buscar alumno: {ex.Message}");
             }
-
-            CargarCargos(cargos);
-
-            AlumnoId = seleccionado.AlumnoId;
-            AlumnoNombre = seleccionado.Nombre;
-
-            RecalcularResumen();
         }
 
         public void CargarCargos(IEnumerable<DestinoCargoDTO> cargos)

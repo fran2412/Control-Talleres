@@ -54,6 +54,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                         {
                             InscripcionId = i.InscripcionId,
                             NombreAlumno = a.Nombre,
+                            TallerEliminado = t.Eliminado,
                             NombreTaller = t.Eliminado ? $"{t.Nombre} (Eliminado)" : t.Nombre,
                             NombreSede = s != null ? s.Nombre : "Sin Sede",
                             NombrePromotor = p.Nombre,
@@ -105,7 +106,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 
                 MontoTotalInscripciones = inscripciones.Sum(i => i.Costo),
                 MontoTotalRecaudado = inscripciones.Sum(i => i.Costo - i.SaldoActual),
-                MontoTotalPendiente = inscripciones.Sum(i => i.SaldoActual),
+                MontoTotalPendiente = inscripciones.Where(i => !i.TallerEliminado).Sum(i => i.SaldoActual),
                 
                 TalleresConInscripciones = inscripciones.Select(i => i.NombreTaller).Distinct().Count(),
                 

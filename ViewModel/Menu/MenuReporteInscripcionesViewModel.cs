@@ -217,7 +217,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public int InscripcionesPagadas => Inscripciones.Count(i => i.Estado == "Pagada");
         public decimal MontoTotalInscripciones => Inscripciones.Sum(i => i.Costo);
         public decimal MontoTotalRecaudado => Inscripciones.Sum(i => i.Costo - i.SaldoActual);
-        public decimal MontoTotalPendiente => Inscripciones.Sum(i => i.SaldoActual);
+        public decimal MontoTotalPendiente => Inscripciones.Where(i => !i.TallerEliminado).Sum(i => i.SaldoActual);
 
         // Método para actualizar estadísticas cuando cambia la colección
         partial void OnInscripcionesChanged(ObservableCollection<InscripcionReporteDTO> value)

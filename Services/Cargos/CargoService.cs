@@ -28,7 +28,7 @@ namespace ControlTalleresMVP.Services.Cargos
             // Todos los cargos con saldo > 0 del alumno (incluyendo alumnos dados de baja)
             // Los pagos deben mostrarse incluso si el alumno está dado de baja
             var generacion = _generacionService.ObtenerGeneracionActual();
-            if (generacion == null) throw new ArgumentException(nameof(generacion));
+            if (generacion == null) throw new ArgumentException($"No hay ninguna {nameof(generacion)} activa.");
 
             var query = _escuelaContext.Cargos
                 .AsNoTracking()
