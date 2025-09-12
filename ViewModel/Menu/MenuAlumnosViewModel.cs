@@ -259,32 +259,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             try
             {
-                // Usar el ServiceProvider estático para obtener el NavigatorService
                 var navigatorService = App.ServiceProvider?.GetRequiredService<INavigatorService>();
-                if (navigatorService == null)
-                {
-                    _dialogService.Error("No se pudo obtener el servicio de navegación.");
-                    return;
-                }
+                if (navigatorService == null) return;
 
-                // Navegar al formulario de pagos de clases
                 navigatorService.NavigateTo<MenuClaseUserControl>();
                 
-                // Esperar un momento para que la navegación se complete
                 await Task.Delay(100);
                 
-                // Obtener el ViewModel de pagos de clases y preseleccionar el alumno
                 var claseUserControl = navigatorService.CurrentViewModel as MenuClaseUserControl;
                 if (claseUserControl?.MenuClaseCobroVM != null)
                 {
-                    // Simular la selección del alumno en el formulario de pagos de clases
-                    var alumno = new Alumno 
-                    { 
-                        AlumnoId = alumnoId, 
-                        Nombre = nombreAlumno 
-                    };
-                    
-                    // Llamar al método BuscarAlumno del ViewModel de pagos de clases
+                    var alumno = new Alumno { AlumnoId = alumnoId, Nombre = nombreAlumno };
                     await claseUserControl.MenuClaseCobroVM.BuscarAlumnoConAlumno(alumno);
                 }
             }
