@@ -12,7 +12,7 @@
         <converters:NotNullConverter x:Key="NotNullConverter"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

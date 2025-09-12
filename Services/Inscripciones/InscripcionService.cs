@@ -372,13 +372,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     EstadoInscripcion = g.Key.Estado,
                     EstadoTexto = g.Key.Estado == EstadoInscripcion.Pagada ? "Pagada" :
                                  g.Key.Estado == EstadoInscripcion.Pendiente ? "Pendiente" : "Cancelada",
-                    PagosCount = g.Count(z => z.pa != null),
                     UltimoPagoFecha = g.Where(z => z.pa != null)
                                       .Max(z => (DateTime?)z.pa.Pago.Fecha),
-                    UltimoPagoMetodo = g.Where(z => z.pa != null)
-                                       .OrderByDescending(z => z.pa.Pago.Fecha)
-                                       .Select(z => z.pa.Pago.Metodo.ToString())
-                                       .FirstOrDefault(),
                     MotivoCancelacion = g.Key.MotivoCancelacion,
                     CanceladaEn = g.Key.CanceladaEn
                 })

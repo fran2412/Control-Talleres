@@ -275,13 +275,8 @@ namespace ControlTalleresMVP.Services.Clases
                     EstadoCargo    = g.Key.Estado,
                     EstadoTexto    = g.Key.Estado == EstadoCargo.Pagado ? "Pagada" :
                                      g.Key.Estado == EstadoCargo.Pendiente ? "Pendiente" : "Anulada",
-                    PagosCount     = g.Count(z => z.pa != null),
                     UltimoPagoFecha  = g.Where(z => z.pa != null)
-                                        .Max(z => (DateTime?)z.pa.Pago.Fecha),
-                    UltimoPagoMetodo = g.Where(z => z.pa != null)
-                                        .OrderByDescending(z => z.pa.Pago.Fecha)
-                                        .Select(z => z.pa.Pago.Metodo.ToString())
-                                        .FirstOrDefault()
+                                        .Max(z => (DateTime?)z.pa.Pago.Fecha)
                 })
                 .OrderByDescending(r => r.FechaClase)
                 .ThenBy(r => r.TallerNombre)

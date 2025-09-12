@@ -51,14 +51,8 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         public string EstadoTexto { get; set; } = string.Empty; // “Pagada/Parcial/Pendiente/Anulada”
 
         // Trazabilidad de pagos
-        [Display(Name = "# Pagos")]
-        public int PagosCount { get; set; }
-
         [Display(Name = "Último pago")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime? UltimoPagoFecha { get; set; }
-
-        [Display(Name = "Método")]
-        public string? UltimoPagoMetodo { get; set; }
     }
 }

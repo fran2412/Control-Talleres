@@ -14,6 +14,7 @@ namespace ControlTalleresMVP.Services.Talleres
     {
         public ObservableCollection<TallerDTO> RegistrosTalleres { get; set; }
         public Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(CancellationToken ct = default);
+        public Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(bool incluirEliminados, CancellationToken ct = default);
         public Task InicializarRegistros(CancellationToken ct = default);
 
     }

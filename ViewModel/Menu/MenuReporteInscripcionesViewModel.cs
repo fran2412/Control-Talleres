@@ -39,6 +39,19 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private InscripcionEstadisticasDTO estadisticas = new();
         [ObservableProperty] private bool incluirTalleresEliminados = false;
 
+        // Totales separados por tipo de taller
+        [ObservableProperty] private decimal totalMontoTalleresActivos;
+        [ObservableProperty] private decimal totalPagadoTalleresActivos;
+        [ObservableProperty] private decimal totalSaldoTalleresActivos;
+        
+        [ObservableProperty] private decimal totalMontoTalleresEliminados;
+        [ObservableProperty] private decimal totalPagadoTalleresEliminados;
+        [ObservableProperty] private decimal totalSaldoTalleresEliminados;
+        
+        [ObservableProperty] private decimal totalMontoGeneral;
+        [ObservableProperty] private decimal totalPagadoGeneral;
+        [ObservableProperty] private decimal totalSaldoGeneral;
+
         public string TituloEncabezado { get; set; } = "Reporte de Inscripciones";
 
         public MenuReporteInscripcionesViewModel(
@@ -68,7 +81,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 MensajeEstado = "Cargando datos...";
 
                 // Cargar listas de filtros
-                var talleresList = await _tallerService.ObtenerTalleresParaGridAsync();
+                var talleresList = await _tallerService.ObtenerTalleresParaGridAsync(IncluirTalleresEliminados);
                 Talleres = new ObservableCollection<TallerDTO>(talleresList);
 
                 var promotoresList = await _promotorService.ObtenerPromotoresParaGridAsync();
@@ -229,6 +242,51 @@ namespace ControlTalleresMVP.ViewModel.Menu
             OnPropertyChanged(nameof(MontoTotalInscripciones));
             OnPropertyChanged(nameof(MontoTotalRecaudado));
             OnPropertyChanged(nameof(MontoTotalPendiente));
+            
+            // Recalcular totales separados
+            RecalcularTotalesSeparados();
+        }
+
+        private void RecalcularTotalesSeparados()
+        {
+            decimal montoActivos = 0, pagadoActivos = 0, saldoActivos = 0;
+            decimal montoEliminados = 0, pagadoEliminados = 0, saldoEliminados = 0;
+            decimal montoGeneral = 0, pagadoGeneral = 0, saldoGeneral = 0;
+            
+            foreach (var inscripcion in Inscripciones)
+            {
+                // Totales generales (todo lo que se muestra)
+                montoGeneral += inscripcion.Costo;
+                pagadoGeneral += inscripcion.Costo - inscripcion.SaldoActual;
+                saldoGeneral += inscripcion.SaldoActual;
+                
+                // Totales separados por tipo de taller
+                if (inscripcion.TallerEliminado)
+                {
+                    montoEliminados += inscripcion.Costo;
+                    pagadoEliminados += inscripcion.Costo - inscripcion.SaldoActual;
+                    saldoEliminados += inscripcion.SaldoActual;
+                }
+                else
+                {
+                    montoActivos += inscripcion.Costo;
+                    pagadoActivos += inscripcion.Costo - inscripcion.SaldoActual;
+                    saldoActivos += inscripcion.SaldoActual;
+                }
+            }
+            
+            // Actualizar propiedades
+            TotalMontoTalleresActivos = montoActivos;
+            TotalPagadoTalleresActivos = pagadoActivos;
+            TotalSaldoTalleresActivos = saldoActivos;
+            
+            TotalMontoTalleresEliminados = montoEliminados;
+            TotalPagadoTalleresEliminados = pagadoEliminados;
+            TotalSaldoTalleresEliminados = saldoEliminados;
+            
+            TotalMontoGeneral = montoGeneral;
+            TotalPagadoGeneral = pagadoGeneral;
+            TotalSaldoGeneral = saldoGeneral;
         }
 
         // Métodos para actualizar automáticamente cuando cambian las fechas
@@ -259,8 +317,38 @@ namespace ControlTalleresMVP.ViewModel.Menu
         // Método para manejar el cambio del checkbox de talleres eliminados
         partial void OnIncluirTalleresEliminadosChanged(bool value)
         {
-            // Recargar datos cuando cambie el filtro
-            _ = Task.Run(async () => await CargarInscripcionesAsync());
+            // Recargar talleres y datos cuando cambie el filtro
+            _ = Task.Run(async () => await RecargarTalleresYInscripcionesAsync());
+        }
+
+        private async Task RecargarTalleresYInscripcionesAsync()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Actualizando filtros...";
+
+                // Recargar talleres con el nuevo filtro
+                var talleresList = await _tallerService.ObtenerTalleresParaGridAsync(IncluirTalleresEliminados);
+                Talleres = new ObservableCollection<TallerDTO>(talleresList);
+
+                // Limpiar selección de taller si estaba seleccionado un taller eliminado
+                if (TallerSeleccionado != null && TallerSeleccionado.Eliminado && !IncluirTalleresEliminados)
+                {
+                    TallerSeleccionado = null;
+                }
+
+                // Recargar inscripciones
+                await CargarInscripcionesAsync();
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al actualizar filtros: {ex.Message}";
+            }
+            finally
+            {
+                Cargando = false;
+            }
         }
     }
 }

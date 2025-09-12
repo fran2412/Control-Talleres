@@ -113,9 +113,7 @@
                         <DataGridTextColumn Header="Pagado"       Binding="{Binding MontoPagado, StringFormat=C}" Width="110"/>
                         <DataGridTextColumn Header="Saldo"        Binding="{Binding SaldoActual, StringFormat=C}" Width="110"/>
                         <DataGridTextColumn Header="%"            Binding="{Binding PorcentajePagado}" Width="60"/>
-                        <DataGridTextColumn Header="#Pagos"       Binding="{Binding PagosCount}" Width="80"/>
                         <DataGridTextColumn Header="Último Pago"  Binding="{Binding UltimoPagoFecha, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
-                        <DataGridTextColumn Header="Método"       Binding="{Binding UltimoPagoMetodo}" Width="110"/>
                     </DataGrid.Columns>
                 </DataGrid>
 

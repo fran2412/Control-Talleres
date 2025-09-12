@@ -38,5 +38,11 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Fecha de alta")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime CreadoEn { get; set; }
+
+        [ScaffoldColumn(false)]
+        public bool Eliminado { get; set; }
+
+        [ScaffoldColumn(false)]
+        public DateTime? EliminadoEn { get; set; }
     }
 }

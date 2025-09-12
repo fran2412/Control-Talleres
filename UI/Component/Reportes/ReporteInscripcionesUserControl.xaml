@@ -9,10 +9,11 @@
     
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         <converters:NotNullConverter x:Key="NotNullConverter"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -42,9 +43,9 @@
                     <!-- Primera fila: Filtros principales -->
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
@@ -62,8 +63,21 @@
                             <TextBlock Text="Taller:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                             <ComboBox ItemsSource="{Binding Talleres}" 
                                       SelectedItem="{Binding TallerSeleccionado}"
-                                      DisplayMemberPath="Nombre"
-                                      Width="250" Height="35"/>
+                                      Width="250" Height="35">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Nombre}" VerticalAlignment="Center"/>
+                                            <TextBlock Text=" (ELIMINADO)" 
+                                                       FontWeight="Bold" 
+                                                       Foreground="#DC3545" 
+                                                       Margin="8,0,0,0"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding Eliminado, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- Selección de Promotor -->
@@ -199,7 +213,129 @@
                 <TextBlock Grid.Row="0" Text="Estadísticas Detalladas" FontWeight="SemiBold" FontSize="16" 
                            Margin="0,0,0,15" Foreground="#495057"/>
                 
-                <Grid Grid.Row="1">
+                <!-- Totales desglosados cuando SÍ se incluyen talleres eliminados -->
+                <Grid Grid.Row="1" Visibility="{Binding IncluirTalleresEliminados, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Totales de talleres activos -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalMontoTalleresActivos, StringFormat=C2}" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#28A745" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Activos - Total" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalPagadoTalleresActivos, StringFormat=C2}" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#28A745" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Activos - Recaudado" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalSaldoTalleresActivos, StringFormat=C2}" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#28A745" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Activos - Pendiente" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="3" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="TALLERES ACTIVOS" FontSize="12" FontWeight="Bold" 
+                                       Foreground="#28A745" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Totales de talleres eliminados -->
+                    <Grid Grid.Row="1" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalMontoTalleresEliminados, StringFormat=C2}" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#DC3545" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Eliminados - Total" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalPagadoTalleresEliminados, StringFormat=C2}" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#DC3545" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Eliminados - Recaudado" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalSaldoTalleresEliminados, StringFormat=C2}" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#DC3545" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Eliminados - No Cobrado" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="3" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="TALLERES ELIMINADOS" FontSize="12" FontWeight="Bold" 
+                                       Foreground="#DC3545" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Línea separadora -->
+                    <Border Grid.Row="2" Height="1" Background="#DEE2E6" Margin="0,5,0,10"/>
+                    
+                    <!-- Totales generales -->
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalMontoGeneral, StringFormat=C2}" FontSize="18" FontWeight="Bold" 
+                                       Foreground="#495057" HorizontalAlignment="Center"/>
+                            <TextBlock Text="TOTAL GENERAL" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalPagadoGeneral, StringFormat=C2}" FontSize="18" FontWeight="Bold" 
+                                       Foreground="#495057" HorizontalAlignment="Center"/>
+                            <TextBlock Text="TOTAL RECAUDADO" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="{Binding TotalSaldoGeneral, StringFormat=C2}" FontSize="18" FontWeight="Bold" 
+                                       Foreground="#DC3545" HorizontalAlignment="Center"/>
+                            <TextBlock Text="TOTAL NO COBRADO" FontSize="11" HorizontalAlignment="Center" 
+                                       Foreground="#6C757D" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="3" HorizontalAlignment="Center" Margin="5">
+                            <TextBlock Text="RESUMEN GENERAL" FontSize="12" FontWeight="Bold" 
+                                       Foreground="#495057" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+                
+                <!-- Totales básicos cuando NO se incluyen talleres eliminados -->
+                <Grid Grid.Row="1" Visibility="{Binding IncluirTalleresEliminados, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -230,7 +366,6 @@
                         <TextBlock Text="Promedio/Inscripción" FontSize="11" HorizontalAlignment="Center" 
                                    Foreground="#6C757D" TextWrapping="Wrap"/>
                     </StackPanel>
-
 
                     <!-- Monto Total -->
                     <StackPanel Grid.Column="3" HorizontalAlignment="Center" Margin="5">

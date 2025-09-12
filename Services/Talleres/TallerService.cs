@@ -131,10 +131,19 @@ namespace ControlTalleresMVP.Services.Talleres
 
         public async Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(CancellationToken ct = default)
         {
+            return await ObtenerTalleresParaGridAsync(false, ct);
+        }
 
-            var datos = await _context.Talleres
-                .AsNoTracking()
-                .Where(a => !a.Eliminado)
+        public async Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(bool incluirEliminados, CancellationToken ct = default)
+        {
+            var query = _context.Talleres.AsNoTracking();
+            
+            if (!incluirEliminados)
+            {
+                query = query.Where(a => !a.Eliminado);
+            }
+
+            var datos = await query
                 .Select(u => new
                 {
                     u.TallerId,
@@ -144,8 +153,12 @@ namespace ControlTalleresMVP.Services.Talleres
                     u.Nombre,
                     u.FechaInicio,
                     u.FechaFin,
-                    u.CreadoEn
+                    u.CreadoEn,
+                    u.Eliminado,
+                    u.EliminadoEn
                 })
+                .OrderBy(t => t.Eliminado) // Talleres activos primero
+                .ThenBy(t => t.Nombre)     // Luego ordenados por nombre
                 .ToListAsync(ct);
 
             return datos.Select(u => new TallerDTO
@@ -157,7 +170,9 @@ namespace ControlTalleresMVP.Services.Talleres
                 DiaSemana = ConvertirDiaSemanaASpanol(u.DiaSemana),
                 FechaInicio = u.FechaInicio,
                 FechaFin = u.FechaFin,
-                CreadoEn = u.CreadoEn
+                CreadoEn = u.CreadoEn,
+                Eliminado = u.Eliminado,
+                EliminadoEn = u.EliminadoEn
             }).ToList();
         }
 
