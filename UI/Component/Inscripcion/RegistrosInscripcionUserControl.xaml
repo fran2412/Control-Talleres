@@ -11,6 +11,7 @@
     
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
     </UserControl.Resources>
     <Grid>
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="Auto">
@@ -90,7 +91,21 @@
 
                         <!-- Columnas del DTO -->
                         <DataGridTextColumn Header="Fecha"       Binding="{Binding FechaInscripcion, StringFormat=dd/MM/yyyy}" Width="110"/>
-                        <DataGridTextColumn Header="Taller"       Binding="{Binding TallerNombre}" Width="*"/>
+                        <DataGridTemplateColumn Header="Taller" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding TallerNombre}" VerticalAlignment="Center"/>
+                                        <TextBlock Text=" (ELIMINADO)" 
+                                                   FontWeight="Bold" 
+                                                   Foreground="#DC3545" 
+                                                   Margin="8,0,0,0"
+                                                   VerticalAlignment="Center"
+                                                   Visibility="{Binding TallerEliminado, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Alumno"       Binding="{Binding AlumnoNombre}" Width="200"/>
                         <DataGridTextColumn Header="Generación"   Binding="{Binding GeneracionNombre}" Width="120"/>
                         <DataGridTextColumn Header="Estado"       Binding="{Binding EstadoTexto}" Width="110"/>
@@ -106,21 +121,47 @@
 
                 <!-- Totales -->
                 <StackPanel Grid.Row="2" Margin="20,0,20,20">
-                    <!-- Totales principales (talleres activos) -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
-                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoInscripciones, StringFormat=Monto Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoInscripciones, StringFormat=Recaudado: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoInscripciones, StringFormat=Pendiente: {0:C}}"  FontSize="16" FontWeight="SemiBold"/>
+                    <!-- Totales desglosados cuando SÍ se incluyen talleres eliminados -->
+                    <StackPanel Visibility="{Binding MenuInscripcionRegistrosVM.IncluirTalleresEliminados, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <!-- Totales de talleres activos -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,4">
+                            <TextBlock Text="Talleres Activos:" FontSize="14" FontWeight="SemiBold" 
+                                       Foreground="#28A745" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoTalleresActivos, StringFormat=Total: {0:C}}"  FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#28A745"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoTalleresActivos, StringFormat=Recaudado: {0:C}}" FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#28A745"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoTalleresActivos, StringFormat=Pendiente: {0:C}}"  FontSize="14" FontWeight="SemiBold" Foreground="#28A745"/>
+                        </StackPanel>
+                        
+                        <!-- Totales de talleres eliminados -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,4">
+                            <TextBlock Text="Talleres Eliminados:" FontSize="14" FontWeight="SemiBold" 
+                                       Foreground="#DC3545" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoTalleresEliminados, StringFormat=Total: {0:C}}"  FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#DC3545"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoTalleresEliminados, StringFormat=Recaudado: {0:C}}" FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#DC3545"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoTalleresEliminados, StringFormat=No Cobrado: {0:C}}"  FontSize="14" FontWeight="SemiBold" Foreground="#DC3545"/>
+                        </StackPanel>
+                        
+                        <!-- Línea separadora -->
+                        <Border Height="1" Background="#DEE2E6" Margin="0,4,0,4"/>
+                        
+                        <!-- Totales generales -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,0">
+                            <TextBlock Text="TOTAL GENERAL:" FontSize="16" FontWeight="Bold" 
+                                       Foreground="#495057" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoGeneral, StringFormat=Total: {0:C}}"  FontSize="16" FontWeight="Bold" Margin="0,0,20,0" Foreground="#495057"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoGeneral, StringFormat=Recaudado: {0:C}}" FontSize="16" FontWeight="Bold" Margin="0,0,20,0" Foreground="#495057"/>
+                            <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoGeneral, StringFormat=No Cobrado: {0:C}}"  FontSize="16" FontWeight="Bold" Foreground="#DC3545"/>
+                        </StackPanel>
                     </StackPanel>
                     
-                    <!-- Totales incluyendo eliminados (solo cuando el filtro está activo) -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" 
-                                Visibility="{Binding MenuInscripcionRegistrosVM.IncluirTalleresEliminados, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <TextBlock Text="Incluyendo eliminados:" FontSize="12" FontWeight="SemiBold" 
-                                   Foreground="#6C757D" Margin="0,0,16,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoConEliminados, StringFormat=Total: {0:C}}"  FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#6C757D"/>
-                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoConEliminados, StringFormat=Recaudado: {0:C}}" FontSize="14" FontWeight="SemiBold" Margin="0,0,20,0" Foreground="#6C757D"/>
-                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoConEliminados, StringFormat=No Cobrado: {0:C}}"  FontSize="14" FontWeight="SemiBold" Foreground="#DC3545"/>
+                    <!-- Totales básicos cuando NO se incluyen talleres eliminados -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8"
+                                Visibility="{Binding MenuInscripcionRegistrosVM.IncluirTalleresEliminados, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                        <TextBlock Text="TOTAL GENERAL:" FontSize="16" FontWeight="Bold" 
+                                   Foreground="#495057" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalMontoGeneral, StringFormat=Total: {0:C}}"  FontSize="16" FontWeight="Bold" Margin="0,0,20,0" Foreground="#495057"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalPagadoGeneral, StringFormat=Recaudado: {0:C}}" FontSize="16" FontWeight="Bold" Margin="0,0,20,0" Foreground="#495057"/>
+                        <TextBlock Text="{Binding MenuInscripcionRegistrosVM.TotalSaldoGeneral, StringFormat=Pendiente: {0:C}}"  FontSize="16" FontWeight="Bold" Foreground="#DC3545"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
