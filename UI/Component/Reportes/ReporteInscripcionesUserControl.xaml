@@ -50,7 +50,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Selección de Generación -->
-                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                        <StackPanel Grid.Column="0" Margin="0,0,20,0">
                             <TextBlock Text="Generación:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                             <ComboBox ItemsSource="{Binding Generaciones}" 
                                       SelectedItem="{Binding GeneracionSeleccionada}"
@@ -59,7 +59,7 @@
                         </StackPanel>
 
                         <!-- Selección de Taller -->
-                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                        <StackPanel Grid.Column="1" Margin="0,0,20,0">
                             <TextBlock Text="Taller:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                             <ComboBox ItemsSource="{Binding Talleres}" 
                                       SelectedItem="{Binding TallerSeleccionado}"
@@ -81,7 +81,7 @@
                         </StackPanel>
 
                         <!-- Selección de Promotor -->
-                        <StackPanel Grid.Column="2" Margin="0,0,15,0">
+                        <StackPanel Grid.Column="2" Margin="0,0,20,0">
                             <TextBlock Text="Promotor:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                             <ComboBox ItemsSource="{Binding Promotores}" 
                                       SelectedItem="{Binding PromotorSeleccionado}"
@@ -90,27 +90,38 @@
                         </StackPanel>
 
                         <!-- Botones -->
-                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Bottom">
-                            <Button Content="Filtrar" 
+                        <Grid Grid.Column="3" VerticalAlignment="Bottom">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Fila superior -->
+                            <Button Grid.Row="0" Grid.Column="0" Content="Filtrar" 
                                 Command="{Binding FiltrarCommand}"
-                                Width="100" Height="35" Margin="5,0"
+                                Width="120" Height="35" Margin="8,6"
                                 Background="#007ACC" Foreground="White"/>
 
-                            <Button Content="Limpiar" 
+                            <Button Grid.Row="0" Grid.Column="1" Content="Mostrar todos" 
                                 Command="{Binding LimpiarFiltrosCommand}"
-                                Width="100" Height="35" Margin="5,0"
+                                Width="120" Height="35" Margin="8,6"
                                 Background="#6C757D" Foreground="White"/>
 
-                            <Button Content="Exportar CSV" 
+                            <!-- Fila inferior -->
+                            <Button Grid.Row="1" Grid.Column="0" Content="Exportar CSV" 
                                 Command="{Binding ExportarCommand}"
-                                Width="120" Height="35" Margin="5,0"
+                                Width="120" Height="35" Margin="8,6"
                                 Background="#17A2B8" Foreground="White"/>
 
-                            <Button Content="Exportar Excel" 
+                            <Button Grid.Row="1" Grid.Column="1" Content="Exportar Excel" 
                                 Command="{Binding ExportarExcelCommand}"
-                                Width="120" Height="35" Margin="5,0"
+                                Width="120" Height="35" Margin="8,6"
                                 Background="#FD7E14" Foreground="White"/>
-                        </StackPanel>
+                        </Grid>
                     </Grid>
 
                     <!-- Segunda fila: Filtros de fecha y opciones -->

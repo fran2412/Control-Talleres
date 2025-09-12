@@ -52,7 +52,7 @@ namespace ControlTalleresMVP.UI.Component.Backup {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/component/backup/backupusercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/backup/backupusercontrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Backup\BackupUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
