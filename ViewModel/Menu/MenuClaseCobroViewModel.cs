@@ -158,6 +158,18 @@ private async Task BuscarAlumno()
     var alumno = _alumnoPicker.Pick();
     if (alumno is null) return;
 
+    await ProcesarSeleccionAlumno(alumno);
+}
+
+public async Task BuscarAlumnoConAlumno(Alumno alumno)
+{
+    if (alumno is null) return;
+    
+    await ProcesarSeleccionAlumno(alumno);
+}
+
+private async Task ProcesarSeleccionAlumno(Alumno alumno)
+{
     var inscripciones = await _inscripcionService.ObtenerInscripcionesAsync(alumno.AlumnoId);
 
     // Activas (no eliminadas)

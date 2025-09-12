@@ -110,7 +110,7 @@ namespace ControlTalleresMVP
             services.AddTransient<ShellViewModel>();
 
             //Services
-            services.AddTransient<INavigatorService, NavigatorService>();
+            services.AddScoped<INavigatorService, NavigatorService>();
             services.AddTransient<IDialogService, DialogService>();
             services.AddScoped<IAlumnoService, AlumnoService>();
             services.AddScoped<ISedeService, SedeService>();

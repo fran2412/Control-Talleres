@@ -10,6 +10,7 @@ using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
+using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
@@ -187,6 +188,19 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 if (InscribirEnTaller)
                 {
                     await ProcesarInscripcionesTalleres(alumnoGuardado.AlumnoId);
+                    
+                    // Preguntar si desea registrar el pago de las clases del alumno
+                    if (_dialogService.Confirmar(
+                        "¿Desea registrar el pago de las clases del alumno?\n\n" +
+                        "Si selecciona 'Sí', se abrirá el formulario de pagos de clases con este alumno preseleccionado.\n" +
+                        "Si selecciona 'No', solo se registrará la inscripción.", 
+                        "¿Registrar pago de clases?"))
+                    {
+                        // Navegar al formulario de pagos de clases con el alumno preseleccionado
+                        await AbrirFormularioPagoClasesConAlumno(alumnoGuardado.AlumnoId, alumnoGuardado.Nombre);
+                        // No mostrar mensaje aquí ya que se navega a otra pantalla
+                        return; // Salir del método para no limpiar campos ni mostrar mensaje
+                    }
                 }
 
                 LimpiarCampos();
@@ -239,6 +253,45 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             if (errores.Count > 0)
                 _dialogService.Alerta("Algunas inscripciones no se pudieron procesar:\n" + string.Join("\n", errores));
+        }
+
+        private async Task AbrirFormularioPagoClasesConAlumno(int alumnoId, string nombreAlumno)
+        {
+            try
+            {
+                // Usar el ServiceProvider estático para obtener el NavigatorService
+                var navigatorService = App.ServiceProvider?.GetRequiredService<INavigatorService>();
+                if (navigatorService == null)
+                {
+                    _dialogService.Error("No se pudo obtener el servicio de navegación.");
+                    return;
+                }
+
+                // Navegar al formulario de pagos de clases
+                navigatorService.NavigateTo<MenuClaseUserControl>();
+                
+                // Esperar un momento para que la navegación se complete
+                await Task.Delay(100);
+                
+                // Obtener el ViewModel de pagos de clases y preseleccionar el alumno
+                var claseUserControl = navigatorService.CurrentViewModel as MenuClaseUserControl;
+                if (claseUserControl?.MenuClaseCobroVM != null)
+                {
+                    // Simular la selección del alumno en el formulario de pagos de clases
+                    var alumno = new Alumno 
+                    { 
+                        AlumnoId = alumnoId, 
+                        Nombre = nombreAlumno 
+                    };
+                    
+                    // Llamar al método BuscarAlumno del ViewModel de pagos de clases
+                    await claseUserControl.MenuClaseCobroVM.BuscarAlumnoConAlumno(alumno);
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error($"Error al abrir el formulario de pagos de clases: {ex.Message}");
+            }
         }
 
 
