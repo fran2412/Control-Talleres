@@ -38,6 +38,7 @@ namespace ControlTalleresMVP.Services.Clases
         Task<EstadoPagoAlumnoDTO[]> ObtenerEstadoPagoAlumnosAsync(
             int? tallerId = null,
             int? alumnoId = null,
+            int? generacionId = null,
             CancellationToken ct = default);
     }
 }

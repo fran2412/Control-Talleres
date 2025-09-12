@@ -106,7 +106,7 @@
                                 Width="120" Height="35" Margin="8,6"
                                 Background="#007ACC" Foreground="White"/>
 
-                            <Button Grid.Row="0" Grid.Column="1" Content="Mostrar todos" 
+                            <Button Grid.Row="0" Grid.Column="1" Content="Limpiar todos" 
                                 Command="{Binding LimpiarFiltrosCommand}"
                                 Width="120" Height="35" Margin="8,6"
                                 Background="#6C757D" Foreground="White"/>

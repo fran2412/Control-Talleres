@@ -22,6 +22,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private ObservableCollection<EstadoPagoAlumnoDTO> estadosPago = new();
         [ObservableProperty] private ObservableCollection<TallerDTO> talleres = new();
         [ObservableProperty] private TallerDTO? tallerSeleccionado;
+        [ObservableProperty] private ObservableCollection<GeneracionDTO> generaciones = new();
+        [ObservableProperty] private GeneracionDTO? generacionSeleccionada;
         [ObservableProperty] private bool cargando = false;
         [ObservableProperty] private string? mensajeEstado;
 
@@ -39,7 +41,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _exportacionService = exportacionService;
 
             // Cargar datos automáticamente al inicializar
-            _ = Task.Run(async () => await CargarDatosAsync());
+            _ = CargarDatosAsync();
         }
 
         private async Task CargarDatosAsync()
@@ -49,9 +51,27 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 Cargando = true;
                 MensajeEstado = "Cargando datos...";
 
+                // Verificar generación actual
+                var generacion = _generacionService.ObtenerGeneracionActual();
+                if (generacion == null)
+                {
+                    MensajeEstado = "No hay generación activa. Por favor, configure una generación actual.";
+                    return;
+                }
+
+                MensajeEstado = $"Generación actual: {generacion.Nombre}";
+
+                // Cargar generaciones
+                var generacionesList = await _generacionService.ObtenerGeneracionesParaGridAsync();
+                Generaciones = new ObservableCollection<GeneracionDTO>(generacionesList);
+                // Seleccionar la generación actual por defecto
+                GeneracionSeleccionada = generacionesList.FirstOrDefault(g => g.Id == generacion.GeneracionId);
+
                 // Cargar talleres
                 var talleresList = await _tallerService.ObtenerTalleresParaGridAsync();
                 Talleres = new ObservableCollection<TallerDTO>(talleresList);
+                MensajeEstado = $"Talleres cargados: {talleresList.Count}";
+
 
                 // Cargar estados de pago
                 await CargarEstadosPagoAsync();
@@ -59,6 +79,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             catch (Exception ex)
             {
                 MensajeEstado = $"Error al cargar datos: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error en CargarDatosAsync: {ex}");
             }
             finally
             {
@@ -67,23 +88,49 @@ namespace ControlTalleresMVP.ViewModel.Menu
         }
 
         [RelayCommand]
-        public async Task FiltrarPorTallerAsync()
+        public async Task FiltrarAsync()
         {
-            if (TallerSeleccionado == null) return;
-
             try
             {
                 Cargando = true;
-                MensajeEstado = $"Filtrando por taller: {TallerSeleccionado.Nombre}";
+                MensajeEstado = "Aplicando filtros...";
 
-                var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(TallerSeleccionado.Id);
-                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estados);
+                // Obtener IDs de los filtros seleccionados
+                var tallerId = TallerSeleccionado?.Id;
+                var generacionId = GeneracionSeleccionada?.Id;
 
-                MensajeEstado = $"Mostrando {EstadosPago.Count} registros para {TallerSeleccionado.Nombre}";
+                // Construir mensaje de filtros aplicados
+                var filtrosAplicados = new List<string>();
+                if (tallerId.HasValue) filtrosAplicados.Add($"Taller: {TallerSeleccionado!.Nombre}");
+                if (generacionId.HasValue) filtrosAplicados.Add($"Generación: {GeneracionSeleccionada!.Nombre}");
+
+                var mensajeFiltros = filtrosAplicados.Count > 0 
+                    ? string.Join(", ", filtrosAplicados)
+                    : "Todos los registros";
+
+                MensajeEstado = $"Filtrando por: {mensajeFiltros}";
+
+                // Llamar al servicio con los filtros
+                var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(tallerId, null, generacionId);
+                
+                // Aplicar filtros adicionales en memoria si es necesario
+                var estadosFiltrados = estados.AsEnumerable();
+
+                // Filtrar por generación si está seleccionada
+                if (generacionId.HasValue)
+                {
+                    // Nota: Este filtro se aplicaría en el servicio, pero por ahora lo hacemos aquí
+                    // En una implementación completa, se pasaría al servicio
+                }
+
+
+                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosFiltrados);
+                MensajeEstado = $"Mostrando {EstadosPago.Count} registros - {mensajeFiltros}";
             }
             catch (Exception ex)
             {
                 MensajeEstado = $"Error al filtrar: {ex.Message}";
+                EstadosPago.Clear();
             }
             finally
             {
@@ -91,25 +138,62 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        [RelayCommand]
-        public async Task MostrarTodosAsync()
-        {
-            await CargarEstadosPagoAsync();
-        }
 
         [RelayCommand]
         public void LimpiarFiltros()
         {
+            // Solo limpiar la selección de filtros, no cambiar los datos
             TallerSeleccionado = null;
-            EstadosPago.Clear();
+            GeneracionSeleccionada = null;
             MensajeEstado = "Filtros limpiados";
+        }
+
+        [RelayCommand]
+        public async Task MostrarTodos()
+        {
+            try
+            {
+                Cargando = true;
+                MensajeEstado = "Cargando todos los registros...";
+                
+                // Limpiar filtros primero
+                TallerSeleccionado = null;
+                GeneracionSeleccionada = null;
+                
+                // Cargar todos los datos sin filtros (null = sin filtro)
+                var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(null, null, null);
+                
+                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estados);
+                
+                MensajeEstado = $"Mostrando todos los registros: {EstadosPago.Count}";
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al cargar todos los registros: {ex.Message}";
+                EstadosPago.Clear();
+            }
+            finally
+            {
+                Cargando = false;
+            }
         }
 
         private async Task CargarEstadosPagoAsync()
         {
-            var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync();
-            EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estados);
-            MensajeEstado = $"Mostrando {EstadosPago.Count} registros";
+            try
+            {
+                // Usar siempre la generación actual por defecto
+                var generacionId = _generacionService.ObtenerGeneracionActual()?.GeneracionId;
+                var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(null, null, generacionId);
+                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estados);
+                MensajeEstado = $"Mostrando {EstadosPago.Count} registros";
+            }
+            catch (Exception ex)
+            {
+                MensajeEstado = $"Error al cargar estados de pago: {ex.Message}";
+                EstadosPago.Clear();
+                throw; // Re-lanzar para que el método llamador pueda manejar el error
+            }
         }
 
         // Propiedades calculadas para estadísticas
@@ -230,5 +314,36 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 Cargando = false;
             }
         }
+
+        // Propiedades para mostrar información del filtro actual
+        public string FiltroActual
+        {
+            get
+            {
+                var filtros = new List<string>();
+                if (TallerSeleccionado != null) filtros.Add($"Taller: {TallerSeleccionado.Nombre}");
+                if (GeneracionSeleccionada != null) filtros.Add($"Generación: {GeneracionSeleccionada.Nombre}");
+                
+                return filtros.Count > 0 
+                    ? $"Filtrado por: {string.Join(", ", filtros)}"
+                    : "Mostrando todos los registros";
+            }
+        }
+
+        public bool TieneFiltroActivo => TallerSeleccionado != null || GeneracionSeleccionada != null;
+
+        // Métodos para actualizar información de filtro cuando cambian las selecciones
+        partial void OnTallerSeleccionadoChanged(TallerDTO? value)
+        {
+            OnPropertyChanged(nameof(FiltroActual));
+            OnPropertyChanged(nameof(TieneFiltroActivo));
+        }
+
+        partial void OnGeneracionSeleccionadaChanged(GeneracionDTO? value)
+        {
+            OnPropertyChanged(nameof(FiltroActual));
+            OnPropertyChanged(nameof(TieneFiltroActivo));
+        }
+
     }
 }

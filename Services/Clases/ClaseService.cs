@@ -377,11 +377,23 @@ namespace ControlTalleresMVP.Services.Clases
         public async Task<EstadoPagoAlumnoDTO[]> ObtenerEstadoPagoAlumnosAsync(
             int? tallerId = null,
             int? alumnoId = null,
+            int? generacionId = null,
             CancellationToken ct = default)
         {
             var hoy = DateTime.Today;
-            var generacion = _generacionService.ObtenerGeneracionActual();
-            if (generacion == null) return Array.Empty<EstadoPagoAlumnoDTO>();
+            
+            // Si no se especifica generación, traer datos de todas las generaciones
+            if (!generacionId.HasValue)
+            {
+                return await ObtenerEstadosPagoTodasGeneracionesAsync(null, null, ct);
+            }
+            
+            // Usar la generación especificada
+            var generacion = _escuelaContext.Generaciones.FirstOrDefault(g => g.GeneracionId == generacionId.Value);
+            if (generacion == null) 
+            {
+                return Array.Empty<EstadoPagoAlumnoDTO>();
+            }
 
             // Obtener costo de clase desde configuración
             var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
@@ -401,18 +413,36 @@ namespace ControlTalleresMVP.Services.Clases
                 });
 
             var talleres = await talleresQuery.ToListAsync(ct);
+            System.Diagnostics.Debug.WriteLine($"✅ Talleres encontrados: {talleres.Count}");
+            
             var resultados = new List<EstadoPagoAlumnoDTO>();
 
             foreach (var taller in talleres)
             {
-                // Calcular fechas de clases hasta hoy o fecha fin
-                var fechaFin = taller.FechaFin?.Date ?? hoy;
+                System.Diagnostics.Debug.WriteLine($"🔍 Procesando taller: {taller.Nombre} (ID: {taller.TallerId})");
+                
+                // Calcular fechas de clases - usar fecha fin del taller o una fecha futura razonable
+                var fechaFin = taller.FechaFin?.Date ?? hoy.AddMonths(6); // Si no tiene fecha fin, asumir 6 meses
                 var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
                 
                 // Generar fechas de clases desde FechaInicio hasta fechaLimite
                 var fechasClases = GenerarFechasClases(taller.FechaInicio, fechaLimite, taller.DiaSemana);
+                System.Diagnostics.Debug.WriteLine($"📅 Fechas de clases generadas: {fechasClases.Count} (desde {taller.FechaInicio:yyyy-MM-dd} hasta {fechaLimite:yyyy-MM-dd})");
                 
-                if (fechasClases.Count == 0) continue;
+                // Si no hay fechas de clases generadas, crear al menos una fecha para mostrar el taller
+                if (fechasClases.Count == 0)
+                {
+                    // Si el taller no ha comenzado, usar la fecha de inicio
+                    if (taller.FechaInicio > hoy)
+                    {
+                        fechasClases = new List<DateTime> { taller.FechaInicio };
+                    }
+                    else
+                    {
+                        // Si ya comenzó pero no hay fechas, usar hoy
+                        fechasClases = new List<DateTime> { hoy };
+                    }
+                }
 
                 // Obtener alumnos inscritos en este taller (incluyendo cancelados si el taller está eliminado)
                 var alumnosQuery = _escuelaContext.Inscripciones
@@ -425,6 +455,34 @@ namespace ControlTalleresMVP.Services.Clases
                     .Select(i => new { i.AlumnoId, i.Alumno!.Nombre, i.Estado, i.SaldoActual });
 
                 var alumnos = await alumnosQuery.ToListAsync(ct);
+                System.Diagnostics.Debug.WriteLine($"👥 Alumnos inscritos en {taller.Nombre}: {alumnos.Count}");
+                
+                // Si no hay alumnos inscritos, mostrar un mensaje informativo
+                if (alumnos.Count == 0)
+                {
+                    // Crear un registro informativo para talleres sin inscripciones
+                    var resultadoVacio = new EstadoPagoAlumnoDTO
+                    {
+                        AlumnoId = 0,
+                        NombreAlumno = "Sin alumnos inscritos",
+                        TallerId = taller.TallerId,
+                        NombreTaller = taller.Eliminado ? $"{taller.Nombre} (Eliminado)" : taller.Nombre,
+                        FechaInicio = taller.FechaInicio,
+                        FechaFin = taller.FechaFin,
+                        ClasesTotales = fechasClases.Count,
+                        ClasesPagadas = 0,
+                        ClasesPendientes = 0,
+                        MontoTotal = fechasClases.Count * costoClase,
+                        MontoPagado = 0,
+                        MontoPendiente = 0,
+                        TodasLasClasesPagadas = false,
+                        EstadoPago = "ℹ️ Sin inscripciones",
+                        FechaUltimaClase = fechasClases.LastOrDefault(),
+                        FechaHoy = hoy
+                    };
+                    resultados.Add(resultadoVacio);
+                    continue;
+                }
 
                 foreach (var alumno in alumnos)
                 {
@@ -600,6 +658,13 @@ namespace ControlTalleresMVP.Services.Clases
                 fechaActual = fechaActual.AddDays(7);
             }
 
+            // Si no se generaron fechas (por ejemplo, si la fecha límite es muy cercana),
+            // al menos incluir la fecha de inicio
+            if (fechas.Count == 0 && fechaInicio <= fechaLimite)
+            {
+                fechas.Add(fechaInicio);
+            }
+
             return fechas;
         }
 
@@ -624,6 +689,206 @@ namespace ControlTalleresMVP.Services.Clases
                 DayOfWeek.Sunday => "Domingo",
                 _ => "Lunes"
             };
+        }
+
+        private async Task<EstadoPagoAlumnoDTO[]> ObtenerEstadosPagoTodasGeneracionesAsync(
+            int? tallerId = null,
+            int? alumnoId = null,
+            CancellationToken ct = default)
+        {
+            try
+            {
+                var hoy = DateTime.Today;
+                var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+                var resultados = new List<EstadoPagoAlumnoDTO>();
+
+                // Obtener TODAS las inscripciones sin filtros
+                var inscripciones = await _escuelaContext.Inscripciones
+                    .AsNoTracking()
+                    .Include(i => i.Alumno)
+                    .Include(i => i.Taller)
+                    .Include(i => i.Generacion)
+                    .Where(i => (tallerId == null || i.TallerId == tallerId) &&
+                               (alumnoId == null || i.AlumnoId == alumnoId))
+                    .ToListAsync(ct);
+
+                if (inscripciones.Count == 0)
+                {
+                    return Array.Empty<EstadoPagoAlumnoDTO>();
+                }
+
+                // Procesar cada inscripción
+                foreach (var inscripcion in inscripciones)
+                {
+                    // Calcular fechas de clases solo hasta hoy (no futuras)
+                    var fechaInicio = inscripcion.Taller.FechaInicio;
+                    var fechaFin = inscripcion.Taller.FechaFin ?? hoy.AddMonths(6);
+                    
+                    // Usar la fecha más temprana entre la fecha fin del taller y hoy
+                    var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
+                    
+                    // Solo generar fechas si el taller ya comenzó
+                    var fechasClases = new List<DateTime>();
+                    if (fechaInicio <= hoy)
+                    {
+                        fechasClases = GenerarFechasClases(fechaInicio, fechaLimite, inscripcion.Taller.DiaSemana);
+                    }
+                    
+                    if (fechasClases.Count == 0)
+                    {
+                        fechasClases.Add(fechaInicio);
+                    }
+
+                    // Obtener cargos de clases de este alumno para este taller (no todos los cargos)
+                    var cargosClases = await _escuelaContext.Cargos
+                        .AsNoTracking()
+                        .Where(c => c.AlumnoId == inscripcion.AlumnoId
+                                    && c.ClaseId != null
+                                    && c.Clase!.TallerId == inscripcion.TallerId
+                                    && (inscripcion.Taller.Eliminado || c.Estado != EstadoCargo.Anulado))
+                        .Select(c => new { 
+                            c.Clase!.Fecha, 
+                            c.Monto, 
+                            c.SaldoActual,
+                            c.Estado,
+                            MontoPagado = c.Monto - c.SaldoActual
+                        })
+                        .ToListAsync(ct);
+
+                    // Verificar si la inscripción está cancelada
+                    var inscripcionCancelada = inscripcion.Estado == EstadoInscripcion.Cancelada;
+                    
+                    // Calcular clases pagadas y pendientes usando la misma lógica que el método principal
+                    var clasesPagadas = inscripcionCancelada 
+                        ? cargosClases.Where(c => false).ToList() // No hay clases pagadas si la inscripción está cancelada
+                        : inscripcion.Taller.Eliminado 
+                            ? cargosClases.Where(c => c.MontoPagado > 0 && c.Estado != EstadoCargo.Anulado).ToList()
+                            : cargosClases.Where(c => c.MontoPagado > 0).ToList();
+                    
+                    var clasesPendientes = inscripcionCancelada 
+                        ? cargosClases.Where(c => false).ToList() // No hay clases pendientes si la inscripción está cancelada
+                        : inscripcion.Taller.Eliminado 
+                            ? cargosClases.Where(c => c.SaldoActual > 0 && c.Estado != EstadoCargo.Anulado).ToList()
+                            : cargosClases.Where(c => c.SaldoActual > 0).ToList();
+
+                    // Calcular estadísticas
+                    var clasesPagadasCount = clasesPagadas.Count;
+                    var clasesPendientesCount = clasesPendientes.Count;
+                    var clasesTotales = fechasClases.Count;
+                    
+                    // Calcular monto pagado
+                    var montoPagado = inscripcionCancelada 
+                        ? 0 // No hay pagos si la inscripción está cancelada
+                        : clasesPagadas.Sum(c => c.MontoPagado);
+                    
+                    // Calcular monto pendiente
+                    var montoPendiente = inscripcionCancelada 
+                        ? 0 // No hay deuda pendiente si la inscripción está cancelada
+                        : inscripcion.Taller.Eliminado ? 0 : clasesPendientes.Sum(c => c.SaldoActual);
+                    
+                    var montoTotal = clasesTotales * costoClase;
+                    
+                    // Calcular clases completamente pagadas vs parcialmente pagadas
+                    var clasesCompletamentePagadas = inscripcion.Taller.Eliminado 
+                        ? cargosClases.Count(c => c.SaldoActual == 0 && c.Estado != EstadoCargo.Anulado)
+                        : cargosClases.Count(c => c.SaldoActual == 0);
+                    var clasesParcialmentePagadas = cargosClases.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
+                    
+                    // Verificar si se pagaron al menos todas las clases que se deben
+                    var todasLasClasesPagadas = clasesCompletamentePagadas >= clasesTotales && clasesPendientesCount == 0;
+                    // Verificar si se pagó más de lo debido
+                    var pagoExcedido = clasesCompletamentePagadas > clasesTotales;
+
+                    // Determinar estado del pago usando la misma lógica que el método principal
+                    string estadoPago;
+                    if (inscripcionCancelada)
+                    {
+                        estadoPago = "🚫 Inscripción cancelada";
+                    }
+                    else if (inscripcion.Taller.Eliminado)
+                    {
+                        if (montoPagado > 0)
+                        {
+                            var porcentajePagado = montoTotal > 0 ? (montoPagado / montoTotal) * 100 : 0;
+                            estadoPago = $"⚠️ Taller eliminado - Pagó {montoPagado:C2} ({porcentajePagado:F1}%)";
+                        }
+                        else
+                        {
+                            estadoPago = "❌ Taller eliminado - Sin pagos";
+                        }
+                    }
+                    else if (todasLasClasesPagadas && !pagoExcedido)
+                    {
+                        estadoPago = "✅ Todas las clases pagadas";
+                    }
+                    else if (todasLasClasesPagadas && pagoExcedido)
+                    {
+                        estadoPago = "✅ Todas las clases pagadas (con exceso)";
+                    }
+                    else if (clasesCompletamentePagadas > 0 || clasesParcialmentePagadas > 0)
+                    {
+                        if (clasesParcialmentePagadas > 0)
+                        {
+                            estadoPago = $"⚠️ Parcialmente pagado ({clasesCompletamentePagadas} completas, {clasesParcialmentePagadas} parciales de {clasesTotales})";
+                        }
+                        else
+                        {
+                            estadoPago = $"⚠️ Parcialmente pagado ({clasesCompletamentePagadas}/{clasesTotales})";
+                        }
+                    }
+                    else
+                    {
+                        estadoPago = "❌ Sin pagos";
+                    }
+
+                    // Si el taller tiene fecha fin y ya terminó, ajustar el estado (solo si no está eliminado)
+                    if (!inscripcion.Taller.Eliminado && inscripcion.Taller.FechaFin.HasValue && hoy > inscripcion.Taller.FechaFin.Value)
+                    {
+                        if (todasLasClasesPagadas && !pagoExcedido)
+                        {
+                            estadoPago = "✅ Completado - Todas las clases pagadas";
+                        }
+                        else if (todasLasClasesPagadas && pagoExcedido)
+                        {
+                            estadoPago = "✅ Completado - Todas las clases pagadas (con exceso)";
+                        }
+                        else
+                        {
+                            estadoPago = $"❌ Incompleto - Faltan {clasesPendientesCount} clases";
+                        }
+                    }
+
+                    var estado = new EstadoPagoAlumnoDTO
+                    {
+                        AlumnoId = inscripcion.AlumnoId,
+                        NombreAlumno = inscripcion.Alumno.Nombre,
+                        TallerId = inscripcion.TallerId,
+                        NombreTaller = inscripcion.Taller.Eliminado ? $"{inscripcion.Taller.Nombre} (Eliminado)" : inscripcion.Taller.Nombre,
+                        FechaInicio = fechaInicio,
+                        FechaFin = inscripcion.Taller.FechaFin,
+                        ClasesTotales = clasesTotales,
+                        ClasesPagadas = clasesPagadasCount,
+                        ClasesPendientes = clasesPendientesCount,
+                        MontoTotal = montoTotal,
+                        MontoPagado = montoPagado,
+                        MontoPendiente = montoPendiente,
+                        TodasLasClasesPagadas = todasLasClasesPagadas,
+                        EstadoPago = estadoPago,
+                        FechaUltimaClase = fechasClases.LastOrDefault(),
+                        FechaHoy = hoy
+                    };
+
+                    resultados.Add(estado);
+                }
+
+                return resultados.OrderBy(r => r.NombreTaller)
+                                .ThenBy(r => r.NombreAlumno)
+                                .ToArray();
+            }
+            catch
+            {
+                return Array.Empty<EstadoPagoAlumnoDTO>();
+            }
         }
 
     }

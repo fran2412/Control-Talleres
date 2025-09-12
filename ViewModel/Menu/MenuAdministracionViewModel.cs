@@ -73,7 +73,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 if (string.IsNullOrWhiteSpace(FiltroRegistros))
                 {
-                    return true; // Mostrar todos si el filtro está vacío
+                    return true; // Mostrar si el filtro está vacío
                 }
                 return dto.Nombre.Contains(FiltroRegistros, StringComparison.OrdinalIgnoreCase);
             }
