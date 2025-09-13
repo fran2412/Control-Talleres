@@ -181,9 +181,12 @@ namespace ControlTalleresMVP.Services.Talleres
         {
             var talleres = await ObtenerTalleresParaGridAsync(ct);
 
+            // Ordenar por fecha de creación descendente (más recientes primero)
+            var talleresOrdenados = talleres.OrderByDescending(t => t.CreadoEn).ToList();
+
             RegistrosTalleres.Clear();
 
-            foreach (var taller in talleres)
+            foreach (var taller in talleresOrdenados)
             {
                 RegistrosTalleres.Add(taller);
             }

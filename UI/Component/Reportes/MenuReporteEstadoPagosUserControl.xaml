@@ -124,58 +124,9 @@
             </StackPanel>
         </Border>
 
-        <!-- ESTADÍSTICAS -->
-        <Border Grid.Row="2" Background="#E8F4FD" BorderBrush="#B3D9FF" BorderThickness="1" 
-                CornerRadius="8" Padding="15" Margin="0,0,0,15">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Total Alumnos -->
-                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding TotalAlumnos}" FontSize="24" FontWeight="Bold" 
-                               Foreground="#007ACC" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Registros de Pago" FontSize="12" HorizontalAlignment="Center"/>
-                </StackPanel>
-
-                <!-- Completos -->
-                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding AlumnosCompletos}" FontSize="24" FontWeight="Bold" 
-                               Foreground="#28A745" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Pagos Completos" FontSize="12" HorizontalAlignment="Center"/>
-                </StackPanel>
-
-                <!-- Parciales -->
-                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding AlumnosParciales}" FontSize="24" FontWeight="Bold" 
-                               Foreground="#FFC107" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Pagos Parciales" FontSize="12" HorizontalAlignment="Center"/>
-                </StackPanel>
-
-                <!-- Sin Pagos -->
-                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding AlumnosSinPagos}" FontSize="24" FontWeight="Bold" 
-                               Foreground="#DC3545" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Sin Pagos" FontSize="12" HorizontalAlignment="Center"/>
-                </StackPanel>
-
-                <!-- Porcentaje -->
-                <StackPanel Grid.Column="4" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding PorcentajeRecaudacion, StringFormat={}{0:F1}%}" 
-                               FontSize="24" FontWeight="Bold" 
-                               Foreground="#6F42C1" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Recaudación" FontSize="12" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Grid>
-        </Border>
 
         <!-- ESTADÍSTICAS FINANCIERAS DETALLADAS -->
-        <Border Grid.Row="3" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1" 
+        <Border Grid.Row="2" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1" 
                 CornerRadius="8" Padding="15" Margin="0,0,0,15">
             <Grid>
                 <Grid.RowDefinitions>
@@ -248,7 +199,7 @@
         </Border>
 
         <!-- ESTADÍSTICAS DE CLASES -->
-        <Border Grid.Row="4" Background="#FFF3CD" BorderBrush="#FFEAA7" BorderThickness="1" 
+        <Border Grid.Row="3" Background="#FFF3CD" BorderBrush="#FFEAA7" BorderThickness="1" 
                 CornerRadius="8" Padding="15" Margin="0,0,0,15">
             <Grid>
                 <Grid.RowDefinitions>
@@ -261,7 +212,6 @@
                 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -300,19 +250,12 @@
                                    Foreground="#6C757D" TextWrapping="Wrap"/>
                     </StackPanel>
 
-                    <!-- Promedio Clases por Alumno -->
-                    <StackPanel Grid.Column="4" HorizontalAlignment="Center" Margin="5">
-                        <TextBlock Text="{Binding PromedioClasesPorAlumno, StringFormat={}{0:F1}}" FontSize="18" FontWeight="Bold" 
-                                   Foreground="#FD7E14" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Promedio/Alumno" FontSize="11" HorizontalAlignment="Center" 
-                                   Foreground="#6C757D" TextWrapping="Wrap"/>
-                    </StackPanel>
                 </Grid>
             </Grid>
         </Border>
 
         <!-- TABLA DE DATOS -->
-        <DataGrid Grid.Row="5" ItemsSource="{Binding EstadosPago}" 
+        <DataGrid Grid.Row="4" ItemsSource="{Binding EstadosPago}" 
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                   GridLinesVisibility="Horizontal" HeadersVisibility="Column"
                   AlternatingRowBackground="#F8F9FA" RowHeaderWidth="0"
@@ -362,7 +305,7 @@
         </DataGrid>
 
         <!-- MENSAJE DE ESTADO -->
-        <Border Grid.Row="6" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1" 
+        <Border Grid.Row="5" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1" 
                 CornerRadius="6" Padding="10" 
                 Visibility="{Binding MensajeEstado, Converter={StaticResource NotNullConverter}}">
             <TextBlock Text="{Binding MensajeEstado}" FontStyle="Italic" 
@@ -370,7 +313,7 @@
         </Border>
 
         <!-- INDICADOR DE CARGA -->
-        <Border Grid.Row="0" Grid.RowSpan="6" Background="#80000000" 
+        <Border Grid.Row="0" Grid.RowSpan="5" Background="#80000000" 
                 Visibility="{Binding Cargando, Converter={StaticResource BoolToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="Cargando..." FontSize="18" Foreground="White" 

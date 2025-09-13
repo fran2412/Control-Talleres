@@ -32,5 +32,6 @@ namespace ControlTalleresMVP.Services.Inscripciones
             string? filtro = null,
             bool incluirTalleresEliminados = false,
             CancellationToken ct = default);
+        public Task<decimal> ObtenerSaldoPendienteAsync(int alumnoId, int tallerId, CancellationToken ct = default);
     }
 }

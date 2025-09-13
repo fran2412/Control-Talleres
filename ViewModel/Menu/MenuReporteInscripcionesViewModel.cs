@@ -354,11 +354,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         }
 
         /// <summary>
-        /// Ordena las inscripciones por estado de pago: Pagadas → Parciales (por progreso) → Sin Pagos
+        /// Ordena las inscripciones por estado de pago: Pagadas → Parciales (por progreso) → Sin Pagos → Canceladas (al final)
         /// </summary>
         private IEnumerable<InscripcionReporteDTO> OrdenarPorEstadoPago(IEnumerable<InscripcionReporteDTO> inscripciones)
         {
-            return inscripciones.OrderByDescending(i => i.SaldoActual == 0) // Pagadas primero (SaldoActual = 0)
+            return inscripciones.OrderBy(i => i.Estado == "Cancelada" ? 1 : 0) // Canceladas al final (1 va después de 0)
+                               .ThenByDescending(i => i.SaldoActual == 0) // Pagadas primero (SaldoActual = 0)
                                .ThenByDescending(i => i.MontoPagado > 0) // Luego parciales (MontoPagado > 0 pero SaldoActual > 0)
                                .ThenByDescending(i => i.ProgresoPorcentaje) // Parciales por progreso (mayor a menor)
                                .ThenBy(i => i.NombreAlumno); // Finalmente por nombre de alumno
@@ -371,7 +372,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 var inscripcionesOrdenadas = OrdenarPorEstadoPago(Inscripciones);
                 Inscripciones = new ObservableCollection<InscripcionReporteDTO>(inscripcionesOrdenadas);
-                MensajeEstado = "Inscripciones reordenadas por estado de pago (Pagadas → Parciales por progreso → Sin Pagos)";
+                MensajeEstado = "Inscripciones reordenadas por estado de pago (Pagadas → Parciales por progreso → Sin Pagos → Canceladas al final)";
             }
         }
     }

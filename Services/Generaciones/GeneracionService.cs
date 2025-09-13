@@ -84,9 +84,12 @@ namespace ControlTalleresMVP.Services.Generaciones
         {
             var generaciones = await ObtenerGeneracionesParaGridAsync(ct);
 
+            // Ordenar por fecha de inicio descendente (más recientes primero)
+            var generacionesOrdenadas = generaciones.OrderByDescending(g => g.FechaInicio).ToList();
+
             RegistrosGeneraciones.Clear();
 
-            foreach (var generacion in generaciones)
+            foreach (var generacion in generacionesOrdenadas)
             {
                 RegistrosGeneraciones.Add(generacion);
             }

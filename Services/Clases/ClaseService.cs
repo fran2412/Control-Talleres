@@ -523,6 +523,7 @@ namespace ControlTalleresMVP.Services.Clases
                     
                     if (!inscripcionCancelada)
                     {
+                        // Primero, procesar las clases esperadas del taller
                         foreach (var fechaClase in fechasClases)
                         {
                             if (cargosPorFecha.TryGetValue(fechaClase.Date, out var cargo))
@@ -572,6 +573,25 @@ namespace ControlTalleresMVP.Services.Clases
                                     MontoPagado = 0m
                                 };
                                 clasesPendientes.Add(clasePendiente);
+                            }
+                        }
+
+                        // Luego, agregar las clases pagadas de más (excedentes) que no están en las fechas esperadas
+                        var fechasEsperadas = fechasClases.Select(f => f.Date).ToHashSet();
+                        foreach (var cargo in cargosClases)
+                        {
+                            if (!fechasEsperadas.Contains(cargo.Fecha.Date) && cargo.MontoPagado > 0)
+                            {
+                                // Esta es una clase pagada de más (excedente)
+                                var claseExcedente = new ClaseInfo
+                                {
+                                    Fecha = cargo.Fecha,
+                                    Monto = cargo.Monto,
+                                    SaldoActual = cargo.SaldoActual,
+                                    Estado = cargo.Estado,
+                                    MontoPagado = cargo.MontoPagado
+                                };
+                                clasesPagadas.Add(claseExcedente);
                             }
                         }
                     }
@@ -821,6 +841,7 @@ namespace ControlTalleresMVP.Services.Clases
                     
                     if (!inscripcionCancelada)
                     {
+                        // Primero, procesar las clases esperadas del taller
                         foreach (var fechaClase in fechasClases)
                         {
                             if (cargosPorFecha.TryGetValue(fechaClase.Date, out var cargo))
@@ -870,6 +891,25 @@ namespace ControlTalleresMVP.Services.Clases
                                     MontoPagado = 0m
                                 };
                                 clasesPendientes.Add(clasePendiente);
+                            }
+                        }
+
+                        // Luego, agregar las clases pagadas de más (excedentes) que no están en las fechas esperadas
+                        var fechasEsperadas = fechasClases.Select(f => f.Date).ToHashSet();
+                        foreach (var cargo in cargosClases)
+                        {
+                            if (!fechasEsperadas.Contains(cargo.Fecha.Date) && cargo.MontoPagado > 0)
+                            {
+                                // Esta es una clase pagada de más (excedente)
+                                var claseExcedente = new ClaseInfo
+                                {
+                                    Fecha = cargo.Fecha,
+                                    Monto = cargo.Monto,
+                                    SaldoActual = cargo.SaldoActual,
+                                    Estado = cargo.Estado,
+                                    MontoPagado = cargo.MontoPagado
+                                };
+                                clasesPagadas.Add(claseExcedente);
                             }
                         }
                     }

@@ -98,9 +98,12 @@ namespace ControlTalleresMVP.Services.Promotores
         {
             var promotores = await ObtenerPromotoresParaGridAsync(ct);
 
+            // Ordenar por fecha de creación descendente (más recientes primero)
+            var promotoresOrdenados = promotores.OrderByDescending(p => p.CreadoEn).ToList();
+
             RegistrosPromotores.Clear();
 
-            foreach (var promotor in promotores)
+            foreach (var promotor in promotoresOrdenados)
             {
                 RegistrosPromotores.Add(promotor);
             }

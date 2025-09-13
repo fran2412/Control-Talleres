@@ -272,6 +272,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
             MensajeValidacion = null;
         }
 
+
         [RelayCommand]
         private void UsarMontoSugerido()
         {
@@ -381,32 +382,44 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     }
                     else
                     {
-                        // SIN fecha de fin: solo permitir pagos unitarios el mismo día
-                        var fechaHoy = GenerarFechasSemanas(hoy, 1);
-                        if (fechaHoy.Length == 0)
+                        // SIN fecha de fin: permitir pagos en paquetes como talleres con fecha fin
+                        if (CantidadSeleccionada < 1) { MensajeValidacion = "La cantidad de clases debe ser al menos 1."; return; }
+
+                        // Generar fechas para las clases solicitadas
+                        var fechas = GenerarFechasSemanas(hoy, CantidadSeleccionada);
+                        if (fechas.Length == 0)
                         {
-                            MensajeValidacion = "No hay clase programada para hoy en este taller.";
+                            MensajeValidacion = "No se pueden generar clases futuras para este taller.";
                             return;
                         }
                         
-                        // Solo permitir pago de 1 clase (la de hoy)
-                        if (CantidadSeleccionada > 1)
+                        // Validar que el monto no exceda las clases solicitadas
+                        var montoMaximo = R2(fechas.Length * CostoClase);
+                        if (totalIngresado > montoMaximo)
                         {
-                            MensajeValidacion = "Este taller no tiene fecha de fin definida. Solo se puede pagar la clase del día actual.";
+                            MensajeValidacion = $"El monto no puede superar el necesario para pagar {fechas.Length} clases ({montoMaximo:C2}).";
                             return;
                         }
                         
-                        // Validar monto para una sola clase
-                        if (totalIngresado > costo)
+                        // Procesar pagos para las fechas generadas
+                        var clasesCompletas = (int)Math.Min(fechas.Length, Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo)));
+                        var sobrante = totalIngresado - (clasesCompletas * costo);
+                        
+                        for (int i = 0; i < clasesCompletas; i++)
                         {
-                            MensajeValidacion = $"Solo se puede pagar la clase de hoy. El monto máximo es {costo:C2}.";
-                            return;
+                            var r = await _claseService.RegistrarClaseAsync(
+                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[i], costo, ct);
+                            resultados.Add(r);
                         }
                         
-                        // Registrar pago para la clase de hoy
-                        var r = await _claseService.RegistrarClaseAsync(
-                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaHoy[0], totalIngresado, ct);
-                        resultados.Add(r);
+                        // Si hay sobrante, aplicarlo a la última clase
+                        if (sobrante > 0 && clasesCompletas > 0)
+                        {
+                            var ultimaClase = fechas[clasesCompletas - 1];
+                            var r = await _claseService.RegistrarClaseAsync(
+                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, ultimaClase, sobrante, ct);
+                            resultados.Add(r);
+                        }
                     }
                 }
 
@@ -450,7 +463,26 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                 // Notifica a quien muestre el registro que hay cambios
                 WeakReferenceMessenger.Default.Send(new ClasesActualizadasMessage(AlumnoSeleccionado.AlumnoId));
 
-                LimpiarSeleccion();
+                // Preguntar si quiere registrar otro pago
+                var continuar = _dialogService.Confirmar("¿Desea registrar otro pago?", "Pago Registrado");
+                if (continuar)
+                {
+                    // Mantener el alumno seleccionado y limpiar solo los campos de pago
+                    TallerSeleccionado = null;
+                    CantidadSeleccionada = 1;
+                    MontoIngresado = null;
+                    MontoSugerido = 0;
+                    MensajeValidacion = null;
+                    InformacionClasesPendientes = null;
+                    AvisoClasesPendientes = null;
+                    ActualizarMostrarAvisoClasesPendientes();
+                    RecalcularSugeridoYQuizasMonto(forceSetMonto: true);
+                }
+                else
+                {
+                    // Limpiar toda la selección
+                    LimpiarSeleccion();
+                }
             }
             catch (Exception ex)
             {
@@ -528,25 +560,20 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                         }
                         else
                         {
-                            // SIN fecha de fin: solo permitir pago unitario del día actual
-                            var fechaHoy = GenerarFechasSemanas(hoy, 1);
-                            if (fechaHoy.Length > 0)
+                            // SIN fecha de fin: permitir pagos en paquetes como talleres con fecha fin
+                            var fechas = GenerarFechasSemanas(hoy, CantidadSeleccionada);
+                            if (fechas.Length > 0)
                             {
-                                nuevoSugerido = R2(CostoClase);
-                                InformacionClasesPendientes = "Taller sin fecha de fin - solo se puede pagar la clase del día actual";
-                                // Limitar cantidad a 1
-                                if (CantidadSeleccionada > 1)
-                                {
-                                    CantidadSeleccionada = 1;
-                                }
+                                nuevoSugerido = R2(fechas.Length * CostoClase);
+                                InformacionClasesPendientes = $"Taller sin fecha de fin - se pueden pagar {fechas.Length} clases";
                             }
                             else
                             {
                                 nuevoSugerido = 0;
-                                InformacionClasesPendientes = "No hay clase programada para hoy en este taller.";
+                                InformacionClasesPendientes = "No se pueden generar clases futuras para este taller.";
                             }
-                            MostrarControlesCantidad = false; // Ocultar controles de cantidad
-                            AvisoClasesPendientes = "⚠️ ATENCIÓN: Este taller no tiene fecha de fin definida. Solo se puede pagar la clase del día actual.";
+                            MostrarControlesCantidad = true; // Mostrar controles de cantidad
+                            AvisoClasesPendientes = null; // Limpiar aviso
                         }
                         ActualizarMostrarAvisoClasesPendientes();
                     }
@@ -693,6 +720,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
 
             return clasesPendientes;
         }
+
 
 
         private static decimal R2(decimal v) => Math.Round(v, 2, MidpointRounding.AwayFromZero);

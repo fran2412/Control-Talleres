@@ -123,9 +123,12 @@ namespace ControlTalleresMVP.Services.Alumnos
         {
             var alumnos = await ObtenerAlumnosParaGridAsync(ct);
 
+            // Ordenar por fecha de creación descendente (más recientes primero)
+            var alumnosOrdenados = alumnos.OrderByDescending(a => a.CreadoEn).ToList();
+
             RegistrosAlumnos.Clear();
 
-            foreach (var alumno in alumnos)
+            foreach (var alumno in alumnosOrdenados)
             {
                 RegistrosAlumnos.Add(alumno);
             }

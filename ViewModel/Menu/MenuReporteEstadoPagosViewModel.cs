@@ -156,7 +156,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 var estadosOrdenados = OrdenarPorEstado(EstadosPago);
                 EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosOrdenados);
-                MensajeEstado = "Datos reordenados por estado (Completos → Parciales por progreso → Sin Pagos)";
+                MensajeEstado = "Datos reordenados por estado (Con Exceso → Completos → Parciales por progreso → Sin Pagos)";
             }
         }
 
@@ -210,11 +210,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         }
 
         /// <summary>
-        /// Ordena los estados de pago por prioridad: Completos → Parciales (por progreso) → Sin Pagos
+        /// Ordena los estados de pago por prioridad: Con Exceso → Completos → Parciales (por progreso) → Sin Pagos
         /// </summary>
         private IEnumerable<EstadoPagoAlumnoDTO> OrdenarPorEstado(IEnumerable<EstadoPagoAlumnoDTO> estados)
         {
-            return estados.OrderByDescending(e => e.TodasLasClasesPagadas) // Completos primero (TodasLasClasesPagadas = true)
+            return estados.OrderByDescending(e => e.ClasesPagadas > e.ClasesTotales) // Con exceso primero (ClasesPagadas > ClasesTotales)
+                         .ThenByDescending(e => e.TodasLasClasesPagadas) // Luego completos (TodasLasClasesPagadas = true)
                          .ThenByDescending(e => e.ClasesPagadas > 0) // Luego parciales (ClasesPagadas > 0 pero no todas)
                          .ThenByDescending(e => CalcularProgresoPago(e.MontoTotal, e.MontoPendiente)) // Parciales por progreso (mayor a menor)
                          .ThenBy(e => e.NombreAlumno); // Finalmente por nombre de alumno
@@ -254,7 +255,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
         // Métricas por taller (si hay filtro)
         public int TalleresActivos => EstadosPago.Select(e => e.TallerId).Distinct().Count();
         public decimal PromedioPagoPorAlumno => TotalAlumnos > 0 ? MontoTotalRecaudado / TotalAlumnos : 0;
-        public decimal PromedioClasesPorAlumno => TotalAlumnos > 0 ? (decimal)TotalClasesEsperadas / TotalAlumnos : 0;
         
         // Formateo de montos para mostrar
         public string MontoTotalEsperadoFormateado => $"${MontoTotalEsperado:N2}";
@@ -287,7 +287,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             // Métricas adicionales
             OnPropertyChanged(nameof(TalleresActivos));
             OnPropertyChanged(nameof(PromedioPagoPorAlumno));
-            OnPropertyChanged(nameof(PromedioClasesPorAlumno));
             
             // Formateo
             OnPropertyChanged(nameof(MontoTotalEsperadoFormateado));

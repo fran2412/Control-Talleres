@@ -261,6 +261,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     Estado      = i.Estado,
                     CreadoEn    = i.Fecha
                 })
+                .OrderByDescending(i => i.CreadoEn)
                 .ToListAsync(ct);
 
             return datos;
@@ -404,6 +405,23 @@ namespace ControlTalleresMVP.Services.Inscripciones
             {
                 RegistrosInscripcionesCompletos.Add(inscripcion);
             }
+        }
+
+        public async Task<decimal> ObtenerSaldoPendienteAsync(int alumnoId, int tallerId, CancellationToken ct = default)
+        {
+            var generacion = _generacionService.ObtenerGeneracionActual();
+            if (generacion == null) return 0m;
+
+            var inscripcion = await _escuelaContext.Inscripciones
+                .AsNoTracking()
+                .Where(i => i.AlumnoId == alumnoId 
+                         && i.TallerId == tallerId 
+                         && i.GeneracionId == generacion.GeneracionId
+                         && !i.Eliminado)
+                .Select(i => i.SaldoActual)
+                .FirstOrDefaultAsync(ct);
+
+            return inscripcion;
         }
     }
 }

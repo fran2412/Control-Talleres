@@ -103,9 +103,12 @@ namespace ControlTalleresMVP.Services.Sedes
         {
             var sedes = await ObtenerSedesParaGridAsync(ct);
 
+            // Ordenar por fecha de creación descendente (más recientes primero)
+            var sedesOrdenadas = sedes.OrderByDescending(s => s.CreadoEn).ToList();
+
             RegistrosSedes.Clear();
 
-            foreach (var sede in sedes)
+            foreach (var sede in sedesOrdenadas)
             {
                 RegistrosSedes.Add(sede);
             }
