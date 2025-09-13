@@ -10,6 +10,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ControlTalleresMVP.Services.Clases
 {
+    public class ClaseInfo
+    {
+        public DateTime Fecha { get; set; }
+        public decimal Monto { get; set; }
+        public decimal SaldoActual { get; set; }
+        public EstadoCargo Estado { get; set; }
+        public decimal MontoPagado { get; set; }
+    }
+
     public class ClaseService : IClaseService
     {
         private readonly EscuelaContext _escuelaContext;
@@ -505,19 +514,67 @@ namespace ControlTalleresMVP.Services.Clases
                         })
                         .ToListAsync(ct);
 
-                    // Para inscripciones canceladas, no considerar cargos en cálculos de pagos
-                    // pero sí mostrar la información histórica
-                    var clasesPagadas = inscripcionCancelada 
-                        ? cargosClases.Where(c => false).ToList() // No hay clases pagadas si la inscripción está cancelada
-                        : taller.Eliminado 
-                            ? cargosClases.Where(c => c.MontoPagado > 0 && c.Estado != EstadoCargo.Anulado).ToList()
-                            : cargosClases.Where(c => c.MontoPagado > 0).ToList();
+                    // Crear un diccionario de cargos por fecha para facilitar la búsqueda
+                    var cargosPorFecha = cargosClases.ToDictionary(c => c.Fecha.Date, c => c);
+
+                    // Calcular clases pagadas y pendientes basándose en las fechas esperadas
+                    var clasesPagadas = new List<ClaseInfo>();
+                    var clasesPendientes = new List<ClaseInfo>();
                     
-                    var clasesPendientes = inscripcionCancelada 
-                        ? cargosClases.Where(c => false).ToList() // No hay clases pendientes si la inscripción está cancelada
-                        : taller.Eliminado 
-                            ? cargosClases.Where(c => c.SaldoActual > 0 && c.Estado != EstadoCargo.Anulado).ToList()
-                            : cargosClases.Where(c => c.SaldoActual > 0).ToList();
+                    if (!inscripcionCancelada)
+                    {
+                        foreach (var fechaClase in fechasClases)
+                        {
+                            if (cargosPorFecha.TryGetValue(fechaClase.Date, out var cargo))
+                            {
+                                // Hay un cargo para esta clase
+                                var claseInfo = new ClaseInfo
+                                {
+                                    Fecha = cargo.Fecha,
+                                    Monto = cargo.Monto,
+                                    SaldoActual = cargo.SaldoActual,
+                                    Estado = cargo.Estado,
+                                    MontoPagado = cargo.MontoPagado
+                                };
+
+                                if (taller.Eliminado)
+                                {
+                                    if (cargo.MontoPagado > 0 && cargo.Estado != EstadoCargo.Anulado)
+                                    {
+                                        clasesPagadas.Add(claseInfo);
+                                    }
+                                    if (cargo.SaldoActual > 0 && cargo.Estado != EstadoCargo.Anulado)
+                                    {
+                                        clasesPendientes.Add(claseInfo);
+                                    }
+                                }
+                                else
+                                {
+                                    if (cargo.MontoPagado > 0)
+                                    {
+                                        clasesPagadas.Add(claseInfo);
+                                    }
+                                    if (cargo.SaldoActual > 0)
+                                    {
+                                        clasesPendientes.Add(claseInfo);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // No hay cargo para esta clase, es una clase pendiente
+                                var clasePendiente = new ClaseInfo
+                                {
+                                    Fecha = fechaClase,
+                                    Monto = costoClase,
+                                    SaldoActual = costoClase,
+                                    Estado = EstadoCargo.Pendiente,
+                                    MontoPagado = 0m
+                                };
+                                clasesPendientes.Add(clasePendiente);
+                            }
+                        }
+                    }
 
                     // Calcular estadísticas
                     var clasesPagadasCount = clasesPagadas.Count;
@@ -537,12 +594,9 @@ namespace ControlTalleresMVP.Services.Clases
                     var montoTotal = clasesTotales * costoClase;
                     
                     // Calcular clases completamente pagadas vs parcialmente pagadas
-                    // Si el taller está eliminado, no considerar cargos anulados como completamente pagados
-                    var clasesCompletamentePagadas = taller.Eliminado 
-                        ? cargosClases.Count(c => c.SaldoActual == 0 && c.Estado != EstadoCargo.Anulado)
-                        : cargosClases.Count(c => c.SaldoActual == 0);
-                    var clasesParcialmentePagadas = cargosClases.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
-                    var clasesSinPagos = cargosClases.Count(c => c.MontoPagado == 0);
+                    var clasesCompletamentePagadas = clasesPagadas.Count(c => c.SaldoActual == 0);
+                    var clasesParcialmentePagadas = clasesPagadas.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
+                    var clasesSinPagos = clasesTotales - clasesPagadasCount;
                     
                     // Verificar si se pagaron al menos todas las clases que se deben
                     var todasLasClasesPagadas = clasesCompletamentePagadas >= clasesTotales && clasesPendientesCount == 0;
@@ -758,18 +812,67 @@ namespace ControlTalleresMVP.Services.Clases
                     // Verificar si la inscripción está cancelada
                     var inscripcionCancelada = inscripcion.Estado == EstadoInscripcion.Cancelada;
                     
-                    // Calcular clases pagadas y pendientes usando la misma lógica que el método principal
-                    var clasesPagadas = inscripcionCancelada 
-                        ? cargosClases.Where(c => false).ToList() // No hay clases pagadas si la inscripción está cancelada
-                        : inscripcion.Taller.Eliminado 
-                            ? cargosClases.Where(c => c.MontoPagado > 0 && c.Estado != EstadoCargo.Anulado).ToList()
-                            : cargosClases.Where(c => c.MontoPagado > 0).ToList();
+                    // Crear un diccionario de cargos por fecha para facilitar la búsqueda
+                    var cargosPorFecha = cargosClases.ToDictionary(c => c.Fecha.Date, c => c);
+
+                    // Calcular clases pagadas y pendientes basándose en las fechas esperadas
+                    var clasesPagadas = new List<ClaseInfo>();
+                    var clasesPendientes = new List<ClaseInfo>();
                     
-                    var clasesPendientes = inscripcionCancelada 
-                        ? cargosClases.Where(c => false).ToList() // No hay clases pendientes si la inscripción está cancelada
-                        : inscripcion.Taller.Eliminado 
-                            ? cargosClases.Where(c => c.SaldoActual > 0 && c.Estado != EstadoCargo.Anulado).ToList()
-                            : cargosClases.Where(c => c.SaldoActual > 0).ToList();
+                    if (!inscripcionCancelada)
+                    {
+                        foreach (var fechaClase in fechasClases)
+                        {
+                            if (cargosPorFecha.TryGetValue(fechaClase.Date, out var cargo))
+                            {
+                                // Hay un cargo para esta clase
+                                var claseInfo = new ClaseInfo
+                                {
+                                    Fecha = cargo.Fecha,
+                                    Monto = cargo.Monto,
+                                    SaldoActual = cargo.SaldoActual,
+                                    Estado = cargo.Estado,
+                                    MontoPagado = cargo.MontoPagado
+                                };
+
+                                if (inscripcion.Taller.Eliminado)
+                                {
+                                    if (cargo.MontoPagado > 0 && cargo.Estado != EstadoCargo.Anulado)
+                                    {
+                                        clasesPagadas.Add(claseInfo);
+                                    }
+                                    if (cargo.SaldoActual > 0 && cargo.Estado != EstadoCargo.Anulado)
+                                    {
+                                        clasesPendientes.Add(claseInfo);
+                                    }
+                                }
+                                else
+                                {
+                                    if (cargo.MontoPagado > 0)
+                                    {
+                                        clasesPagadas.Add(claseInfo);
+                                    }
+                                    if (cargo.SaldoActual > 0)
+                                    {
+                                        clasesPendientes.Add(claseInfo);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // No hay cargo para esta clase, es una clase pendiente
+                                var clasePendiente = new ClaseInfo
+                                {
+                                    Fecha = fechaClase,
+                                    Monto = costoClase,
+                                    SaldoActual = costoClase,
+                                    Estado = EstadoCargo.Pendiente,
+                                    MontoPagado = 0m
+                                };
+                                clasesPendientes.Add(clasePendiente);
+                            }
+                        }
+                    }
 
                     // Calcular estadísticas
                     var clasesPagadasCount = clasesPagadas.Count;
@@ -789,10 +892,8 @@ namespace ControlTalleresMVP.Services.Clases
                     var montoTotal = clasesTotales * costoClase;
                     
                     // Calcular clases completamente pagadas vs parcialmente pagadas
-                    var clasesCompletamentePagadas = inscripcion.Taller.Eliminado 
-                        ? cargosClases.Count(c => c.SaldoActual == 0 && c.Estado != EstadoCargo.Anulado)
-                        : cargosClases.Count(c => c.SaldoActual == 0);
-                    var clasesParcialmentePagadas = cargosClases.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
+                    var clasesCompletamentePagadas = clasesPagadas.Count(c => c.SaldoActual == 0);
+                    var clasesParcialmentePagadas = clasesPagadas.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
                     
                     // Verificar si se pagaron al menos todas las clases que se deben
                     var todasLasClasesPagadas = clasesCompletamentePagadas >= clasesTotales && clasesPendientesCount == 0;
