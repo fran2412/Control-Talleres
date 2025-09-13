@@ -70,7 +70,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                             NombreGeneracion = g.Nombre,
                             DiasTranscurridos = (DateTime.Today - i.Fecha).Days,
                             DiasRestantes = t.FechaFin.HasValue ? (t.FechaFin.Value - DateTime.Today).Days : null,
-                            ProgresoPorcentaje = CalcularProgreso(i.Fecha, t.FechaInicio, t.FechaFin)
+                            ProgresoPorcentaje = CalcularProgresoPago(i.Costo, i.SaldoActual)
                         };
 
             // Filtrar por promotor si se especifica
@@ -159,10 +159,19 @@ namespace ControlTalleresMVP.Services.Inscripciones
             return Math.Max(0, Math.Min(100, progreso));
         }
 
+        private static decimal CalcularProgresoPago(decimal costo, decimal saldoActual)
+        {
+            if (costo <= 0) return 0;
+            
+            var montoPagado = costo - saldoActual;
+            var progreso = (montoPagado / costo) * 100;
+            
+            return Math.Max(0, Math.Min(100, progreso));
+        }
+
         private static string CalcularEstadoPago(decimal costo, decimal saldoActual)
         {
             var montoPagado = costo - saldoActual;
-            var porcentajePagado = costo > 0 ? (montoPagado / costo) * 100 : 0;
 
             if (saldoActual <= 0)
             {
@@ -170,7 +179,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             }
             else if (montoPagado > 0)
             {
-                return $"⚠️ Parcialmente pagado ({porcentajePagado:F1}%)";
+                return "⚠️ Parcialmente pagado";
             }
             else
             {

@@ -76,6 +76,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- Fila superior -->
@@ -104,6 +105,11 @@
                                 Command="{Binding ExportarExcelCommand}"
                                 Width="120" Height="35" Margin="8,6"
                                 Background="#FD7E14" Foreground="White"/>
+
+                            <Button Grid.Row="1" Grid.Column="2" Content="Reordenar" 
+                                Command="{Binding ReordenarPorEstadoCommand}"
+                                Width="120" Height="35" Margin="8,6"
+                                Background="#6F42C1" Foreground="White"/>
                         </Grid>
                     </Grid>
 

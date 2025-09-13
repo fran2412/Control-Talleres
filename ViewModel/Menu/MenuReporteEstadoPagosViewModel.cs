@@ -123,8 +123,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     // En una implementación completa, se pasaría al servicio
                 }
 
-
-                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosFiltrados);
+                // Ordenar por estado antes de asignar
+                var estadosOrdenados = OrdenarPorEstado(estadosFiltrados);
+                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosOrdenados);
                 MensajeEstado = $"Mostrando {EstadosPago.Count} registros - {mensajeFiltros}";
             }
             catch (Exception ex)
@@ -146,6 +147,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
             TallerSeleccionado = null;
             GeneracionSeleccionada = null;
             MensajeEstado = "Filtros limpiados";
+        }
+
+        [RelayCommand]
+        public void ReordenarPorEstado()
+        {
+            if (EstadosPago.Any())
+            {
+                var estadosOrdenados = OrdenarPorEstado(EstadosPago);
+                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosOrdenados);
+                MensajeEstado = "Datos reordenados por estado (Completos → Parciales por progreso → Sin Pagos)";
+            }
         }
 
         [RelayCommand]
@@ -185,7 +197,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 // Usar siempre la generación actual por defecto
                 var generacionId = _generacionService.ObtenerGeneracionActual()?.GeneracionId;
                 var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(null, null, generacionId);
-                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estados);
+                var estadosOrdenados = OrdenarPorEstado(estados);
+                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosOrdenados);
                 MensajeEstado = $"Mostrando {EstadosPago.Count} registros";
             }
             catch (Exception ex)
@@ -194,6 +207,30 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 EstadosPago.Clear();
                 throw; // Re-lanzar para que el método llamador pueda manejar el error
             }
+        }
+
+        /// <summary>
+        /// Ordena los estados de pago por prioridad: Completos → Parciales (por progreso) → Sin Pagos
+        /// </summary>
+        private IEnumerable<EstadoPagoAlumnoDTO> OrdenarPorEstado(IEnumerable<EstadoPagoAlumnoDTO> estados)
+        {
+            return estados.OrderByDescending(e => e.TodasLasClasesPagadas) // Completos primero (TodasLasClasesPagadas = true)
+                         .ThenByDescending(e => e.ClasesPagadas > 0) // Luego parciales (ClasesPagadas > 0 pero no todas)
+                         .ThenByDescending(e => CalcularProgresoPago(e.MontoTotal, e.MontoPendiente)) // Parciales por progreso (mayor a menor)
+                         .ThenBy(e => e.NombreAlumno); // Finalmente por nombre de alumno
+        }
+
+        /// <summary>
+        /// Calcula el progreso de pago basado en el monto total y el saldo pendiente
+        /// </summary>
+        private static decimal CalcularProgresoPago(decimal montoTotal, decimal montoPendiente)
+        {
+            if (montoTotal <= 0) return 0;
+            
+            var montoPagado = montoTotal - montoPendiente;
+            var progreso = (montoPagado / montoTotal) * 100;
+            
+            return Math.Max(0, Math.Min(100, progreso));
         }
 
         // Propiedades calculadas para estadísticas

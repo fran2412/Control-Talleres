@@ -98,6 +98,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <!-- Fila superior -->
@@ -110,6 +111,11 @@
                             Command="{Binding LimpiarFiltrosCommand}"
                             Width="120" Height="35" Margin="8,6"
                             Background="#6C757D" Foreground="White"/>
+
+                                <Button Grid.Row="0" Grid.Column="2" Content="Reordenar" 
+                            Command="{Binding ReordenarPorEstadoPagoCommand}"
+                            Width="120" Height="35" Margin="8,6"
+                            Background="#6F42C1" Foreground="White"/>
 
                                 <!-- Fila inferior -->
                                 <Button Grid.Row="1" Grid.Column="0" Content="Exportar CSV" 

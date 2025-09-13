@@ -199,7 +199,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     FechaHasta,
                     IncluirTalleresEliminados); // Ya está limitado a fecha actual en el servicio
 
-                Inscripciones = new ObservableCollection<InscripcionReporteDTO>(inscripcionesList);
+                // Ordenar por estado de pago: pagadas primero, luego pendientes
+                var inscripcionesOrdenadas = OrdenarPorEstadoPago(inscripcionesList);
+                Inscripciones = new ObservableCollection<InscripcionReporteDTO>(inscripcionesOrdenadas);
 
                 // Cargar estadísticas
                 var estadisticasData = await _inscripcionReporteService.ObtenerEstadisticasInscripcionesAsync(
@@ -348,6 +350,28 @@ namespace ControlTalleresMVP.ViewModel.Menu
             finally
             {
                 Cargando = false;
+            }
+        }
+
+        /// <summary>
+        /// Ordena las inscripciones por estado de pago: Pagadas → Parciales (por progreso) → Sin Pagos
+        /// </summary>
+        private IEnumerable<InscripcionReporteDTO> OrdenarPorEstadoPago(IEnumerable<InscripcionReporteDTO> inscripciones)
+        {
+            return inscripciones.OrderByDescending(i => i.SaldoActual == 0) // Pagadas primero (SaldoActual = 0)
+                               .ThenByDescending(i => i.MontoPagado > 0) // Luego parciales (MontoPagado > 0 pero SaldoActual > 0)
+                               .ThenByDescending(i => i.ProgresoPorcentaje) // Parciales por progreso (mayor a menor)
+                               .ThenBy(i => i.NombreAlumno); // Finalmente por nombre de alumno
+        }
+
+        [RelayCommand]
+        public void ReordenarPorEstadoPago()
+        {
+            if (Inscripciones.Any())
+            {
+                var inscripcionesOrdenadas = OrdenarPorEstadoPago(Inscripciones);
+                Inscripciones = new ObservableCollection<InscripcionReporteDTO>(inscripcionesOrdenadas);
+                MensajeEstado = "Inscripciones reordenadas por estado de pago (Pagadas → Parciales por progreso → Sin Pagos)";
             }
         }
     }
