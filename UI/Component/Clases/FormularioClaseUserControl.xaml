@@ -91,8 +91,18 @@
                     </DockPanel>
                 </Border>
 
+                <!-- INFORMACIÓN DE FECHAS DE CLASES -->
+                <Border Grid.Row="3" Padding="10" CornerRadius="12" Background="#E8F4FD" BorderBrush="#B3D9FF" BorderThickness="1" Margin="0,0,0,10"
+                        Visibility="{Binding MostrarInformacionFechas, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📅" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding InformacionFechasClases}" 
+                                   Foreground="#1E40AF" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
                 <!-- MONTO (CurrencyUpDown) -->
-                <Grid Grid.Row="3" Margin="0,0,0,10">
+                <Grid Grid.Row="4" Margin="0,0,0,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
@@ -125,7 +135,7 @@
                 </Grid>
 
                 <!-- NOTIFICACIÓN DE TALLERES SIN PAGAR -->
-                <Border Grid.Row="4" Background="#FFF3CD" BorderBrush="#FFEAA7" BorderThickness="1" 
+                <Border Grid.Row="5" Background="#FFF3CD" BorderBrush="#FFEAA7" BorderThickness="1" 
                         CornerRadius="6" Padding="12" Margin="0,0,0,8"
                         Visibility="{Binding TieneTalleresSinPagar, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
@@ -136,7 +146,7 @@
                 </Border>
 
                 <!-- AVISO DE CLASES PENDIENTES -->
-                <Border Grid.Row="5" Background="#FFE6E6" BorderBrush="#FFB3B3" BorderThickness="1" 
+                <Border Grid.Row="6" Background="#FFE6E6" BorderBrush="#FFB3B3" BorderThickness="1" 
                         CornerRadius="6" Padding="12" Margin="0,0,0,8"
                         Visibility="{Binding MostrarAvisoClasesPendientes, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel>
@@ -146,7 +156,7 @@
                 </Border>
 
                 <!-- RESUMEN -->
-                <Grid Grid.Row="6" Margin="0,0,0,8">
+                <Grid Grid.Row="7" Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
@@ -158,7 +168,7 @@
                 </Grid>
 
                 <!-- FOOTER -->
-                <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Cancelar" Command="{Binding CancelarPagoClasesCommand}"
                         Style="{StaticResource BotonNormal}" Height="40" MinWidth="120"/>
                     <Button Content="Guardar" Command="{Binding GuardarPagoClasesCommand}"
