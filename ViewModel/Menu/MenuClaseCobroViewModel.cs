@@ -128,22 +128,18 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     // Hay clases pendientes: validar contra el monto sugerido
                     if (value > MontoSugerido)
-                {
-                    MensajeValidacion = $"El monto no puede superar el necesario para pagar todas las clases pendientes ({MontoSugerido:C2}).";
-                }
-                else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
-                {
-                    MensajeValidacion = null; // Limpiar mensaje si ya no aplica
+                    {
+                        MensajeValidacion = $"El monto no puede superar el necesario para pagar todas las clases pendientes ({MontoSugerido:C2}).";
+                    }
+                    else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
+                    {
+                        MensajeValidacion = null; // Limpiar mensaje si ya no aplica
                     }
                 }
                 else
                 {
-                    // No hay clases pendientes: validar contra el límite de clases seleccionadas
-                    if (value > limiteMaximo)
-                    {
-                        MensajeValidacion = $"El monto no puede superar el costo de {CantidadSeleccionada} clases ({limiteMaximo:C2}).";
-                    }
-                    else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
+                    // No hay clases pendientes: limpiar mensajes de validación de límite
+                    if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
                     {
                         MensajeValidacion = null; // Limpiar mensaje si ya no aplica
                     }
@@ -541,13 +537,21 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     
                     if (clasesPendientes.Length > 0)
                     {
-                        // HAY clases pendientes: sugerir monto para pagar todas las clases pendientes
+                        // HAY clases pendientes: actualizar la cantidad automáticamente
+                        if (!_ajustandoCantidad)
+                        {
+                            _ajustandoCantidad = true;
+                            CantidadSeleccionada = clasesPendientes.Length;
+                            _ajustandoCantidad = false;
+                        }
+                        
+                        // Sugerir monto para pagar todas las clases pendientes
                         nuevoSugerido = R2(clasesPendientes.Length * CostoClase);
                         
                         var fechas = clasesPendientes.Select(f => f.ToString("dd/MM/yyyy")).ToArray();
                         var fechasTexto = string.Join(", ", fechas);
                         InformacionClasesPendientes = $"Clases pendientes ({clasesPendientes.Length}): {fechasTexto}";
-                        MostrarControlesCantidad = false; // Ocultar controles de cantidad
+                        MostrarControlesCantidad = true; // Mostrar controles de cantidad para que el usuario vea la actualización
                         
                         // Mostrar aviso de que se están pagando clases no pagadas
                         AvisoClasesPendientes = "⚠️ ATENCIÓN: Se están pagando clases que no fueron pagadas o no se terminaron de pagar anteriormente. El pago se aplicará a las clases pendientes en orden cronológico.";
