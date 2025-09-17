@@ -66,7 +66,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 var seleccionado = await _alumnoPicker.PickConDeudasAsync();
                 if (seleccionado is null)
                 {
-                    _dialog.Alerta("No hay alumnos con deudas pendientes.");
+                    // No mostrar mensaje si el usuario simplemente cerró el picker sin seleccionar
                     return;
                 }
 

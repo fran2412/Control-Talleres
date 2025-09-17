@@ -3,6 +3,7 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.UI.Windows.Select;
 using ControlTalleresMVP.ViewModel.Menu;
+using ControlTalleresMVP.Helpers.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,10 @@ namespace ControlTalleresMVP.Services.Picker
 
             if (alumnosConDeudas.Count == 0)
             {
-                return null; // No hay alumnos con deudas
+                // Mostrar mensaje específico cuando no hay alumnos con deudas
+                var dialogService = _sp.GetRequiredService<IDialogService>();
+                dialogService.Alerta("No hay alumnos con deudas pendientes.");
+                return null;
             }
 
             // Crear un ViewModel temporal solo con alumnos con deudas
