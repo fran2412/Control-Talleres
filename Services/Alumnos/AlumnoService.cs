@@ -142,5 +142,28 @@ namespace ControlTalleresMVP.Services.Alumnos
                 .ToList();
         }
 
+        public async Task<List<Alumno>> ObtenerAlumnosConDeudasPendientesAsync(CancellationToken ct = default)
+        {
+            var generacion = _cargosService.GetGeneracionActual();
+            if (generacion == null) return new List<Alumno>();
+
+            var alumnosConDeudas = await _context.Cargos
+                .AsNoTracking()
+                .Where(c => c.SaldoActual > 0
+                           && c.Estado != EstadoCargo.Anulado
+                           && !c.Eliminado
+                           && (c.InscripcionId == null
+                               || c.Inscripcion!.GeneracionId == generacion.GeneracionId))
+                .Select(c => c.Alumno)
+                .Distinct()
+                .Where(a => !a.Eliminado)
+                .Include(a => a.Sede)
+                .Include(a => a.Promotor)
+                .OrderBy(a => a.Nombre)
+                .ToListAsync(ct);
+
+            return alumnosConDeudas;
+        }
+
     }
 }

@@ -15,6 +15,6 @@ namespace ControlTalleresMVP.Services.Alumnos
         public ObservableCollection<AlumnoDTO> RegistrosAlumnos { get; set; }
         public Task<List<AlumnoDTO>> ObtenerAlumnosParaGridAsync(CancellationToken ct = default);
         public Task InicializarRegistros(CancellationToken ct = default);
-
+        public Task<List<Alumno>> ObtenerAlumnosConDeudasPendientesAsync(CancellationToken ct = default);
     }
 }

@@ -63,9 +63,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             try
             {
-                var seleccionado = _alumnoPicker.Pick();
+                var seleccionado = await _alumnoPicker.PickConDeudasAsync();
                 if (seleccionado is null)
                 {
+                    _dialog.Alerta("No hay alumnos con deudas pendientes.");
                     return;
                 }
 

@@ -10,6 +10,7 @@ namespace ControlTalleresMVP.Services.Picker
     public interface IAlumnoPickerService
     {
         Alumno? Pick();
+        Task<Alumno?> PickConDeudasAsync();
     }
 
 }

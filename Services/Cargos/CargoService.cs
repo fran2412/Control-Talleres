@@ -72,5 +72,10 @@ namespace ControlTalleresMVP.Services.Cargos
 
             return cargos;
         }
+
+        public Generacion? GetGeneracionActual()
+        {
+            return _generacionService.ObtenerGeneracionActual();
+        }
     }
 }
