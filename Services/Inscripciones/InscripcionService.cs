@@ -115,13 +115,21 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 // 3. Si hay abono inicial, crear el pago y su aplicación
                 if (abonoInicial > 0m)
                 {
+                    // Obtener información del alumno y taller para la descripción
+                    var alumno = await _escuelaContext.Alumnos
+                        .Where(a => a.AlumnoId == alumnoId)
+                        .Select(a => a.Nombre)
+                        .FirstOrDefaultAsync(ct);
+                    
+                    var descripcion = $"Pago de inscripción - {alumno ?? "Alumno"} en {taller.Nombre} - Abono: ${abonoInicial:F2} de ${costo:F2} (Deuda pendiente: ${saldo:F2})";
+                    
                     var pago = new Pago
                     {
                         AlumnoId = alumnoId,
                         Fecha = now,
                         MontoTotal = abonoInicial,
                         Metodo = MetodoPago.Efectivo,
-                        Notas = "Abono inicial de inscripción",
+                        Notas = descripcion,
                         CreadoEn = now,
                         ActualizadoEn = now,
                         Eliminado = false

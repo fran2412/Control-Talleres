@@ -40,6 +40,10 @@ namespace ControlTalleresMVP.Services.Cargos
 
             // Orden recomendable: Clases primero (si ClaseId != null), luego inscripciones, y por saldo descendente
             var list = await query
+                .Include(c => c.Inscripcion!)
+                    .ThenInclude(i => i.Taller!)
+                .Include(c => c.Clase!)
+                    .ThenInclude(cl => cl.Taller!)
                 .OrderByDescending(c => c.ClaseId != null)
                 .Select(c => new DestinoCargoDTO(
                     c.CargoId,
@@ -47,9 +51,9 @@ namespace ControlTalleresMVP.Services.Cargos
                        : c.InscripcionId != null ? "Inscripción"
                        : "Cargo",
                     c.ClaseId != null
-                       ? $"Clase #{c.ClaseId}"
+                       ? $"Clase del {c.Fecha:dd/MM/yyyy} - {c.Clase!.Taller!.Nombre}"
                        : c.InscripcionId != null
-                           ? $"Inscripción #{c.InscripcionId}"
+                           ? $"Inscripción - {c.Inscripcion!.Taller!.Nombre}"
                            : $"Cargo #{c.CargoId}",
                     c.SaldoActual,
                     c.InscripcionId,

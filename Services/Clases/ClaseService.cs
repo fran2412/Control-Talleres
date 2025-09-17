@@ -120,12 +120,22 @@ namespace ControlTalleresMVP.Services.Clases
                     var aAplicar = Math.Min(montoAbono, cargo.SaldoActual);
                     if (aAplicar > 0m)
                     {
+                        // Obtener información del taller para la descripción
+                        var taller = await _escuelaContext.Talleres
+                            .Where(t => t.TallerId == tallerId)
+                            .Select(t => new { t.Nombre, t.DiaSemana })
+                            .FirstOrDefaultAsync(ct);
+                        
+                        var diaSemana = ConvertirDiaSemanaASpanol(taller?.DiaSemana ?? DayOfWeek.Monday);
+                        var descripcion = $"Pago de clase - {taller?.Nombre ?? "Taller"} ({diaSemana} {day:dd/MM/yyyy}) - Monto: ${aAplicar:F2}";
+                        
                         var pago = new Pago
                         {
                             AlumnoId = alumnoId,
                             Fecha = DateTime.Now,
                             Metodo = MetodoPago.Efectivo, // ajusta según tu UI
-                            MontoTotal = aAplicar
+                            MontoTotal = aAplicar,
+                            Notas = descripcion
                         };
                         _escuelaContext.Pagos.Add(pago);
                         await _escuelaContext.SaveChangesAsync(ct);
