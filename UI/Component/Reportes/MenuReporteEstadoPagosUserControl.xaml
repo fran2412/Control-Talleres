@@ -46,6 +46,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- Selección de Generación -->
@@ -66,8 +67,17 @@
                                       Width="250" Height="35"/>
                         </StackPanel>
 
+                        <!-- Selección de Sede -->
+                        <StackPanel Grid.Column="2" Margin="0,0,20,0">
+                            <TextBlock Text="Sede:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding Sedes}" 
+                                      SelectedItem="{Binding SedeSeleccionada}"
+                                      DisplayMemberPath="Nombre"
+                                      Width="250" Height="35"/>
+                        </StackPanel>
+
                         <!-- Botones -->
-                        <Grid Grid.Column="2" VerticalAlignment="Bottom">
+                        <Grid Grid.Column="3" VerticalAlignment="Bottom">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -113,13 +123,49 @@
                         </Grid>
                     </Grid>
 
-                    <!-- Segunda fila: Información de filtros -->
-                    <StackPanel Grid.Row="1" Margin="0,15,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding FiltroActual}" 
-                                   FontStyle="Italic" 
-                                   Foreground="#6C757D" 
-                                   FontSize="12"/>
-                    </StackPanel>
+                    <!-- Segunda fila: Filtros de fecha y opciones -->
+                    <Grid Grid.Row="1" Margin="0,15,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Fecha Desde -->
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <TextBlock Text="Fecha Desde:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <DatePicker SelectedDate="{Binding FechaDesde}" 
+                                Width="200" Height="35"
+                                DisplayDateStart="2020-01-01"/>
+                        </StackPanel>
+
+                        <!-- Fecha Hasta -->
+                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                            <TextBlock Text="Fecha Hasta:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <DatePicker SelectedDate="{Binding FechaHasta}" 
+                                Width="200" Height="35"
+                                DisplayDateStart="2020-01-01"/>
+                        </StackPanel>
+
+                        <!-- Información de rango de fechas -->
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="15,0,0,0">
+                            <TextBlock Text="💡 Tip: Selecciona un rango de fechas para filtrar los pagos" 
+                               FontStyle="Italic" 
+                               Foreground="#6C757D" 
+                               FontSize="12"
+                               TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <!-- Información de filtro actual -->
+                        <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="15,0,0,0">
+                            <TextBlock Text="{Binding FiltroActual}" 
+                                       FontStyle="Italic" 
+                                       Foreground="#6C757D" 
+                                       FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </StackPanel>
         </Border>
@@ -267,6 +313,10 @@
                 <DataGridTextColumn Header="Alumno" Binding="{Binding NombreAlumno}" 
                                     Width="150" IsReadOnly="True"/>
                 
+                <!-- Sede -->
+                <DataGridTextColumn Header="Sede" Binding="{Binding NombreSede}" 
+                                    Width="120" IsReadOnly="True"/>
+                
                 <!-- Taller -->
                 <DataGridTextColumn Header="Taller" Binding="{Binding NombreTaller}" 
                                     Width="200" IsReadOnly="True"/>
@@ -300,7 +350,7 @@
                 
                 <!-- Estado -->
                 <DataGridTextColumn Header="Estado" Binding="{Binding EstadoPago}" 
-                                    Width="200" IsReadOnly="True"/>
+                                    Width="420" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
 

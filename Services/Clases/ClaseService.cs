@@ -471,7 +471,14 @@ namespace ControlTalleresMVP.Services.Clases
                                 && !i.Eliminado
                                 && (taller.Eliminado || i.Estado != EstadoInscripcion.Cancelada)
                                 && (alumnoId == null || i.AlumnoId == alumnoId))
-                    .Select(i => new { i.AlumnoId, i.Alumno!.Nombre, i.Estado, i.SaldoActual });
+                    .Select(i => new { 
+                        i.AlumnoId, 
+                        i.Alumno!.Nombre, 
+                        i.Estado, 
+                        i.SaldoActual,
+                        SedeId = i.Alumno.SedeId,
+                        NombreSede = i.Alumno.Sede!.Nombre
+                    });
 
                 var alumnos = await alumnosQuery.ToListAsync(ct);
                 System.Diagnostics.Debug.WriteLine($"👥 Alumnos inscritos en {taller.Nombre}: {alumnos.Count}");
@@ -486,6 +493,8 @@ namespace ControlTalleresMVP.Services.Clases
                         NombreAlumno = "Sin alumnos inscritos",
                         TallerId = taller.TallerId,
                         NombreTaller = taller.Eliminado ? $"{taller.Nombre} (Eliminado)" : taller.Nombre,
+                        SedeId = 0,
+                        NombreSede = "N/A",
                         FechaInicio = taller.FechaInicio,
                         FechaFin = taller.FechaFin,
                         ClasesTotales = fechasClases.Count,
@@ -607,7 +616,9 @@ namespace ControlTalleresMVP.Services.Clases
                     }
 
                     // Calcular estadísticas
-                    var clasesPagadasCount = clasesPagadas.Count;
+                    // Solo contar como "pagadas" las clases completamente pagadas (saldo = 0)
+                    var clasesCompletamentePagadas = clasesPagadas.Count(c => c.SaldoActual == 0);
+                    var clasesPagadasCount = clasesCompletamentePagadas;
                     var clasesPendientesCount = clasesPendientes.Count;
                     var clasesTotales = fechasClases.Count;
                     
@@ -623,8 +634,7 @@ namespace ControlTalleresMVP.Services.Clases
                     
                     var montoTotal = clasesTotales * costoClase;
                     
-                    // Calcular clases completamente pagadas vs parcialmente pagadas
-                    var clasesCompletamentePagadas = clasesPagadas.Count(c => c.SaldoActual == 0);
+                    // Calcular clases parcialmente pagadas (tienen pago pero no están completas)
                     var clasesParcialmentePagadas = clasesPagadas.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
                     var clasesSinPagos = clasesTotales - clasesPagadasCount;
                     
@@ -701,6 +711,8 @@ namespace ControlTalleresMVP.Services.Clases
                         NombreAlumno = alumno.Nombre,
                         TallerId = taller.TallerId,
                         NombreTaller = taller.Eliminado ? $"{taller.Nombre} (Eliminado)" : taller.Nombre,
+                        SedeId = alumno.SedeId ?? 0,
+                        NombreSede = alumno.NombreSede ?? "Sin sede",
                         FechaInicio = taller.FechaInicio,
                         FechaFin = taller.FechaFin,
                         ClasesTotales = clasesTotales,
@@ -790,6 +802,7 @@ namespace ControlTalleresMVP.Services.Clases
                 var inscripciones = await _escuelaContext.Inscripciones
                     .AsNoTracking()
                     .Include(i => i.Alumno)
+                        .ThenInclude(a => a.Sede)
                     .Include(i => i.Taller)
                     .Include(i => i.Generacion)
                     .Where(i => (tallerId == null || i.TallerId == tallerId) &&
@@ -925,7 +938,9 @@ namespace ControlTalleresMVP.Services.Clases
                     }
 
                     // Calcular estadísticas
-                    var clasesPagadasCount = clasesPagadas.Count;
+                    // Solo contar como "pagadas" las clases completamente pagadas (saldo = 0)
+                    var clasesCompletamentePagadas = clasesPagadas.Count(c => c.SaldoActual == 0);
+                    var clasesPagadasCount = clasesCompletamentePagadas;
                     var clasesPendientesCount = clasesPendientes.Count;
                     var clasesTotales = fechasClases.Count;
                     
@@ -941,8 +956,7 @@ namespace ControlTalleresMVP.Services.Clases
                     
                     var montoTotal = clasesTotales * costoClase;
                     
-                    // Calcular clases completamente pagadas vs parcialmente pagadas
-                    var clasesCompletamentePagadas = clasesPagadas.Count(c => c.SaldoActual == 0);
+                    // Calcular clases parcialmente pagadas (tienen pago pero no están completas)
                     var clasesParcialmentePagadas = clasesPagadas.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
                     
                     // Verificar si se pagaron al menos todas las clases que se deben
@@ -1015,6 +1029,8 @@ namespace ControlTalleresMVP.Services.Clases
                         NombreAlumno = inscripcion.Alumno.Nombre,
                         TallerId = inscripcion.TallerId,
                         NombreTaller = inscripcion.Taller.Eliminado ? $"{inscripcion.Taller.Nombre} (Eliminado)" : inscripcion.Taller.Nombre,
+                        SedeId = inscripcion.Alumno.SedeId ?? 0,
+                        NombreSede = inscripcion.Alumno.Sede?.Nombre ?? "Sin sede",
                         FechaInicio = fechaInicio,
                         FechaFin = inscripcion.Taller.FechaFin,
                         ClasesTotales = clasesTotales,

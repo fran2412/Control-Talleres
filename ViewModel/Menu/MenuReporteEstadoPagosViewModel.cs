@@ -4,6 +4,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Talleres;
+using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Exportacion;
 using System;
 using System.Collections.ObjectModel;
@@ -17,6 +18,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private readonly IClaseService _claseService;
         private readonly ITallerService _tallerService;
         private readonly IGeneracionService _generacionService;
+        private readonly ISedeService _sedeService;
         private readonly IExportacionService _exportacionService;
 
         [ObservableProperty] private ObservableCollection<EstadoPagoAlumnoDTO> estadosPago = new();
@@ -24,6 +26,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private TallerDTO? tallerSeleccionado;
         [ObservableProperty] private ObservableCollection<GeneracionDTO> generaciones = new();
         [ObservableProperty] private GeneracionDTO? generacionSeleccionada;
+        [ObservableProperty] private ObservableCollection<SedeDTO> sedes = new();
+        [ObservableProperty] private SedeDTO? sedeSeleccionada;
+        [ObservableProperty] private DateTime fechaDesde = DateTime.Today.AddMonths(-1);
+        [ObservableProperty] private DateTime fechaHasta = DateTime.Today; // Incluye todo el día actual
         [ObservableProperty] private bool cargando = false;
         [ObservableProperty] private string? mensajeEstado;
 
@@ -33,11 +39,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
             IClaseService claseService,
             ITallerService tallerService,
             IGeneracionService generacionService,
+            ISedeService sedeService,
             IExportacionService exportacionService)
         {
             _claseService = claseService;
             _tallerService = tallerService;
             _generacionService = generacionService;
+            _sedeService = sedeService;
             _exportacionService = exportacionService;
 
             // Cargar datos automáticamente al inicializar
@@ -67,6 +75,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 // Seleccionar la generación actual por defecto
                 GeneracionSeleccionada = generacionesList.FirstOrDefault(g => g.Id == generacion.GeneracionId);
 
+                // Cargar sedes
+                var sedesList = await _sedeService.ObtenerSedesParaGridAsync();
+                Sedes = new ObservableCollection<SedeDTO>(sedesList);
+                MensajeEstado = $"Sedes cargadas: {sedesList.Count}";
+
                 // Cargar talleres
                 var talleresList = await _tallerService.ObtenerTalleresParaGridAsync();
                 Talleres = new ObservableCollection<TallerDTO>(talleresList);
@@ -90,63 +103,20 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [RelayCommand]
         public async Task FiltrarAsync()
         {
-            try
-            {
-                Cargando = true;
-                MensajeEstado = "Aplicando filtros...";
-
-                // Obtener IDs de los filtros seleccionados
-                var tallerId = TallerSeleccionado?.Id;
-                var generacionId = GeneracionSeleccionada?.Id;
-
-                // Construir mensaje de filtros aplicados
-                var filtrosAplicados = new List<string>();
-                if (tallerId.HasValue) filtrosAplicados.Add($"Taller: {TallerSeleccionado!.Nombre}");
-                if (generacionId.HasValue) filtrosAplicados.Add($"Generación: {GeneracionSeleccionada!.Nombre}");
-
-                var mensajeFiltros = filtrosAplicados.Count > 0 
-                    ? string.Join(", ", filtrosAplicados)
-                    : "Todos los registros";
-
-                MensajeEstado = $"Filtrando por: {mensajeFiltros}";
-
-                // Llamar al servicio con los filtros
-                var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(tallerId, null, generacionId);
-                
-                // Aplicar filtros adicionales en memoria si es necesario
-                var estadosFiltrados = estados.AsEnumerable();
-
-                // Filtrar por generación si está seleccionada
-                if (generacionId.HasValue)
-                {
-                    // Nota: Este filtro se aplicaría en el servicio, pero por ahora lo hacemos aquí
-                    // En una implementación completa, se pasaría al servicio
-                }
-
-                // Ordenar por estado antes de asignar
-                var estadosOrdenados = OrdenarPorEstado(estadosFiltrados);
-                EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosOrdenados);
-                MensajeEstado = $"Mostrando {EstadosPago.Count} registros - {mensajeFiltros}";
-            }
-            catch (Exception ex)
-            {
-                MensajeEstado = $"Error al filtrar: {ex.Message}";
-                EstadosPago.Clear();
-            }
-            finally
-            {
-                Cargando = false;
-            }
+            await CargarEstadosPagoAsync();
         }
 
 
         [RelayCommand]
-        public void LimpiarFiltros()
+        public async Task LimpiarFiltrosAsync()
         {
-            // Solo limpiar la selección de filtros, no cambiar los datos
             TallerSeleccionado = null;
             GeneracionSeleccionada = null;
-            MensajeEstado = "Filtros limpiados";
+            SedeSeleccionada = null;
+            FechaDesde = DateTime.Today.AddMonths(-1);
+            FechaHasta = DateTime.Today; // Siempre hasta la fecha actual
+            
+            await CargarEstadosPagoAsync();
         }
 
         [RelayCommand]
@@ -171,6 +141,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 // Limpiar filtros primero
                 TallerSeleccionado = null;
                 GeneracionSeleccionada = null;
+                SedeSeleccionada = null;
                 
                 // Cargar todos los datos sin filtros (null = sin filtro)
                 var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(null, null, null);
@@ -194,18 +165,64 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             try
             {
-                // Usar siempre la generación actual por defecto
-                var generacionId = _generacionService.ObtenerGeneracionActual()?.GeneracionId;
-                var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(null, null, generacionId);
-                var estadosOrdenados = OrdenarPorEstado(estados);
+                Cargando = true;
+                MensajeEstado = "Cargando datos...";
+
+                // Obtener IDs de los filtros seleccionados
+                var tallerId = TallerSeleccionado?.Id;
+                var generacionId = GeneracionSeleccionada?.Id ?? _generacionService.ObtenerGeneracionActual()?.GeneracionId;
+                var sedeId = SedeSeleccionada?.Id;
+
+                // Construir mensaje de filtros aplicados
+                var filtrosAplicados = new List<string>();
+                if (tallerId.HasValue) filtrosAplicados.Add($"Taller: {TallerSeleccionado!.Nombre}");
+                if (generacionId.HasValue) filtrosAplicados.Add($"Generación: {GeneracionSeleccionada?.Nombre ?? "Actual"}");
+                if (sedeId.HasValue) filtrosAplicados.Add($"Sede: {SedeSeleccionada!.Nombre}");
+                if (FechaDesde != DateTime.Today.AddMonths(-1) || FechaHasta != DateTime.Today)
+                {
+                    filtrosAplicados.Add($"Fechas: {FechaDesde:dd/MM/yyyy} - {FechaHasta:dd/MM/yyyy}");
+                }
+
+                var mensajeFiltros = filtrosAplicados.Count > 0 
+                    ? string.Join(", ", filtrosAplicados)
+                    : "Todos los registros";
+
+                MensajeEstado = $"Filtrando por: {mensajeFiltros}";
+
+                // Llamar al servicio con los filtros
+                var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(tallerId, null, generacionId);
+                
+                // Aplicar filtros en memoria
+                var estadosFiltrados = estados.AsEnumerable();
+                
+                // Filtrar por sede si está seleccionada
+                if (sedeId.HasValue)
+                {
+                    estadosFiltrados = estadosFiltrados.Where(e => e.SedeId == sedeId.Value);
+                }
+                
+                // Filtrar por rango de fechas si están configuradas
+                if (FechaDesde != DateTime.MinValue || FechaHasta != DateTime.MaxValue)
+                {
+                    estadosFiltrados = estadosFiltrados.Where(e => 
+                        e.FechaInicio.Date >= FechaDesde.Date && 
+                        e.FechaInicio.Date <= FechaHasta.Date);
+                }
+
+                // Ordenar por estado antes de asignar
+                var estadosOrdenados = OrdenarPorEstado(estadosFiltrados);
                 EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estadosOrdenados);
-                MensajeEstado = $"Mostrando {EstadosPago.Count} registros";
+                MensajeEstado = $"Mostrando {EstadosPago.Count} registros - {mensajeFiltros}";
             }
             catch (Exception ex)
             {
                 MensajeEstado = $"Error al cargar estados de pago: {ex.Message}";
                 EstadosPago.Clear();
                 throw; // Re-lanzar para que el método llamador pueda manejar el error
+            }
+            finally
+            {
+                Cargando = false;
             }
         }
 
@@ -359,6 +376,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 var filtros = new List<string>();
                 if (TallerSeleccionado != null) filtros.Add($"Taller: {TallerSeleccionado.Nombre}");
                 if (GeneracionSeleccionada != null) filtros.Add($"Generación: {GeneracionSeleccionada.Nombre}");
+                if (SedeSeleccionada != null) filtros.Add($"Sede: {SedeSeleccionada.Nombre}");
+                if (FechaDesde != DateTime.Today.AddMonths(-1) || FechaHasta != DateTime.Today)
+                {
+                    filtros.Add($"Fechas: {FechaDesde:dd/MM/yyyy} - {FechaHasta:dd/MM/yyyy}");
+                }
                 
                 return filtros.Count > 0 
                     ? $"Filtrado por: {string.Join(", ", filtros)}"
@@ -366,7 +388,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        public bool TieneFiltroActivo => TallerSeleccionado != null || GeneracionSeleccionada != null;
+        public bool TieneFiltroActivo => TallerSeleccionado != null || GeneracionSeleccionada != null || 
+            SedeSeleccionada != null || FechaDesde != DateTime.Today.AddMonths(-1) || FechaHasta != DateTime.Today;
 
         // Métodos para actualizar información de filtro cuando cambian las selecciones
         partial void OnTallerSeleccionadoChanged(TallerDTO? value)
@@ -379,6 +402,44 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             OnPropertyChanged(nameof(FiltroActual));
             OnPropertyChanged(nameof(TieneFiltroActivo));
+        }
+
+        partial void OnSedeSeleccionadaChanged(SedeDTO? value)
+        {
+            OnPropertyChanged(nameof(FiltroActual));
+            OnPropertyChanged(nameof(TieneFiltroActivo));
+        }
+
+        partial void OnFechaDesdeChanged(DateTime value)
+        {
+            // Si la fecha desde es mayor que la fecha hasta, ajustar la fecha hasta
+            if (value > FechaHasta)
+            {
+                FechaHasta = value;
+            }
+            
+            // Actualizar propiedades de filtro
+            OnPropertyChanged(nameof(FiltroActual));
+            OnPropertyChanged(nameof(TieneFiltroActivo));
+            
+            // Recargar datos automáticamente
+            _ = Task.Run(async () => await CargarEstadosPagoAsync());
+        }
+
+        partial void OnFechaHastaChanged(DateTime value)
+        {
+            // Si la fecha hasta es menor que la fecha desde, ajustar la fecha desde
+            if (value < FechaDesde)
+            {
+                FechaDesde = value;
+            }
+            
+            // Actualizar propiedades de filtro
+            OnPropertyChanged(nameof(FiltroActual));
+            OnPropertyChanged(nameof(TieneFiltroActivo));
+            
+            // Recargar datos automáticamente
+            _ = Task.Run(async () => await CargarEstadosPagoAsync());
         }
 
     }

@@ -12,6 +12,8 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         public string NombreAlumno { get; set; } = string.Empty;
         public int TallerId { get; set; }
         public string NombreTaller { get; set; } = string.Empty;
+        public int SedeId { get; set; }
+        public string NombreSede { get; set; } = string.Empty;
         public DateTime FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
         public int ClasesTotales { get; set; }

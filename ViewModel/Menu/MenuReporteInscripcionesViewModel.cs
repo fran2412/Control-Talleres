@@ -27,10 +27,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private ObservableCollection<TallerDTO> talleres = new();
         [ObservableProperty] private ObservableCollection<PromotorDTO> promotores = new();
         [ObservableProperty] private ObservableCollection<GeneracionDTO> generaciones = new();
+        [ObservableProperty] private ObservableCollection<SedeDTO> sedes = new();
         
         [ObservableProperty] private TallerDTO? tallerSeleccionado;
         [ObservableProperty] private PromotorDTO? promotorSeleccionado;
         [ObservableProperty] private GeneracionDTO? generacionSeleccionada;
+        [ObservableProperty] private SedeDTO? sedeSeleccionada;
         [ObservableProperty] private DateTime fechaDesde = DateTime.Today.AddMonths(-1);
         [ObservableProperty] private DateTime fechaHasta = DateTime.Today; // Incluye todo el día actual
         
@@ -87,6 +89,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 var promotoresList = await _promotorService.ObtenerPromotoresParaGridAsync();
                 Promotores = new ObservableCollection<PromotorDTO>(promotoresList);
 
+                // Cargar sedes
+                var sedesList = await _sedeService.ObtenerSedesParaGridAsync();
+                Sedes = new ObservableCollection<SedeDTO>(sedesList);
+
                 // Cargar generaciones
                 var generacionesList = await _generacionService.ObtenerGeneracionesParaGridAsync();
                 Generaciones = new ObservableCollection<GeneracionDTO>(generacionesList);
@@ -123,6 +129,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             TallerSeleccionado = null;
             PromotorSeleccionado = null;
             GeneracionSeleccionada = null;
+            SedeSeleccionada = null;
             FechaDesde = DateTime.Today.AddMonths(-1);
             FechaHasta = DateTime.Today; // Siempre hasta la fecha actual
             
@@ -199,8 +206,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     FechaHasta,
                     IncluirTalleresEliminados); // Ya está limitado a fecha actual en el servicio
 
+                // Aplicar filtro por sede en memoria
+                var inscripcionesFiltradas = inscripcionesList.AsEnumerable();
+                if (SedeSeleccionada != null)
+                {
+                    inscripcionesFiltradas = inscripcionesFiltradas.Where(i => i.NombreSede == SedeSeleccionada.Nombre);
+                }
+
                 // Ordenar por estado de pago: pagadas primero, luego pendientes
-                var inscripcionesOrdenadas = OrdenarPorEstadoPago(inscripcionesList);
+                var inscripcionesOrdenadas = OrdenarPorEstadoPago(inscripcionesFiltradas);
                 Inscripciones = new ObservableCollection<InscripcionReporteDTO>(inscripcionesOrdenadas);
 
                 // Cargar estadísticas
@@ -321,6 +335,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             // Recargar talleres y datos cuando cambie el filtro
             _ = Task.Run(async () => await RecargarTalleresYInscripcionesAsync());
+        }
+
+        // Método para manejar el cambio de sede
+        partial void OnSedeSeleccionadaChanged(SedeDTO? value)
+        {
+            // Recargar datos cuando cambie la sede
+            _ = Task.Run(async () => await CargarInscripcionesAsync());
         }
 
         private async Task RecargarTalleresYInscripcionesAsync()
