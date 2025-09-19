@@ -163,6 +163,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(e => e.FechaInicio).HasColumnName("fecha_inicio");
                 entity.Property(e => e.FechaFin).HasColumnName("fecha_fin");
+                entity.Property(e => e.SedeId).HasColumnName("sede_id");
 
                 entity.Property(e => e.CreadoEn)
                     .HasColumnName("creado_en")
@@ -179,6 +180,12 @@ namespace ControlTalleresMVP.Persistence.DataContext
                     .HasDefaultValue(false);
 
                 entity.Property(e => e.EliminadoEn).HasColumnName("eliminado_en");
+
+                // Relación con Sede
+                entity.HasOne(t => t.Sede)
+                      .WithMany(s => s.Talleres)
+                      .HasForeignKey(t => t.SedeId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ====================

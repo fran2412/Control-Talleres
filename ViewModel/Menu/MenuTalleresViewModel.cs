@@ -39,11 +39,47 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty]
         private DateTime? fechaFin;
 
-        public MenuTalleresViewModel(ITallerService itemService, IDialogService dialogService)
+        // Propiedades para manejar sedes
+        [ObservableProperty]
+        private ObservableCollection<Sede> sedesDisponibles = new();
+
+        [ObservableProperty]
+        private Sede? sedeSeleccionada;
+
+        private readonly ISedeService _sedeService;
+
+        public MenuTalleresViewModel(ITallerService itemService, ISedeService sedeService, IDialogService dialogService)
             : base(itemService, dialogService)
         {
+            _sedeService = sedeService;
             itemService.InicializarRegistros();
             InicializarVista();
+            CargarSedesDisponibles();
+        }
+
+        private void CargarSedesDisponibles()
+        {
+            try
+            {
+                var sedes = _sedeService.ObtenerTodos();
+                SedesDisponibles.Clear();
+                foreach (var sede in sedes)
+                {
+                    SedesDisponibles.Add(sede);
+                }
+                
+                // Seleccionar la primera sede por defecto
+                if (SedesDisponibles.Any())
+                {
+                    SedeSeleccionada = SedesDisponibles.First();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejar error de carga de sedes
+                System.Windows.MessageBox.Show($"Error al cargar sedes: {ex.Message}", "Error", 
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
 
         [RelayCommand]
@@ -52,6 +88,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
             if (string.IsNullOrWhiteSpace(CampoTextoNombre))
             {
                 _dialogService.Alerta("El nombre del taller es obligatorio");
+                return;
+            }
+
+            if (SedeSeleccionada == null)
+            {
+                _dialogService.Alerta("Debe seleccionar una sede para el taller");
                 return;
             }
 
@@ -82,7 +124,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     HorarioFin = HorarioFin,
                     DiaSemana = DiaSemanaSeleccionado,
                     FechaInicio = FechaInicio,
-                    FechaFin = FechaFin
+                    FechaFin = FechaFin,
+                    SedeId = SedeSeleccionada.SedeId
                 });
 
                 LimpiarCampos();
@@ -108,6 +151,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             DiaSemanaSeleccionado = DayOfWeek.Monday; // ← NUEVO (reset)
             FechaInicio = DateTime.Today;
             FechaFin = null;
+            SedeSeleccionada = SedesDisponibles.FirstOrDefault(); // Resetear a la primera sede
         }
 
         public override bool Filtro(object o)

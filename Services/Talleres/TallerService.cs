@@ -115,6 +115,7 @@ namespace ControlTalleresMVP.Services.Talleres
             tallerExistente.DiaSemana = taller.DiaSemana;
             tallerExistente.FechaInicio = taller.FechaInicio;
             tallerExistente.FechaFin = taller.FechaFin;
+            tallerExistente.SedeId = taller.SedeId;
             tallerExistente.ActualizadoEn = DateTime.Now;
 
             try
@@ -144,6 +145,7 @@ namespace ControlTalleresMVP.Services.Talleres
             }
 
             var datos = await query
+                .Include(t => t.Sede)
                 .Select(u => new
                 {
                     u.TallerId,
@@ -153,6 +155,8 @@ namespace ControlTalleresMVP.Services.Talleres
                     u.Nombre,
                     u.FechaInicio,
                     u.FechaFin,
+                    u.SedeId,
+                    SedeNombre = u.Sede.Nombre,
                     u.CreadoEn,
                     u.Eliminado,
                     u.EliminadoEn
@@ -170,6 +174,8 @@ namespace ControlTalleresMVP.Services.Talleres
                 DiaSemana = ConvertirDiaSemanaASpanol(u.DiaSemana),
                 FechaInicio = u.FechaInicio,
                 FechaFin = u.FechaFin,
+                SedeId = u.SedeId,
+                NombreSede = u.SedeNombre,
                 CreadoEn = u.CreadoEn,
                 Eliminado = u.Eliminado,
                 EliminadoEn = u.EliminadoEn

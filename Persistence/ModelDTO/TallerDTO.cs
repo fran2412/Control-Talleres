@@ -35,6 +35,12 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? FechaFin { get; set; }
 
+        [Display(Name = "Sede")]
+        public int SedeId { get; set; }
+
+        [Display(Name = "Nombre de la sede")]
+        public string NombreSede { get; set; } = "";
+
         [Display(Name = "Fecha de alta")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime CreadoEn { get; set; }

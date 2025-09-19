@@ -19,5 +19,8 @@ namespace ControlTalleresMVP.Persistence.Models
 
         // Relación inversa: una sede puede tener muchos alumnos
         public ICollection<Alumno> Alumnos { get; set; } = new List<Alumno>();
+        
+        // Relación inversa: una sede puede tener muchos talleres
+        public ICollection<Taller> Talleres { get; set; } = new List<Taller>();
     }
 }

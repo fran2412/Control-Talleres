@@ -72,6 +72,7 @@
                         
                         <!-- Columnas manuales -->
                         <DataGridTextColumn Header="Nombre del taller" Binding="{Binding Nombre}" Width="*"/>
+                        <DataGridTextColumn Header="Sede" Binding="{Binding NombreSede}" Width="120"/>
                         <DataGridTextColumn Header="Día de clase" Binding="{Binding DiaSemana, Converter={StaticResource DiaSemanaToTextoConverter}}" Width="120"/>
                         <DataGridTextColumn Header="Horario de inicio" Binding="{Binding HorarioInicio, Converter={StaticResource TimeSpanConverter}}" Width="120"/>
                         <DataGridTextColumn Header="Horario de fin" Binding="{Binding HorarioFin, Converter={StaticResource TimeSpanConverter}}" Width="120"/>
