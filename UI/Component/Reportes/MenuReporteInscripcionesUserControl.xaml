@@ -38,12 +38,12 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Primera fila: Filtros principales -->
                         <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
@@ -98,60 +98,47 @@
                                   DisplayMemberPath="Nombre"
                                   Width="250" Height="35"/>
                             </StackPanel>
-
-                            <!-- Botones -->
-                            <Grid Grid.Column="4" VerticalAlignment="Bottom">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Fila superior -->
-                                <Button Grid.Row="0" Grid.Column="0" Content="Filtrar" 
-                            Command="{Binding FiltrarCommand}"
-                            Width="120" Height="35" Margin="8,6"
-                            Background="#007ACC" Foreground="White"/>
-
-                                <Button Grid.Row="0" Grid.Column="1" Content="Limpiar todos" 
-                            Command="{Binding LimpiarFiltrosCommand}"
-                            Width="120" Height="35" Margin="8,6"
-                            Background="#6C757D" Foreground="White"/>
-
-                                <Button Grid.Row="0" Grid.Column="2" Content="Reordenar" 
-                            Command="{Binding ReordenarPorEstadoPagoCommand}"
-                            Width="120" Height="35" Margin="8,6"
-                            Background="#6F42C1" Foreground="White"/>
-
-                                <!-- Fila inferior -->
-                                <Button Grid.Row="1" Grid.Column="0" Content="Exportar CSV" 
-                            Command="{Binding ExportarCommand}"
-                            Width="120" Height="35" Margin="8,6"
-                            Background="#17A2B8" Foreground="White"/>
-
-                                <Button Grid.Row="1" Grid.Column="1" Content="Exportar Excel" 
-                            Command="{Binding ExportarExcelCommand}"
-                            Width="120" Height="35" Margin="8,6"
-                            Background="#FD7E14" Foreground="White"/>
-                            </Grid>
                         </Grid>
 
-                        <!-- Segunda fila: Filtros de fecha y opciones -->
-                        <Grid Grid.Row="1" Margin="0,15,0,0">
+                        <!-- Segunda fila: Botones de acción -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,15,0,0" HorizontalAlignment="Left">
+                            <Button Content="Filtrar" 
+                                Command="{Binding FiltrarCommand}"
+                                Width="120" Height="35" Margin="0,0,8,0"
+                                Background="#007ACC" Foreground="White"/>
+
+                            <Button Content="Limpiar todos" 
+                                Command="{Binding LimpiarFiltrosCommand}"
+                                Width="120" Height="35" Margin="0,0,8,0"
+                                Background="#6C757D" Foreground="White"/>
+
+                            <Button Content="Reordenar" 
+                                Command="{Binding ReordenarPorEstadoPagoCommand}"
+                                Width="120" Height="35" Margin="0,0,8,0"
+                                Background="#6F42C1" Foreground="White"/>
+
+                            <Button Content="Exportar CSV" 
+                                Command="{Binding ExportarCommand}"
+                                Width="120" Height="35" Margin="0,0,8,0"
+                                Background="#17A2B8" Foreground="White"/>
+
+                            <Button Content="Exportar Excel" 
+                                Command="{Binding ExportarExcelCommand}"
+                                Width="120" Height="35"
+                                Background="#FD7E14" Foreground="White"/>
+                        </StackPanel>
+
+                        <!-- Tercera fila: Filtros de fecha y opciones -->
+                        <Grid Grid.Row="2" Margin="0,15,0,0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- Fecha Desde -->
-                            <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
                                 <TextBlock Text="Fecha Desde:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                                 <DatePicker SelectedDate="{Binding FechaDesde}" 
                                     Width="200" Height="35"
@@ -159,28 +146,31 @@
                             </StackPanel>
 
                             <!-- Fecha Hasta -->
-                            <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                            <StackPanel Grid.Column="1" Margin="0,0,20,0">
                                 <TextBlock Text="Fecha Hasta:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                                 <DatePicker SelectedDate="{Binding FechaHasta}" 
                                     Width="200" Height="35"
                                     DisplayDateStart="2020-01-01"/>
                             </StackPanel>
 
+                            <!-- Checkbox para incluir talleres eliminados -->
+                            <StackPanel Grid.Column="2" Margin="0,0,20,0" VerticalAlignment="Bottom">
+                                <CheckBox Content="Incluir talleres eliminados" 
+                                  IsChecked="{Binding IncluirTalleresEliminados}"
+                                  FontWeight="SemiBold"
+                                  Foreground="#495057"
+                                  Margin="0,0,0,10"/>
+                            </StackPanel>
+
                             <!-- Información de rango de fechas -->
-                            <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="15,0,0,0">
+                            <StackPanel Grid.Column="3" VerticalAlignment="Bottom" MinWidth="200">
                                 <TextBlock Text="💡 Tip: Selecciona un rango de fechas para filtrar las inscripciones" 
                                    FontStyle="Italic" 
                                    Foreground="#6C757D" 
                                    FontSize="12"
-                                   TextWrapping="Wrap"/>
-                            </StackPanel>
-
-                            <!-- Checkbox para incluir talleres eliminados -->
-                            <StackPanel Grid.Column="3" Margin="15,0,0,0" VerticalAlignment="Center">
-                                <CheckBox Content="Incluir talleres eliminados" 
-                                  IsChecked="{Binding IncluirTalleresEliminados}"
-                                  FontWeight="SemiBold"
-                                  Foreground="#495057"/>
+                                   TextWrapping="Wrap"
+                                   MinWidth="200"
+                                   Margin="0,0,0,10"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
