@@ -8,5 +8,6 @@
 //------------------------------------------------------------------------------
 
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("logosistematalleres.ico")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("logosistematalleres.png")]
 
 

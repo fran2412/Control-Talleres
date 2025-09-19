@@ -23,11 +23,13 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Background="#FF222222" Focusable="False">
+            <Grid Grid.Row="0" Background="#c8c8c8" Focusable="False">
                 <Button Style="{StaticResource BotonTransparente}" Command="{Binding GoInicio}">
-                    <TextBlock Text="Sistema talleres" VerticalAlignment="Center" 
-                               HorizontalAlignment="Center" FontSize="20" FontFamily="Inter_28pt-ExtraBold" 
-                               Width="178" FontWeight="Bold" Foreground="White" Focusable="False"/>
+                    <Image x:Name="LogoEscuela" 
+                       HorizontalAlignment="Center" VerticalAlignment="Top"
+                       Source="../../Resources\Images\LogoSistemaTalleres.png" 
+                       Stretch="Uniform"
+                       ToolTip="Logo de la escuela"/>
                 </Button>
             </Grid>
 

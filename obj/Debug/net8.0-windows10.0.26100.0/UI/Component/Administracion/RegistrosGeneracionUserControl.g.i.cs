@@ -62,8 +62,8 @@ namespace ControlTalleresMVP.UI.Component.Administracion {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/component/administracion/registrosgeneraci" +
-                    "onusercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/administracion/registrosgeneracionusercon" +
+                    "trol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Administracion\RegistrosGeneracionUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

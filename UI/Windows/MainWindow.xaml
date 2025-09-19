@@ -7,23 +7,27 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Title="Iniciar sesión" Height="540" Width="520">
+        Title="Iniciar sesión" Height="502" Width="520">
 
     <Grid Background="{StaticResource BrushFondo}">
-        <Rectangle HorizontalAlignment="Center" Height="400" Stroke="White" VerticalAlignment="Center" Width="350" RadiusX="38" RadiusY="38" Fill="White"/>
+        <Rectangle HorizontalAlignment="Center" Height="405" Stroke="White" VerticalAlignment="Center" Width="350" RadiusX="38" RadiusY="38" Fill="White"/>
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
 
+            <Image x:Name="LogoEscuela" 
+                       HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-23,0,0"
+                       Source="../../Resources\Images\LogoSistemaTalleres.png" 
+                       Width="220" Height="110" 
+                       Stretch="Uniform"
+                       ToolTip="Logo de la escuela"/>
+
             <!-- Título -->
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-23,0,0">
-                <Label Content="Control talleres" 
-                       HorizontalAlignment="Center" VerticalAlignment="Top" 
-                       FontFamily="Inter 28pt 28pt SemiBold" FontSize="22" Foreground="Black" Margin="0,-10,0,0"/>
-                <Label Content="Iniciar sesión" HorizontalAlignment="Center" Margin="0,27,0,0" 
-                       VerticalAlignment="Top" FontFamily="Inter 28pt 28pt SemiBold" FontSize="18" Foreground="Black"/>
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,100,0,0">
+                <Label Content="Iniciar sesión" HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" FontFamily="Inter 28pt 28pt SemiBold" FontSize="18" Foreground="Black"/>
             </Grid>
 
             <!-- Usuario -->
-            <Grid HorizontalAlignment="Center" Margin="0,49,0,0" VerticalAlignment="Top">
+            <Grid HorizontalAlignment="Center" Margin="0,130,0,0" VerticalAlignment="Top">
                 <TextBox x:Name="txtUsuario"
                          ToolTip="Ingrese su nombre de usuario"
                          Style="{DynamicResource UserLoginTextBox}" 
@@ -33,7 +37,7 @@
             </Grid>
 
             <!-- Contraseña -->
-            <Grid HorizontalAlignment="Center" Margin="0,121,0,0" VerticalAlignment="Top">
+            <Grid HorizontalAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top">
                 <PasswordBox x:Name="txtPassword"
                              Style="{StaticResource LoginPasswordBox}" 
                              HorizontalAlignment="Center" Height="35" Margin="0,24,0,0" 
@@ -46,7 +50,7 @@
 
             <!-- Botón -->
             <Button Style="{StaticResource FeaturedButton}" Content="Iniciar sesión" 
-                    HorizontalAlignment="Center" Height="43" Margin="0,200,0,0" VerticalAlignment="Top" Width="222"
+                    HorizontalAlignment="Left" Height="43" Margin="6,286,0,0" VerticalAlignment="Top" Width="222"
                     Click="LoginButton_Click"/>
         </Grid>
     </Grid>

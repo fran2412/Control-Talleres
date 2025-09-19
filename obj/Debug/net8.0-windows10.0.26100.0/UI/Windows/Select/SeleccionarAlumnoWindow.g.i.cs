@@ -62,8 +62,7 @@ namespace ControlTalleresMVP.UI.Windows.Select {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/windows/select/seleccionaralumnowindow.xam" +
-                    "l", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/windows/select/seleccionaralumnowindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Windows\Select\SeleccionarAlumnoWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

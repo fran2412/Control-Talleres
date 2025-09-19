@@ -31,10 +31,12 @@
     <None Remove="Resources\Icons\LupaIcono.svg" />
     <None Remove="Resources\Icons\LupaNegraIcono.svg" />
     <None Remove="Resources\Icons\SedeIcono.svg" />
+    <None Remove="Resources\Images\LogoSistemaTalleres.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="LogoSistemaTalleres.ico" />
+    <Content Include="LogoSistemaTalleres.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,6 +63,7 @@
     <Resource Include="Resources\Icons\TallerIcono.svg" />
     <Resource Include="Resources\Icons\UsuarioIcono.svg" />
     <Resource Include="Resources\Images\AlumnoMenuItem.png" />
+    <Resource Include="Resources\Images\LogoSistemaTalleres.png" />
   </ItemGroup>
 
   <ItemGroup>
