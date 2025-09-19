@@ -54,8 +54,8 @@ namespace ControlTalleresMVP.UI.Component.Promotor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/promotor/registrospromotorusercontrol.xam" +
-                    "l", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ControlTalleres;V1.0.0.0;component/ui/component/promotor/registrospromotoruserco" +
+                    "ntrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Promotor\RegistrosPromotorUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
