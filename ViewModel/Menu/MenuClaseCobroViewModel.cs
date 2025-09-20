@@ -860,26 +860,15 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                 
                 if (clasesPendientes.Length > 0)
                 {
-                    // Hay clases pendientes: mostrar las fechas de las clases pendientes
-                    var fechasTexto = string.Join(", ", clasesPendientes.Select(f => f.ToString("dd/MM/yyyy")));
-                    
-                    // Obtener el monto pendiente de la clase más lejana
-                    var montoPendienteClaseLejana = await ObtenerMontoPendienteClaseAsync(clasesPendientes[clasesPendientes.Length - 1]);
-                    
-                    if (montoPendienteClaseLejana > 0)
-                    {
-                        var fechaLejana = clasesPendientes[clasesPendientes.Length - 1].ToString("dd/MM/yyyy");
-                        InformacionFechasClases = $"Pagando clases del día: {fechasTexto}\nMonto pendiente de la clase del {fechaLejana}: ${montoPendienteClaseLejana:F2}";
-                    }
-                    else
-                    {
-                        InformacionFechasClases = $"Pagando clases del día: {fechasTexto}";
-                    }
+                    // Hay clases pendientes: mostrar información precisa
+                    var montoIngresado = MontoIngresado ?? 0m;
+                    var mensaje = await GenerarMensajeClasesPendientes(clasesPendientes, montoIngresado);
+                    InformacionFechasClases = mensaje;
                     MostrarInformacionFechas = true;
                 }
                 else
                 {
-                    // No hay clases pendientes: calcular fechas futuras a partir de la última clase pagada
+                    // No hay clases pendientes: calcular fechas futuras
                     var fechasFuturas = await CalcularFechasDesdeUltimaClasePagada();
                     
                     if (fechasFuturas.Length == 0)
@@ -889,149 +878,159 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                         return;
                     }
 
-                    // Calcular el monto total y el monto por clase
-                    var montoTotal = CantidadSeleccionada * CostoClase;
                     var montoIngresado = MontoIngresado ?? 0m;
-                    
-                    if (montoIngresado >= montoTotal)
-                    {
-                        // Pago completo de todas las clases
-                        var fechasTexto = string.Join(", ", fechasFuturas.Select(f => f.ToString("dd/MM/yyyy")));
-                        
-                        // Verificar si hay monto pendiente en la última clase
-                        var ultimaFecha = fechasFuturas.Last();
-                        var montoPendienteUltima = await ObtenerMontoPendienteClaseAsync(ultimaFecha);
-                        
-                        // Calcular si habrá excedente
-                        var excedente = montoIngresado - montoTotal;
-                        
-                        if (montoPendienteUltima > 0)
-                        {
-                            var mensaje = $"Pagando clases del día: {fechasTexto}\nMonto pendiente real de la clase del {ultimaFecha:dd/MM/yyyy}: ${montoPendienteUltima:F2}";
-                            if (excedente > 0)
-                            {
-                                var siguienteFecha = ultimaFecha.AddDays(7);
-                                var objetivo = TallerSeleccionado.DiaSemana;
-                                int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                                var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                                mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
-                            }
-                            InformacionFechasClases = mensaje;
-                        }
-                        else
-                        {
-                            var mensaje = $"Pagando clases del día: {fechasTexto}";
-                            if (excedente > 0)
-                            {
-                                var siguienteFecha = ultimaFecha.AddDays(7);
-                                var objetivo = TallerSeleccionado.DiaSemana;
-                                int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                                var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                                mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
-                            }
-                            InformacionFechasClases = mensaje;
-                        }
-                        MostrarInformacionFechas = true;
-                    }
-                    else if (montoIngresado > 0)
-                    {
-                        // Pago parcial
-                        var clasesCompletas = (int)Math.Truncate(montoIngresado / CostoClase);
-                        var montoRestante = montoIngresado - (clasesCompletas * CostoClase);
-                        
-                        if (clasesCompletas > 0)
-                        {
-                            var fechasCompletas = fechasFuturas.Take(clasesCompletas).Select(f => f.ToString("dd/MM/yyyy"));
-                            var fechasTexto = string.Join(", ", fechasCompletas);
-                            
-                            if (montoRestante > 0 && clasesCompletas < fechasFuturas.Length)
-                            {
-                                var fechaParcial = fechasFuturas[clasesCompletas].ToString("dd/MM/yyyy");
-                                var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[clasesCompletas]);
-                                
-                                var mensaje = $"Pagando clases del día: {fechasTexto} y ${montoRestante:F2} de la clase del día {fechaParcial}";
-                                if (montoPendienteReal > 0)
-                                {
-                                    mensaje += $"\nMonto pendiente real de la clase del {fechaParcial}: ${montoPendienteReal:F2}";
-                                }
-                                
-                                // Verificar si hay excedente después de aplicar el monto restante
-                                var excedente = montoRestante - montoPendienteReal;
-                                if (excedente > 0)
-                                {
-                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
-                                }
-                                
-                                InformacionFechasClases = mensaje;
-                            }
-                            else
-                            {
-                                // Verificar si hay monto pendiente en la última clase completa
-                                var ultimaFechaCompleta = fechasCompletas.Last();
-                                var montoPendienteUltimaCompleta = await ObtenerMontoPendienteClaseAsync(DateTime.ParseExact(ultimaFechaCompleta, "dd/MM/yyyy", null));
-                                
-                                var mensaje = $"Pagando clases del día: {fechasTexto}";
-                                if (montoPendienteUltimaCompleta > 0)
-                                {
-                                    mensaje += $"\nMonto pendiente real de la clase del {ultimaFechaCompleta}: ${montoPendienteUltimaCompleta:F2}";
-                                }
-                                
-                                // Verificar si hay excedente
-                                var excedente = montoIngresado - (clasesCompletas * CostoClase);
-                                if (excedente > 0)
-                                {
-                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
-                                }
-                                
-                                InformacionFechasClases = mensaje;
-                            }
-                            MostrarInformacionFechas = true;
-                        }
-                        else
-                        {
-                            // Solo pago parcial de la primera clase
-                            var fechaParcial = fechasFuturas[0].ToString("dd/MM/yyyy");
-                            var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[0]);
-                            
-                            var mensaje = $"Pagando ${montoIngresado:F2} de la clase del día {fechaParcial}";
-                            if (montoPendienteReal > 0)
-                            {
-                                mensaje += $"\nMonto pendiente real: ${montoPendienteReal:F2}";
-                                
-                                // Verificar si hay excedente después de aplicar el monto
-                                var excedente = montoIngresado - montoPendienteReal;
-                                if (excedente > 0)
-                                {
-                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
-                                }
-                            }
-                            else
-                            {
-                                // Si no hay monto pendiente, todo el monto es excedente
-                                var excedente = montoIngresado;
-                                if (excedente > 0)
-                                {
-                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
-                                }
-                            }
-                            
-                            InformacionFechasClases = mensaje;
-                            MostrarInformacionFechas = true;
-                        }
-                    }
-                    else
-                    {
-                        // Sin monto ingresado, mostrar las fechas que se pagarían
-                        var fechasTexto = string.Join(", ", fechasFuturas.Select(f => f.ToString("dd/MM/yyyy")));
-                        InformacionFechasClases = $"Se pagarán clases del día: {fechasTexto}";
-                        MostrarInformacionFechas = true;
-                    }
+                    var mensaje = await GenerarMensajeClasesFuturas(fechasFuturas, montoIngresado);
+                    InformacionFechasClases = mensaje;
+                    MostrarInformacionFechas = true;
                 }
             }
             catch (Exception ex)
             {
                 InformacionFechasClases = $"Error al calcular fechas: {ex.Message}";
                 MostrarInformacionFechas = true;
+            }
+        }
+
+        private async Task<string> GenerarMensajeClasesPendientes(DateTime[] clasesPendientes, decimal montoIngresado)
+        {
+            var fechasTexto = string.Join(", ", clasesPendientes.Select(f => f.ToString("dd/MM/yyyy")));
+            var mensaje = $"Pagando clases pendientes del día: {fechasTexto}";
+            
+            // Obtener el monto pendiente real de la clase más lejana
+            var montoPendienteClaseLejana = await ObtenerMontoPendienteClaseAsync(clasesPendientes[clasesPendientes.Length - 1]);
+            
+            if (montoPendienteClaseLejana > 0)
+            {
+                var fechaLejana = clasesPendientes[clasesPendientes.Length - 1].ToString("dd/MM/yyyy");
+                mensaje += $"\nMonto pendiente real de la clase del {fechaLejana}: ${montoPendienteClaseLejana:F2}";
+            }
+            
+            if (montoIngresado > 0)
+            {
+                var montoNecesario = clasesPendientes.Length * CostoClase;
+                var excedente = montoIngresado - montoNecesario;
+                
+                if (excedente > 0)
+                {
+                    // Calcular la siguiente clase después de la última clase pendiente
+                    var ultimaClase = clasesPendientes[clasesPendientes.Length - 1];
+                    var siguienteFecha = ultimaClase.AddDays(7);
+                    var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
+                    int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                    var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                    
+                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
+                }
+            }
+            
+            return mensaje;
+        }
+
+        private async Task<string> GenerarMensajeClasesFuturas(DateTime[] fechasFuturas, decimal montoIngresado)
+        {
+            if (montoIngresado <= 0)
+            {
+                var fechasTexto = string.Join(", ", fechasFuturas.Select(f => f.ToString("dd/MM/yyyy")));
+                return $"Se pagarán clases del día: {fechasTexto}";
+            }
+
+            var clasesCompletas = (int)Math.Truncate(montoIngresado / CostoClase);
+            var montoRestante = montoIngresado - (clasesCompletas * CostoClase);
+            
+            if (clasesCompletas == 0)
+            {
+                // Solo pago parcial de la primera clase
+                var fechaParcial = fechasFuturas[0].ToString("dd/MM/yyyy");
+                var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[0]);
+                
+                var mensaje = $"Pagando ${montoIngresado:F2} de la clase del día {fechaParcial}";
+                
+                if (montoPendienteReal > 0)
+                {
+                    mensaje += $"\nMonto pendiente real: ${montoPendienteReal:F2}";
+                    
+                    var excedente = montoIngresado - montoPendienteReal;
+                    if (excedente > 0)
+                    {
+                        var siguienteFecha = fechasFuturas[0].AddDays(7);
+                        var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
+                        int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                        var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                        mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
+                    }
+                }
+                else
+                {
+                    // Si no hay monto pendiente, todo el monto es excedente
+                    var siguienteFecha = fechasFuturas[0].AddDays(7);
+                    var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
+                    int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                    var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                    mensaje += $"\nExcedente de ${montoIngresado:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
+                }
+                
+                return mensaje;
+            }
+            else if (clasesCompletas >= fechasFuturas.Length)
+            {
+                // Pago completo de todas las clases disponibles + excedente
+                var fechasTexto = string.Join(", ", fechasFuturas.Select(f => f.ToString("dd/MM/yyyy")));
+                var mensaje = $"Pagando clases del día: {fechasTexto}";
+                
+                // Verificar si hay monto pendiente en la última clase
+                var ultimaFecha = fechasFuturas[fechasFuturas.Length - 1];
+                var montoPendienteUltima = await ObtenerMontoPendienteClaseAsync(ultimaFecha);
+                
+                if (montoPendienteUltima > 0)
+                {
+                    mensaje += $"\nMonto pendiente real de la clase del {ultimaFecha:dd/MM/yyyy}: ${montoPendienteUltima:F2}";
+                }
+                
+                if (montoRestante > 0)
+                {
+                    var siguienteFecha = ultimaFecha.AddDays(7);
+                    var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
+                    int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                    var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                    mensaje += $"\nExcedente de ${montoRestante:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
+                }
+                
+                return mensaje;
+            }
+            else
+            {
+                // Pago parcial de algunas clases
+                var fechasCompletas = fechasFuturas.Take(clasesCompletas).Select(f => f.ToString("dd/MM/yyyy"));
+                var fechasTexto = string.Join(", ", fechasCompletas);
+                
+                if (montoRestante > 0)
+                {
+                    var fechaParcial = fechasFuturas[clasesCompletas].ToString("dd/MM/yyyy");
+                    var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[clasesCompletas]);
+                    
+                    var mensaje = $"Pagando clases del día: {fechasTexto} y ${montoRestante:F2} de la clase del día {fechaParcial}";
+                    
+                    if (montoPendienteReal > 0)
+                    {
+                        mensaje += $"\nMonto pendiente real de la clase del {fechaParcial}: ${montoPendienteReal:F2}";
+                    }
+                    
+                    var excedente = montoRestante - montoPendienteReal;
+                    if (excedente > 0)
+                    {
+                        var siguienteFecha = fechasFuturas[clasesCompletas].AddDays(7);
+                        var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
+                        int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                        var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                        mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
+                    }
+                    
+                    return mensaje;
+                }
+                else
+                {
+                    return $"Pagando clases del día: {fechasTexto}";
+                }
             }
         }
 

@@ -70,7 +70,8 @@ namespace ControlTalleresMVP.UI.Component.Clases {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ControlTalleres;component/ui/component/clases/formularioclaseusercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri(("/ControlTalleres;V1.0.0.0;component/ui/component/clases/formularioclaseusercontro" +
+                    "l.xaml"), System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Clases\FormularioClaseUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
