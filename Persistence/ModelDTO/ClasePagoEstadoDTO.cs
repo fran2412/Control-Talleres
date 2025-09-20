@@ -19,6 +19,7 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         bool CargoCreado, 
         bool PagoCreado, 
         decimal MontoAplicado, 
-        bool CargoYaPagado
+        bool CargoYaPagado,
+        decimal ExcedenteAplicado = 0m
         );
 }

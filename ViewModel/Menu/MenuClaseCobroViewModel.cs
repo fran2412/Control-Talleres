@@ -326,13 +326,8 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
 
                 if (clasesPendientes.Length > 0)
                 {
-                    // HAY clases pendientes: permitir pagos parciales
-                    var montoMaximo = R2(clasesPendientes.Length * CostoClase);
-                    if (totalIngresado > montoMaximo) 
-                    { 
-                        MensajeValidacion = $"El monto no puede superar el necesario para pagar todas las clases pendientes ({montoMaximo:C2})."; 
-                        return; 
-                    }
+                    // HAY clases pendientes: permitir pagos con excedentes
+                    var montoNecesario = R2(clasesPendientes.Length * CostoClase);
                     
                     // Validar que el monto sea mayor a 0
                     if (totalIngresado <= 0)
@@ -341,7 +336,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                         return;
                     }
                     
-                    // Aplicar pago a las clases pendientes en orden cronológico (permitir pagos parciales)
+                    // Aplicar pago a las clases pendientes en orden cronológico
                     var montoRestante = totalIngresado;
                     for (int i = 0; i < clasesPendientes.Length && montoRestante > 0; i++)
                     {
@@ -350,6 +345,24 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                             AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, clasesPendientes[i], montoAPagar, ct);
                         resultados.Add(r);
                         montoRestante -= montoAPagar;
+                    }
+                    
+                    // Si queda monto restante después de pagar todas las clases pendientes, aplicarlo como excedente
+                    if (montoRestante > 0m)
+                    {
+                        // Calcular la siguiente clase después de la última clase pendiente
+                        var ultimaClasePendiente = clasesPendientes[clasesPendientes.Length - 1];
+                        var siguienteFecha = ultimaClasePendiente.AddDays(7);
+                        
+                        // Ajustar al día de la semana correcto del taller
+                        var objetivo = TallerSeleccionado.DiaSemana;
+                        int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                        var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                        
+                        // Aplicar el excedente a la siguiente clase
+                        var r = await _claseService.RegistrarClaseAsync(
+                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaSiguienteClase, montoRestante, ct);
+                        resultados.Add(r);
                     }
                 }
                 else
@@ -417,6 +430,21 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                                 AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[0], totalIngresado, ct);
                             resultados.Add(r);
                         }
+                        else if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas >= fechas.Length)
+                        {
+                            // Si se pagaron todas las clases disponibles y hay sobrante, aplicarlo a la siguiente clase
+                            var ultimaFecha = fechas[fechas.Length - 1];
+                            var siguienteFecha = ultimaFecha.AddDays(7);
+                            
+                            // Ajustar al día de la semana correcto del taller
+                            var objetivo = TallerSeleccionado.DiaSemana;
+                            int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                            var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                            
+                            var r = await _claseService.RegistrarClaseAsync(
+                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaSiguienteClase, sobrante, ct);
+                            resultados.Add(r);
+                        }
                     }
                     else
                     {
@@ -457,12 +485,19 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                             resultados.Add(r);
                         }
                         
-                        // Si hay sobrante, aplicarlo a la última clase
+                        // Si hay sobrante, aplicarlo a la siguiente clase
                         if (sobrante > 0 && clasesCompletas > 0)
                         {
                             var ultimaClase = fechas[clasesCompletas - 1];
+                            var siguienteFecha = ultimaClase.AddDays(7);
+                            
+                            // Ajustar al día de la semana correcto del taller
+                            var objetivo = TallerSeleccionado.DiaSemana;
+                            int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                            var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                            
                             var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, ultimaClase, sobrante, ct);
+                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaSiguienteClase, sobrante, ct);
                             resultados.Add(r);
                         }
                         else if (clasesCompletas == 0 && totalIngresado > 0m)
@@ -489,26 +524,33 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                 var pagadasFull = resultados.Where(r => r.PagoCreado && r.MontoAplicado >= costo).Select(r => r.Fecha).OrderBy(d => d).ToList();
                 var parciales = resultados.Where(r => r.PagoCreado && r.MontoAplicado > 0m && r.MontoAplicado < costo)
                                           .Select(r => new { r.Fecha, r.MontoAplicado }).OrderBy(x => x.Fecha).ToList();
+                var excedentes = resultados.Where(r => r.ExcedenteAplicado > 0m)
+                                          .Select(r => new { r.Fecha, r.ExcedenteAplicado }).OrderBy(x => x.Fecha).ToList();
 
-                if (pagadasFull.Count > 0 && parciales.Count > 0)
+                // Construir mensaje de confirmación
+                var mensaje = new List<string>();
+
+                if (pagadasFull.Count > 0)
                 {
                     var listado = string.Join(", ", pagadasFull.Select(F));
-                    var p = parciales.Last();
-                    _dialogService.Info($"Se registraron {pagadasFull.Count} clase(s) pagada(s) ({listado}) y un abono de {p.MontoAplicado:0.00} para la clase de {F(p.Fecha)}.", "Clases");
+                    mensaje.Add($"Se registraron {pagadasFull.Count} clase(s) pagada(s) ({listado})");
                 }
-                else if (pagadasFull.Count == 1)
-                {
-                    _dialogService.Info($"Se registró la clase de {F(pagadasFull[0])} pagada por completo.", "Clases");
-                }
-                else if (pagadasFull.Count > 1)
-                {
-                    var listado = string.Join(", ", pagadasFull.Select(F));
-                    _dialogService.Info($"Se registraron {pagadasFull.Count} clase(s) pagada(s): {listado}.", "Clases");
-                }
-                else if (parciales.Count > 0)
+
+                if (parciales.Count > 0)
                 {
                     var p = parciales.Last();
-                    _dialogService.Info($"Se registró un abono de {p.MontoAplicado:0.00} para la clase de {F(p.Fecha)}.", "Clases");
+                    mensaje.Add($"Se registró un abono de {p.MontoAplicado:0.00} para la clase de {F(p.Fecha)}");
+                }
+
+                if (excedentes.Count > 0)
+                {
+                    var totalExcedente = excedentes.Sum(e => e.ExcedenteAplicado);
+                    mensaje.Add($"Se aplicó un excedente de ${totalExcedente:0.00} a la siguiente clase");
+                }
+
+                if (mensaje.Count > 0)
+                {
+                    _dialogService.Info(string.Join(".\n", mensaje) + ".", "Clases");
                 }
 
                 // Notifica a quien muestre el registro que hay cambios
@@ -851,13 +893,34 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                         var ultimaFecha = fechasFuturas.Last();
                         var montoPendienteUltima = await ObtenerMontoPendienteClaseAsync(ultimaFecha);
                         
+                        // Calcular si habrá excedente
+                        var excedente = montoIngresado - montoTotal;
+                        
                         if (montoPendienteUltima > 0)
                         {
-                            InformacionFechasClases = $"Pagando clases del día: {fechasTexto}\nMonto pendiente real de la clase del {ultimaFecha:dd/MM/yyyy}: ${montoPendienteUltima:F2}";
+                            var mensaje = $"Pagando clases del día: {fechasTexto}\nMonto pendiente real de la clase del {ultimaFecha:dd/MM/yyyy}: ${montoPendienteUltima:F2}";
+                            if (excedente > 0)
+                            {
+                                var siguienteFecha = ultimaFecha.AddDays(7);
+                                var objetivo = TallerSeleccionado.DiaSemana;
+                                int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                                var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                                mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
+                            }
+                            InformacionFechasClases = mensaje;
                         }
                         else
                         {
-                            InformacionFechasClases = $"Pagando clases del día: {fechasTexto}";
+                            var mensaje = $"Pagando clases del día: {fechasTexto}";
+                            if (excedente > 0)
+                            {
+                                var siguienteFecha = ultimaFecha.AddDays(7);
+                                var objetivo = TallerSeleccionado.DiaSemana;
+                                int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
+                                var fechaSiguienteClase = siguienteFecha.AddDays(delta);
+                                mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
+                            }
+                            InformacionFechasClases = mensaje;
                         }
                         MostrarInformacionFechas = true;
                     }
@@ -877,14 +940,20 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                                 var fechaParcial = fechasFuturas[clasesCompletas].ToString("dd/MM/yyyy");
                                 var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[clasesCompletas]);
                                 
+                                var mensaje = $"Pagando clases del día: {fechasTexto} y ${montoRestante:F2} de la clase del día {fechaParcial}";
                                 if (montoPendienteReal > 0)
                                 {
-                                    InformacionFechasClases = $"Pagando clases del día: {fechasTexto} y ${montoRestante:F2} de la clase del día {fechaParcial}\nMonto pendiente real de la clase del {fechaParcial}: ${montoPendienteReal:F2}";
+                                    mensaje += $"\nMonto pendiente real de la clase del {fechaParcial}: ${montoPendienteReal:F2}";
                                 }
-                                else
+                                
+                                // Verificar si hay excedente después de aplicar el monto restante
+                                var excedente = montoRestante - montoPendienteReal;
+                                if (excedente > 0)
                                 {
-                                    InformacionFechasClases = $"Pagando clases del día: {fechasTexto} y ${montoRestante:F2} de la clase del día {fechaParcial}";
+                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
                                 }
+                                
+                                InformacionFechasClases = mensaje;
                             }
                             else
                             {
@@ -892,14 +961,20 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                                 var ultimaFechaCompleta = fechasCompletas.Last();
                                 var montoPendienteUltimaCompleta = await ObtenerMontoPendienteClaseAsync(DateTime.ParseExact(ultimaFechaCompleta, "dd/MM/yyyy", null));
                                 
+                                var mensaje = $"Pagando clases del día: {fechasTexto}";
                                 if (montoPendienteUltimaCompleta > 0)
                                 {
-                                    InformacionFechasClases = $"Pagando clases del día: {fechasTexto}\nMonto pendiente real de la clase del {ultimaFechaCompleta}: ${montoPendienteUltimaCompleta:F2}";
+                                    mensaje += $"\nMonto pendiente real de la clase del {ultimaFechaCompleta}: ${montoPendienteUltimaCompleta:F2}";
                                 }
-                                else
+                                
+                                // Verificar si hay excedente
+                                var excedente = montoIngresado - (clasesCompletas * CostoClase);
+                                if (excedente > 0)
                                 {
-                                    InformacionFechasClases = $"Pagando clases del día: {fechasTexto}";
+                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
                                 }
+                                
+                                InformacionFechasClases = mensaje;
                             }
                             MostrarInformacionFechas = true;
                         }
@@ -909,14 +984,29 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                             var fechaParcial = fechasFuturas[0].ToString("dd/MM/yyyy");
                             var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[0]);
                             
+                            var mensaje = $"Pagando ${montoIngresado:F2} de la clase del día {fechaParcial}";
                             if (montoPendienteReal > 0)
                             {
-                                InformacionFechasClases = $"Pagando ${montoIngresado:F2} de la clase del día {fechaParcial}\nMonto pendiente real: ${montoPendienteReal:F2}";
+                                mensaje += $"\nMonto pendiente real: ${montoPendienteReal:F2}";
+                                
+                                // Verificar si hay excedente después de aplicar el monto
+                                var excedente = montoIngresado - montoPendienteReal;
+                                if (excedente > 0)
+                                {
+                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
+                                }
                             }
                             else
                             {
-                                InformacionFechasClases = $"Pagando ${montoIngresado:F2} de la clase del día {fechaParcial}";
+                                // Si no hay monto pendiente, todo el monto es excedente
+                                var excedente = montoIngresado;
+                                if (excedente > 0)
+                                {
+                                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la siguiente clase";
+                                }
                             }
+                            
+                            InformacionFechasClases = mensaje;
                             MostrarInformacionFechas = true;
                         }
                     }
