@@ -846,7 +846,19 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     {
                         // Pago completo de todas las clases
                         var fechasTexto = string.Join(", ", fechasFuturas.Select(f => f.ToString("dd/MM/yyyy")));
-                        InformacionFechasClases = $"Pagando clases del día: {fechasTexto}";
+                        
+                        // Verificar si hay monto pendiente en la última clase
+                        var ultimaFecha = fechasFuturas.Last();
+                        var montoPendienteUltima = await ObtenerMontoPendienteClaseAsync(ultimaFecha);
+                        
+                        if (montoPendienteUltima > 0)
+                        {
+                            InformacionFechasClases = $"Pagando clases del día: {fechasTexto}\nMonto pendiente real de la clase del {ultimaFecha:dd/MM/yyyy}: ${montoPendienteUltima:F2}";
+                        }
+                        else
+                        {
+                            InformacionFechasClases = $"Pagando clases del día: {fechasTexto}";
+                        }
                         MostrarInformacionFechas = true;
                     }
                     else if (montoIngresado > 0)
@@ -876,7 +888,18 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                             }
                             else
                             {
-                                InformacionFechasClases = $"Pagando clases del día: {fechasTexto}";
+                                // Verificar si hay monto pendiente en la última clase completa
+                                var ultimaFechaCompleta = fechasCompletas.Last();
+                                var montoPendienteUltimaCompleta = await ObtenerMontoPendienteClaseAsync(DateTime.ParseExact(ultimaFechaCompleta, "dd/MM/yyyy", null));
+                                
+                                if (montoPendienteUltimaCompleta > 0)
+                                {
+                                    InformacionFechasClases = $"Pagando clases del día: {fechasTexto}\nMonto pendiente real de la clase del {ultimaFechaCompleta}: ${montoPendienteUltimaCompleta:F2}";
+                                }
+                                else
+                                {
+                                    InformacionFechasClases = $"Pagando clases del día: {fechasTexto}";
+                                }
                             }
                             MostrarInformacionFechas = true;
                         }
