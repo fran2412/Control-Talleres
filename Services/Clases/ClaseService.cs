@@ -161,8 +161,8 @@ namespace ControlTalleresMVP.Services.Clases
                         aplicado = aAplicar;
 
                         // 5) Verificar si hay excedente y aplicarlo a la siguiente clase
-                        // El excedente es la diferencia entre lo que se pagó y el costo de la clase
-                        var excedente = montoAbono - costoClase;
+                        // El excedente es la diferencia entre lo que se pagó y lo que se aplicó a esta clase
+                        var excedente = montoAbono - aAplicar;
                         if (excedente > 0m)
                         {
                             excedenteAplicado = await AplicarExcedenteASiguienteClaseAsync(
@@ -912,6 +912,16 @@ namespace ControlTalleresMVP.Services.Clases
                     : EstadoCargo.Pendiente;
 
                 await _escuelaContext.SaveChangesAsync(ct);
+
+                // Verificar si hay excedente restante y aplicarlo recursivamente
+                var excedenteRestante = excedente - montoAplicar;
+                if (excedenteRestante > 0m)
+                {
+                    // Aplicar el excedente restante a la siguiente clase
+                    var excedenteAdicional = await AplicarExcedenteASiguienteClaseAsync(
+                        alumnoId, tallerId, fechaSiguienteClase, excedenteRestante, nombreTaller, ct);
+                    return montoAplicar + excedenteAdicional;
+                }
 
                 return montoAplicar;
             }

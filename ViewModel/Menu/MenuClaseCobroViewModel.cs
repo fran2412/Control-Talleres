@@ -340,7 +340,8 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     var montoRestante = totalIngresado;
                     for (int i = 0; i < clasesPendientes.Length && montoRestante > 0; i++)
                     {
-                        var montoAPagar = Math.Min(costo, montoRestante);
+                        // Calcular cuánto pagar a esta clase
+                        var montoAPagar = Math.Min(montoRestante, costo);
                         var r = await _claseService.RegistrarClaseAsync(
                             AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, clasesPendientes[i], montoAPagar, ct);
                         resultados.Add(r);
@@ -359,7 +360,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                         int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
                         var fechaSiguienteClase = siguienteFecha.AddDays(delta);
                         
-                        // Aplicar el excedente a la siguiente clase
+                        // Aplicar el excedente a la siguiente clase (el ClaseService manejará la recursividad)
                         var r = await _claseService.RegistrarClaseAsync(
                             AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaSiguienteClase, montoRestante, ct);
                         resultados.Add(r);
@@ -545,7 +546,15 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                 if (excedentes.Count > 0)
                 {
                     var totalExcedente = excedentes.Sum(e => e.ExcedenteAplicado);
-                    mensaje.Add($"Se aplicó un excedente de ${totalExcedente:0.00} a la siguiente clase");
+                    var clasesConExcedente = excedentes.Count;
+                    if (clasesConExcedente == 1)
+                    {
+                        mensaje.Add($"Se aplicó un excedente de ${totalExcedente:0.00} a la siguiente clase");
+                    }
+                    else
+                    {
+                        mensaje.Add($"Se aplicaron excedentes de ${totalExcedente:0.00} a las siguientes clases");
+                    }
                 }
 
                 if (mensaje.Count > 0)
