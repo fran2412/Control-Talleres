@@ -19,11 +19,11 @@
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="80"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Background="#c8c8c8" Focusable="False">
+            <Grid Grid.Row="0" Background="#F5F5F5" Focusable="False">
                 <Button Style="{StaticResource BotonTransparente}" Command="{Binding GoInicio}">
                     <Image x:Name="LogoEscuela" 
                        HorizontalAlignment="Center" VerticalAlignment="Top"

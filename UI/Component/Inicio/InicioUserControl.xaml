@@ -69,12 +69,30 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Tarjeta de Alumnos -->
-                    <Border Grid.Column="0" 
-                            Background="#E8F5E8" 
-                            CornerRadius="15" 
+                    <!-- Botón de Alumnos -->
+                    <Button Grid.Column="0" 
+                            Background="#E8F5E8"  
                             Margin="0,0,10,0"
-                            Padding="20">
+                            Padding="20"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Command="{Binding GoAlumnos}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#D5F4D5"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#C8E6C9"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="👥" 
                                        FontSize="40" 
@@ -93,14 +111,32 @@
                                        TextWrapping="Wrap"
                                        TextAlignment="Center"/>
                         </StackPanel>
-                    </Border>
+                    </Button>
 
-                    <!-- Tarjeta de Talleres -->
-                    <Border Grid.Column="1" 
+                    <!-- Botón de Talleres -->
+                    <Button Grid.Column="1" 
                             Background="#E3F2FD" 
-                            CornerRadius="15" 
                             Margin="5,0"
-                            Padding="20">
+                            Padding="20"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Command="{Binding GoTalleres}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#BBDEFB"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#90CAF9"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="🎨" 
                                        FontSize="40" 
@@ -119,14 +155,32 @@
                                        TextWrapping="Wrap"
                                        TextAlignment="Center"/>
                         </StackPanel>
-                    </Border>
+                    </Button>
 
-                    <!-- Tarjeta de Pagos -->
-                    <Border Grid.Column="2" 
+                    <!-- Botón de Pagos -->
+                    <Button Grid.Column="2" 
                             Background="#FFF3E0" 
-                            CornerRadius="15" 
                             Margin="10,0,0,0"
-                            Padding="20">
+                            Padding="20"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Command="{Binding GoPagos}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FFE0B2"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#FFCC80"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="💰" 
                                        FontSize="40" 
@@ -145,7 +199,7 @@
                                        TextWrapping="Wrap"
                                        TextAlignment="Center"/>
                         </StackPanel>
-                    </Border>
+                    </Button>
                 </Grid>
 
                 <!-- Footer con información adicional -->
@@ -162,10 +216,6 @@
                                    FontSize="16"
                                    Foreground="#34495E"
                                    Margin="0,0,0,5"/>
-                        <TextBlock Text="Versión 1.0 - Desarrollado para instituciones educativas" 
-                                   FontFamily="Inter 24pt 24pt Medium"
-                                   FontSize="12"
-                                   Foreground="#7F8C8D"/>
                     </StackPanel>
 
                     <!-- Fecha actual -->
