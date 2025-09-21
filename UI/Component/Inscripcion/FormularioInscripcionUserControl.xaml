@@ -6,6 +6,10 @@
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
              mc:Ignorable="d"
              d:DesignHeight="640" d:DesignWidth="980">
+    <!-- Atajos de teclado -->
+    <UserControl.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelarCommand}"/>
+    </UserControl.InputBindings>
     <Grid Background="White">
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" Margin="0" Padding="16" BorderThickness="1">
             <Grid>
@@ -43,6 +47,7 @@
                                 <StackPanel Orientation="Horizontal" Width="550">
                                     <TextBox Text="{Binding CampoTextoNombre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource TextBoxCampo}"
+                                             Cursor="Arrow"
                                              IsReadOnly="True"
                                              Height="30" Width="430"
                                              ToolTip="Alumno seleccionado"/>

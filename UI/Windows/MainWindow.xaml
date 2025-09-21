@@ -32,7 +32,8 @@
                          ToolTip="Ingrese su nombre de usuario"
                          Style="{DynamicResource UserLoginTextBox}" 
                          HorizontalAlignment="Center" Height="35" Margin="0,25,0,0" 
-                         Tag="Nombre de usuario" VerticalAlignment="Top" Width="211"/>
+                         Tag="Nombre de usuario" VerticalAlignment="Top" Width="211"
+                         KeyDown="txtUsuario_KeyDown"/>
                 <Label Style="{StaticResource LoginLabel}" Content="Usuario" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="84" Foreground="#FF333333"/>
             </Grid>
 
@@ -44,12 +45,13 @@
                              VerticalAlignment="Top" Width="211"
                              ToolTip="Ingrese su contraseña"
                              PasswordChanged="txtPassword_PasswordChanged"
+                             KeyDown="txtPassword_KeyDown"
                              Tag="Contraseña"/>
                 <Label Style="{StaticResource LoginLabel}" Content="Contraseña" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="84" Foreground="#FF333333"/>
             </Grid>
 
             <!-- Botón -->
-            <Button Style="{StaticResource FeaturedButton}" Content="Iniciar sesión" 
+            <Button x:Name="btnIniciarSesion" Style="{StaticResource FeaturedButton}" Content="Iniciar sesión" 
                     HorizontalAlignment="Left" Height="43" Margin="6,286,0,0" VerticalAlignment="Top" Width="222"
                     Click="LoginButton_Click"/>
         </Grid>

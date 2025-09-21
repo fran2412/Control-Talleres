@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Aplicación de escritorio para la administración de alumnos, maestros, inscripcion" +
     "es, pagos y asistencias en talleres escolares.")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e57b7b8ea7b84b213f5d5fc78983b5c446fb7e93")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+907bbf483f2f1dd9b0f66f8190dc42ca43ca81db")]
 [assembly: System.Reflection.AssemblyProductAttribute("ControlTalleres")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ControlTalleres")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

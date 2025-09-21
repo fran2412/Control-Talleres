@@ -33,6 +33,13 @@ namespace ControlTalleresMVP.UI.Component.Alumno
                 // engancha doble click (no cambia estilos)
                 if (AlumnosGrid != null)
                     AlumnosGrid.MouseDoubleClick += AlumnosGrid_MouseDoubleClick;
+                
+                // Si está en modo picker, dar foco al TextBox de búsqueda
+                if (IsPickerMode && BusquedaTextBox != null)
+                {
+                    BusquedaTextBox.Focus();
+                    BusquedaTextBox.SelectAll();
+                }
             };
         }
 
@@ -164,7 +171,16 @@ namespace ControlTalleresMVP.UI.Component.Alumno
         public bool IsPickerMode
         {
             get => (bool)GetValue(IsPickerModeProperty);
-            set => SetValue(IsPickerModeProperty, value);
+            set 
+            { 
+                SetValue(IsPickerModeProperty, value);
+                // Si se activa el modo picker, dar foco al TextBox de búsqueda
+                if (value && BusquedaTextBox != null)
+                {
+                    BusquedaTextBox.Focus();
+                    BusquedaTextBox.SelectAll();
+                }
+            }
         }
     }
 }
