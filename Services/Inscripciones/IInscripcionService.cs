@@ -22,7 +22,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
         public Task InicializarRegistros(CancellationToken ct = default);
         public Task InicializarRegistrosCompletos(CancellationToken ct = default);
         public Task CancelarAsync(int inscripcionId, string? motivo = null, CancellationToken ct = default);
-        public Task<Inscripcion[]> ObtenerInscripcionesAsync(int alumnoId, CancellationToken ct = default);
+        public Task<Inscripcion[]> ObtenerInscripcionesAlumnoAsync(int alumnoId, CancellationToken ct = default);
         public Task<List<InscripcionRegistroDTO>> ObtenerInscripcionesCompletasAsync(
             int? generacionId = null,
             int? tallerId = null,

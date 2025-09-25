@@ -275,7 +275,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             return datos;
         }
 
-        public async Task<Inscripcion[]> ObtenerInscripcionesAsync(int alumnoId, CancellationToken ct = default)
+        public async Task<Inscripcion[]> ObtenerInscripcionesAlumnoAsync(int alumnoId, CancellationToken ct = default)
         {
             return await _escuelaContext.Inscripciones
                 .Include(i => i.Taller) // 🔹 Importante para que ya venga cargado

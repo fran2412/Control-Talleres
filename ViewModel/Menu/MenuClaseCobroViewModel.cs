@@ -194,7 +194,7 @@ public async Task BuscarAlumnoConAlumno(Alumno alumno)
 
 private async Task ProcesarSeleccionAlumno(Alumno alumno)
 {
-    var inscripciones = await _inscripcionService.ObtenerInscripcionesAsync(alumno.AlumnoId);
+    var inscripciones = await _inscripcionService.ObtenerInscripcionesAlumnoAsync(alumno.AlumnoId);
 
     // Activas (no eliminadas)
     var activas = inscripciones.Where(i => !i.Eliminado).ToArray();
