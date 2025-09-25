@@ -7,7 +7,7 @@
              xmlns:sys="clr-namespace:System;assembly=netstandard"
              mc:Ignorable="d" d:DesignWidth="900">
     <Grid>
-        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" MaxHeight="600" Height="auto"
+        <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" Height="auto"
         BorderThickness="1,1,1,1">
             <Grid>
                 <Grid.RowDefinitions>

@@ -30,6 +30,7 @@
     <None Remove="Resources\Icons\InscripcionIcono.svg" />
     <None Remove="Resources\Icons\LupaIcono.svg" />
     <None Remove="Resources\Icons\LupaNegraIcono.svg" />
+    <None Remove="Resources\Icons\ReportePagosIcono.svg" />
     <None Remove="Resources\Icons\SedeIcono.svg" />
     <None Remove="Resources\Images\LogoSistemaTalleres.png" />
   </ItemGroup>
@@ -59,6 +60,8 @@
     <Resource Include="Resources\Icons\MaestroIcono.svg" />
     <Resource Include="Resources\Icons\PagoIcono.svg" />
     <Resource Include="Resources\Icons\PromotorIcono.svg" />
+    <Resource Include="Resources\Icons\ReportePagosIcono.svg" />
+    <Resource Include="Resources\Icons\ReporteInscripcionesrsIcono.svg" />
     <Resource Include="Resources\Icons\SedeIcono.svg" />
     <Resource Include="Resources\Icons\TallerIcono.svg" />
     <Resource Include="Resources\Icons\UsuarioIcono.svg" />
