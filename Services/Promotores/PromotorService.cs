@@ -26,7 +26,13 @@ namespace ControlTalleresMVP.Services.Promotores
         {
             _context.Promotores.Add(promotor);
             await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+
+            await _context.Entry(promotor)
+                .Collection(p => p.Alumnos)
+                .LoadAsync(ct);
+
+            var dto = MapToDto(promotor);
+            InsertOrUpdateRegistro(dto);
             return promotor;
         }
 
@@ -39,7 +45,12 @@ namespace ControlTalleresMVP.Services.Promotores
             promotor.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+
+            var dto = RegistrosPromotores.FirstOrDefault(p => p.Id == id);
+            if (dto is not null)
+            {
+                RegistrosPromotores.Remove(dto);
+            }
         }
 
         public async Task ActualizarAsync(Promotor promotor, CancellationToken ct = default)
@@ -61,7 +72,13 @@ namespace ControlTalleresMVP.Services.Promotores
             try
             {
                 await _context.SaveChangesAsync(ct);
-                await InicializarRegistros(ct);
+
+                await _context.Entry(promotorExistente)
+                    .Collection(p => p.Alumnos)
+                    .LoadAsync(ct);
+
+                var dtoActualizado = MapToDto(promotorExistente);
+                InsertOrUpdateRegistro(dtoActualizado);
             }
             catch (Exception ex)
             {
@@ -115,6 +132,38 @@ namespace ControlTalleresMVP.Services.Promotores
                 .AsNoTracking()
                 .Where(p => !p.Eliminado)
                 .ToList();
+        }
+
+        private static PromotorDTO MapToDto(Promotor promotor)
+        {
+            return new PromotorDTO
+            {
+                Id = promotor.PromotorId,
+                Nombre = promotor.Nombre,
+                Telefono = promotor.Telefono,
+                CreadoEn = promotor.CreadoEn
+            };
+        }
+
+        private void InsertOrUpdateRegistro(PromotorDTO dto)
+        {
+            var existente = RegistrosPromotores
+                .Select((p, index) => new { Promotor = p, Index = index })
+                .FirstOrDefault(x => x.Promotor.Id == dto.Id);
+
+            if (existente is not null)
+            {
+                RegistrosPromotores.RemoveAt(existente.Index);
+            }
+
+            var insertIndex = 0;
+            while (insertIndex < RegistrosPromotores.Count &&
+                   RegistrosPromotores[insertIndex].CreadoEn >= dto.CreadoEn)
+            {
+                insertIndex++;
+            }
+
+            RegistrosPromotores.Insert(insertIndex, dto);
         }
     }
 }
