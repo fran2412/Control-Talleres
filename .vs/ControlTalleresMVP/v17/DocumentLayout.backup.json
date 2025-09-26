@@ -7,12 +7,12 @@
       "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:services\\alumnos\\alumnoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\panch\\source\\repos\\controltalleresmvp\\controltalleresmvp\\services\\alumnos\\ialumnoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:services\\alumnos\\ialumnoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\panch\\source\\repos\\controltalleresmvp\\controltalleresmvp\\persistence\\modeldto\\alumnodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:persistence\\modeldto\\alumnodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\panch\\source\\repos\\controltalleresmvp\\controltalleresmvp\\viewmodel\\menu\\menualumnosviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:viewmodel\\menu\\menualumnosviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\panch\\source\\repos\\controltalleresmvp\\controltalleresmvp\\services\\promotores\\promotorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:services\\promotores\\promotorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,34 +22,8 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MenuAlumnosViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\ViewModel\\Menu\\MenuAlumnosViewModel.cs",
-              "RelativeDocumentMoniker": "ViewModel\\Menu\\MenuAlumnosViewModel.cs",
-              "ToolTip": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\ViewModel\\Menu\\MenuAlumnosViewModel.cs",
-              "RelativeToolTip": "ViewModel\\Menu\\MenuAlumnosViewModel.cs",
-              "ViewState": "AgIAAJ8AAAAAAAAAAAAwwLIAAAA4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-25T13:55:08.653Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "IAlumnoService.cs",
-              "DocumentMoniker": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Alumnos\\IAlumnoService.cs",
-              "RelativeDocumentMoniker": "Services\\Alumnos\\IAlumnoService.cs",
-              "ToolTip": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Alumnos\\IAlumnoService.cs",
-              "RelativeToolTip": "Services\\Alumnos\\IAlumnoService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-25T13:44:54.918Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
@@ -60,15 +34,41 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AlumnoDTO.cs",
+              "DocumentMoniker": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Persistence\\ModelDTO\\AlumnoDTO.cs",
+              "RelativeDocumentMoniker": "Persistence\\ModelDTO\\AlumnoDTO.cs",
+              "ToolTip": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Persistence\\ModelDTO\\AlumnoDTO.cs",
+              "RelativeToolTip": "Persistence\\ModelDTO\\AlumnoDTO.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAwBsAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T13:57:17.409Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "AlumnoService.cs",
               "DocumentMoniker": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Alumnos\\AlumnoService.cs",
               "RelativeDocumentMoniker": "Services\\Alumnos\\AlumnoService.cs",
               "ToolTip": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Alumnos\\AlumnoService.cs",
               "RelativeToolTip": "Services\\Alumnos\\AlumnoService.cs",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAwwHYAAABMAAAAAAAAAA==",
+              "ViewState": "AgIAACsAAAAAAAAAAAAnwDwAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-25T13:30:24.444Z",
+              "WhenOpened": "2025-09-26T13:53:27.458Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PromotorService.cs",
+              "DocumentMoniker": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Promotores\\PromotorService.cs",
+              "RelativeDocumentMoniker": "Services\\Promotores\\PromotorService.cs",
+              "ToolTip": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Promotores\\PromotorService.cs",
+              "RelativeToolTip": "Services\\Promotores\\PromotorService.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAzwBgAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T13:53:12.015Z",
               "EditorCaption": ""
             }
           ]

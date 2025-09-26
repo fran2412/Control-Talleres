@@ -37,10 +37,12 @@ namespace ControlTalleresMVP.Services.Alumnos
             int? idPromotor = alumno.PromotorId;
             int? idSede = alumno.SedeId;
 
-            var alumnoYaRegistrado = ObtenerTodos().Any(a => 
-            a.Nombre == nombreAlumno 
-            && a.PromotorId == idPromotor
-            && a.SedeId == idSede);
+            var alumnoYaRegistrado = await _context.Alumnos
+                .AsNoTracking()
+                .AnyAsync(a => a.Nombre == nombreAlumno
+                            && a.PromotorId == idPromotor
+                            && a.SedeId == idSede
+                            && !a.Eliminado, ct);
 
             if (alumnoYaRegistrado)
             {
@@ -49,6 +51,9 @@ namespace ControlTalleresMVP.Services.Alumnos
 
             _context.Alumnos.Add(alumno);
             await _context.SaveChangesAsync(ct);
+
+            await _context.Entry(alumno).Reference(a => a.Sede).LoadAsync(ct);
+            await _context.Entry(alumno).Reference(a => a.Promotor).LoadAsync(ct);
 
             var alumnoDto = ConvertirADto(alumno);
 
@@ -100,7 +105,7 @@ namespace ControlTalleresMVP.Services.Alumnos
             existente.PromotorId = alumno.PromotorId == 0 ? null : alumno.PromotorId;
             existente.ActualizadoEn = DateTime.Now;
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
 
             var dtoActualizado = await _context.Alumnos
                 .AsNoTracking()
