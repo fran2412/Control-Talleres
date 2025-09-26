@@ -48,7 +48,14 @@ namespace ControlTalleresMVP.Services.Generaciones
             generacion.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+
+            var dto = RegistrosGeneraciones
+                .FirstOrDefault(g => g.Id == generacion.GeneracionId);
+
+            if (dto is not null)
+            {
+                RegistrosGeneraciones.Remove(dto);
+            }
         }
 
         public async Task ActualizarAsync(Generacion generacion, CancellationToken ct = default)
@@ -71,7 +78,19 @@ namespace ControlTalleresMVP.Services.Generaciones
             try
             {
                 await _context.SaveChangesAsync(ct);
-                await InicializarRegistros(ct);
+
+                var dto = RegistrosGeneraciones
+                    .FirstOrDefault(g => g.Id == generacionExistente.GeneracionId);
+
+                if (dto is not null)
+                {
+                    dto.Nombre = generacionExistente.Nombre;
+                    dto.FechaInicio = generacionExistente.FechaInicio;
+                    dto.FechaFin = generacionExistente.FechaFin;
+
+                    RegistrosGeneraciones.Remove(dto);
+                    InsertarOrdenado(dto);
+                }
             }
             catch (Exception ex)
             {
@@ -143,6 +162,14 @@ namespace ControlTalleresMVP.Services.Generaciones
             if (ultimaGeneracion != null && ultimaGeneracion.FechaFin == null)
             {
                 ultimaGeneracion.FechaFin = DateTime.Now;
+
+                var dtoUltima = RegistrosGeneraciones
+                    .FirstOrDefault(g => g.Id == ultimaGeneracion.GeneracionId);
+
+                if (dtoUltima is not null)
+                {
+                    dtoUltima.FechaFin = ultimaGeneracion.FechaFin;
+                }
             }
 
             // Crear nueva generación
@@ -154,9 +181,18 @@ namespace ControlTalleresMVP.Services.Generaciones
                 CreadoEn = DateTime.Now
             };
 
-            await _context.Generaciones.AddAsync(nuevaGeneracion);
-            await _context.SaveChangesAsync();
-            await InicializarRegistros(ct);
+            await _context.Generaciones.AddAsync(nuevaGeneracion, ct);
+            await _context.SaveChangesAsync(ct);
+
+            var nuevoDto = new GeneracionDTO
+            {
+                Id = nuevaGeneracion.GeneracionId,
+                Nombre = nuevaGeneracion.Nombre,
+                FechaInicio = nuevaGeneracion.FechaInicio,
+                FechaFin = nuevaGeneracion.FechaFin,
+            };
+
+            InsertarOrdenado(nuevoDto);
         }
 
         public Generacion? ObtenerGeneracionActual()
@@ -165,6 +201,19 @@ namespace ControlTalleresMVP.Services.Generaciones
                 .Where(g => g.FechaFin == null)
                 .OrderByDescending(g => g.FechaInicio)
                 .FirstOrDefault();
+        }
+
+        private void InsertarOrdenado(GeneracionDTO generacion)
+        {
+            var indice = 0;
+
+            while (indice < RegistrosGeneraciones.Count &&
+                   RegistrosGeneraciones[indice].FechaInicio >= generacion.FechaInicio)
+            {
+                indice++;
+            }
+
+            RegistrosGeneraciones.Insert(indice, generacion);
         }
     }
 }
