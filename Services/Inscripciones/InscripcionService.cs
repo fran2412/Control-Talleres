@@ -5,6 +5,7 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using ControlTalleresMVP.Messages;
@@ -54,6 +55,9 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
             var generacion = await _escuelaContext.Generaciones.FirstOrDefaultAsync(g => g.GeneracionId == generacionId.GeneracionId, ct)
                              ?? throw new InvalidOperationException("Generación no encontrada.");
+
+            var alumno = await _escuelaContext.Alumnos.FirstOrDefaultAsync(a => a.AlumnoId == alumnoId, ct)
+                         ?? throw new InvalidOperationException("Alumno no encontrado.");
 
             // Validar que la fecha de inscripción esté dentro del rango de la generación
             var fechaInscripcion = fecha ?? DateTime.Now;
@@ -116,12 +120,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 if (abonoInicial > 0m)
                 {
                     // Obtener información del alumno y taller para la descripción
-                    var alumno = await _escuelaContext.Alumnos
-                        .Where(a => a.AlumnoId == alumnoId)
-                        .Select(a => a.Nombre)
-                        .FirstOrDefaultAsync(ct);
-                    
-                    var descripcion = $"Pago de inscripción - {alumno ?? "Alumno"} en {taller.Nombre} - Abono: ${abonoInicial:F2} de ${costo:F2} (Deuda pendiente: ${saldo:F2})";
+                    var descripcion = $"Pago de inscripción - {alumno.Nombre} en {taller.Nombre} - Abono: ${abonoInicial:F2} de ${costo:F2} (Deuda pendiente: ${saldo:F2})";
                     
                     var pago = new Pago
                     {
@@ -160,8 +159,66 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 }
 
                 await transaccion.CommitAsync(ct);
-                await InicializarRegistros(ct);
-                
+
+                var nuevoRegistro = new InscripcionDTO
+                {
+                    Id = inscripcion.InscripcionId,
+                    Nombre = alumno.Nombre,
+                    Taller = taller.Nombre,
+                    Costo = inscripcion.Costo,
+                    SaldoActual = inscripcion.SaldoActual,
+                    Estado = inscripcion.Estado,
+                    CreadoEn = inscripcion.Fecha
+                };
+
+                var indiceInsertar = 0;
+                while (indiceInsertar < RegistrosInscripciones.Count &&
+                       RegistrosInscripciones[indiceInsertar].CreadoEn > nuevoRegistro.CreadoEn)
+                {
+                    indiceInsertar++;
+                }
+                RegistrosInscripciones.Insert(indiceInsertar, nuevoRegistro);
+
+                var nuevoRegistroCompleto = new InscripcionRegistroDTO
+                {
+                    InscripcionId = inscripcion.InscripcionId,
+                    TallerId = inscripcion.TallerId,
+                    AlumnoId = inscripcion.AlumnoId,
+                    GeneracionId = inscripcion.GeneracionId,
+                    FechaInscripcion = inscripcion.Fecha,
+                    TallerNombre = taller.Nombre,
+                    TallerEliminado = taller.Eliminado,
+                    AlumnoNombre = alumno.Nombre,
+                    GeneracionNombre = generacion.Nombre,
+                    Monto = inscripcion.Costo,
+                    SaldoActual = inscripcion.SaldoActual,
+                    MontoPagado = inscripcion.Costo - inscripcion.SaldoActual,
+                    PorcentajePagado = inscripcion.Costo > 0
+                        ? (int)Math.Round((double)((inscripcion.Costo - inscripcion.SaldoActual) / inscripcion.Costo * 100m))
+                        : 0,
+                    EstadoInscripcion = inscripcion.Estado,
+                    EstadoTexto = inscripcion.Estado == EstadoInscripcion.Pagada ? "Pagada"
+                                   : inscripcion.Estado == EstadoInscripcion.Pendiente ? "Pendiente"
+                                   : "Cancelada",
+                    UltimoPagoFecha = abonoInicial > 0m ? now : null,
+                    MotivoCancelacion = inscripcion.MotivoCancelacion,
+                    CanceladaEn = inscripcion.CanceladaEn
+                };
+
+                var indiceCompleto = 0;
+                while (indiceCompleto < RegistrosInscripcionesCompletos.Count &&
+                       (RegistrosInscripcionesCompletos[indiceCompleto].FechaInscripcion > nuevoRegistroCompleto.FechaInscripcion ||
+                       (RegistrosInscripcionesCompletos[indiceCompleto].FechaInscripcion == nuevoRegistroCompleto.FechaInscripcion &&
+                        string.Compare(RegistrosInscripcionesCompletos[indiceCompleto].TallerNombre, nuevoRegistroCompleto.TallerNombre, StringComparison.Ordinal) < 0) ||
+                       (RegistrosInscripcionesCompletos[indiceCompleto].FechaInscripcion == nuevoRegistroCompleto.FechaInscripcion &&
+                        RegistrosInscripcionesCompletos[indiceCompleto].TallerNombre == nuevoRegistroCompleto.TallerNombre &&
+                        string.Compare(RegistrosInscripcionesCompletos[indiceCompleto].AlumnoNombre, nuevoRegistroCompleto.AlumnoNombre, StringComparison.Ordinal) <= 0)))
+                {
+                    indiceCompleto++;
+                }
+
+                RegistrosInscripcionesCompletos.Insert(indiceCompleto, nuevoRegistroCompleto);
+
                 // Enviar mensaje de actualización para notificar a otros componentes
                 WeakReferenceMessenger.Default.Send(new InscripcionesActualizadasMessage(alumnoId));
                 
