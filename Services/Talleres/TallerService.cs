@@ -32,7 +32,9 @@ namespace ControlTalleresMVP.Services.Talleres
             
             _context.Talleres.Add(taller);
             await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+
+            var dto = await ConstruirDtoAsync(taller, ct);
+            InsertarOrdenado(dto);
             return taller;
         }
 
@@ -88,7 +90,20 @@ namespace ControlTalleresMVP.Services.Talleres
 
             await _context.SaveChangesAsync(ct);
             await transaccion.CommitAsync(ct);
-            await InicializarRegistros(ct);
+
+            var registro = RegistrosTalleres.FirstOrDefault(r => r.Id == tallerId);
+            if (registro != null)
+            {
+                if (RegistrosTalleres.Any(r => r.Eliminado))
+                {
+                    registro.Eliminado = true;
+                    registro.EliminadoEn = now;
+                }
+                else
+                {
+                    RegistrosTalleres.Remove(registro);
+                }
+            }
         }
 
         public async Task ActualizarAsync(Taller taller, CancellationToken ct = default)
@@ -121,7 +136,15 @@ namespace ControlTalleresMVP.Services.Talleres
             try
             {
                 await _context.SaveChangesAsync(ct);
-                await InicializarRegistros(ct);
+
+                await _context.Entry(tallerExistente).ReloadAsync(ct);
+                await _context.Entry(tallerExistente).Reference(t => t.Sede).LoadAsync(ct);
+
+                var registro = RegistrosTalleres.FirstOrDefault(r => r.Id == tallerExistente.TallerId);
+                if (registro != null)
+                {
+                    ActualizarDto(registro, tallerExistente);
+                }
             }
             catch (Exception ex)
             {
@@ -219,6 +242,58 @@ namespace ControlTalleresMVP.Services.Talleres
                 DayOfWeek.Sunday => "Domingo",
                 _ => "Lunes"
             };
+        }
+
+        private async Task<TallerDTO> ConstruirDtoAsync(Taller taller, CancellationToken ct)
+        {
+            await _context.Entry(taller).ReloadAsync(ct);
+            await _context.Entry(taller).Reference(t => t.Sede).LoadAsync(ct);
+
+            return CrearDtoDesdeTaller(taller);
+        }
+
+        private static TallerDTO CrearDtoDesdeTaller(Taller taller)
+        {
+            return new TallerDTO
+            {
+                Id = taller.TallerId,
+                Nombre = taller.Nombre,
+                HorarioInicio = taller.HorarioInicio,
+                HorarioFin = taller.HorarioFin,
+                DiaSemana = ConvertirDiaSemanaASpanol(taller.DiaSemana),
+                FechaInicio = taller.FechaInicio,
+                FechaFin = taller.FechaFin,
+                SedeId = taller.SedeId,
+                NombreSede = taller.Sede?.Nombre ?? string.Empty,
+                CreadoEn = taller.CreadoEn,
+                Eliminado = taller.Eliminado,
+                EliminadoEn = taller.EliminadoEn
+            };
+        }
+
+        private static void ActualizarDto(TallerDTO destino, Taller origen)
+        {
+            destino.Nombre = origen.Nombre;
+            destino.HorarioInicio = origen.HorarioInicio;
+            destino.HorarioFin = origen.HorarioFin;
+            destino.DiaSemana = ConvertirDiaSemanaASpanol(origen.DiaSemana);
+            destino.FechaInicio = origen.FechaInicio;
+            destino.FechaFin = origen.FechaFin;
+            destino.SedeId = origen.SedeId;
+            destino.NombreSede = origen.Sede?.Nombre ?? string.Empty;
+            destino.Eliminado = origen.Eliminado;
+            destino.EliminadoEn = origen.EliminadoEn;
+        }
+
+        private void InsertarOrdenado(TallerDTO nuevo)
+        {
+            var indice = 0;
+            while (indice < RegistrosTalleres.Count && RegistrosTalleres[indice].CreadoEn >= nuevo.CreadoEn)
+            {
+                indice++;
+            }
+
+            RegistrosTalleres.Insert(indice, nuevo);
         }
 
     }
