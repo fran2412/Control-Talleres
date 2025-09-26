@@ -26,7 +26,13 @@ namespace ControlTalleresMVP.Services.Sedes
         {
             _context.Sedes.Add(sede);
             await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+
+            InsertarSedeOrdenada(new SedeDTO
+            {
+                Id = sede.SedeId,
+                Nombre = sede.Nombre,
+                CreadoEn = sede.CreadoEn
+            });
             return sede;
         }
 
@@ -46,7 +52,12 @@ namespace ControlTalleresMVP.Services.Sedes
             sede.EliminadoEn = DateTime.Now;
 
             await _context.SaveChangesAsync(ct);
-            await InicializarRegistros(ct);
+
+            var dto = RegistrosSedes.FirstOrDefault(s => s.Id == id);
+            if (dto is not null)
+            {
+                RegistrosSedes.Remove(dto);
+            }
         }
 
         public async Task ActualizarAsync(Sede sede, CancellationToken ct = default)
@@ -67,13 +78,57 @@ namespace ControlTalleresMVP.Services.Sedes
             try
             {
                 await _context.SaveChangesAsync(ct);
-                await InicializarRegistros(ct);
+
+                var indice = ObtenerIndicePorId(sedeExistente.SedeId);
+                var sedeDtoActualizada = new SedeDTO
+                {
+                    Id = sedeExistente.SedeId,
+                    Nombre = sedeExistente.Nombre,
+                    CreadoEn = sedeExistente.CreadoEn
+                };
+
+                if (indice >= 0)
+                {
+                    RegistrosSedes[indice] = sedeDtoActualizada;
+                }
+                else
+                {
+                    InsertarSedeOrdenada(sedeDtoActualizada);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error al actualizar la sede: " + ex.Message,
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void InsertarSedeOrdenada(SedeDTO sedeDto)
+        {
+            var indiceExistente = ObtenerIndicePorId(sedeDto.Id);
+            if (indiceExistente >= 0)
+            {
+                RegistrosSedes.RemoveAt(indiceExistente);
+            }
+
+            var index = 0;
+            while (index < RegistrosSedes.Count && RegistrosSedes[index].CreadoEn >= sedeDto.CreadoEn)
+            {
+                index++;
+            }
+
+            RegistrosSedes.Insert(index, sedeDto);
+        }
+
+        private int ObtenerIndicePorId(int id)
+        {
+            for (var i = 0; i < RegistrosSedes.Count; i++)
+            {
+                if (RegistrosSedes[i].Id == id)
+                    return i;
+            }
+
+            return -1;
         }
 
         public async Task<List<SedeDTO>> ObtenerSedesParaGridAsync(CancellationToken ct = default)
