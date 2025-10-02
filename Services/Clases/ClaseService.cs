@@ -44,24 +44,32 @@ namespace ControlTalleresMVP.Services.Clases
     decimal montoAbono,
     CancellationToken ct = default)
         {
-            // 0) Resolver el día semanal del taller
-            var tallerDia = await _escuelaContext.Talleres
+            // 0) Resolver datos del taller y validar la fecha indicada
+            var tallerInfo = await _escuelaContext.Talleres
                 .Where(t => t.TallerId == tallerId && !t.Eliminado)
-                .Select(t => (DayOfWeek?)t.DiaSemana)
+                .Select(t => new { t.DiaSemana, t.FechaInicio, t.FechaFin, t.Nombre })
                 .FirstOrDefaultAsync(ct);
 
-            if (tallerDia is null)
+            if (tallerInfo is null)
                 throw new InvalidOperationException("Taller no encontrado o eliminado.");
 
-            // 1) "Siguiente o el mismo" día semanal respecto a la fecha base
-            //    Si hoy ya es el sábado (por ejemplo), ese mismo día cuenta.
-            var day = SiguienteOElMismo(fecha.Date, tallerDia.Value, incluirSiHoyCoincide: true);
+            var fechaClase = fecha.Date;
 
-            // Validar que la fecha calculada coincida con el día de la semana del taller
-            if (day.DayOfWeek != tallerDia.Value)
+            // Validar que el día de la semana coincida con el del taller
+            if (fechaClase.DayOfWeek != tallerInfo.DiaSemana)
             {
                 throw new InvalidOperationException(
-                    $"La fecha de la clase ({day:dd/MM/yyyy}) no coincide con el día de la semana del taller ({ConvertirDiaSemanaASpanol(tallerDia.Value)}).");
+                    $"La fecha de la clase ({fechaClase:dd/MM/yyyy}) no coincide con el día de la semana del taller ({ConvertirDiaSemanaASpanol(tallerInfo.DiaSemana)}).");
+            }
+
+            // Validar que la fecha esté dentro del rango del taller
+            if (fechaClase < tallerInfo.FechaInicio.Date)
+            {
+                throw new InvalidOperationException($"La fecha indicada ({fechaClase:dd/MM/yyyy}) es anterior al inicio del taller ({tallerInfo.FechaInicio:dd/MM/yyyy}).");
+            }
+            if (tallerInfo.FechaFin.HasValue && fechaClase > tallerInfo.FechaFin.Value.Date)
+            {
+                throw new InvalidOperationException($"La fecha indicada ({fechaClase:dd/MM/yyyy}) es posterior a la fecha fin del taller ({tallerInfo.FechaFin:dd/MM/yyyy}).");
             }
 
             var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
@@ -73,11 +81,11 @@ namespace ControlTalleresMVP.Services.Clases
 
             // 2) Buscar o crear CLASE (única por Taller+Fecha)
             var clase = await _escuelaContext.Clases
-                .FirstOrDefaultAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Fecha.Date == day, ct);
+                .FirstOrDefaultAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Fecha.Date == fechaClase, ct);
 
             if (clase is null)
             {
-                clase = new Clase { TallerId = tallerId, Fecha = day };
+                clase = new Clase { TallerId = tallerId, Fecha = fechaClase };
                 _escuelaContext.Clases.Add(clase);
                 await _escuelaContext.SaveChangesAsync(ct);
                 claseCreada = true;
@@ -97,7 +105,7 @@ namespace ControlTalleresMVP.Services.Clases
                     AlumnoId = alumnoId,
                     ClaseId = clase.ClaseId,
                     Tipo = TipoCargo.Clase,
-                    Fecha = day,               // ← usa la fecha "anclada" al día semanal
+                    Fecha = fechaClase,
                     Monto = costoClase,
                     SaldoActual = costoClase,
                     Estado = EstadoCargo.Pendiente,
@@ -126,9 +134,9 @@ namespace ControlTalleresMVP.Services.Clases
                             .Where(t => t.TallerId == tallerId)
                             .Select(t => new { t.Nombre, t.DiaSemana })
                             .FirstOrDefaultAsync(ct);
-                        
+
                         var diaSemana = ConvertirDiaSemanaASpanol(taller?.DiaSemana ?? DayOfWeek.Monday);
-                        var descripcion = $"Pago de clase - {taller?.Nombre ?? "Taller"} ({diaSemana} {day:dd/MM/yyyy}) - Monto: ${aAplicar:F2}";
+                        var descripcion = $"Pago de clase - {taller?.Nombre ?? "Taller"} ({diaSemana} {fechaClase:dd/MM/yyyy}) - Monto: ${aAplicar:F2}";
                         
                         var pago = new Pago
                         {
@@ -166,14 +174,14 @@ namespace ControlTalleresMVP.Services.Clases
                         if (excedente > 0m)
                         {
                             excedenteAplicado = await AplicarExcedenteASiguienteClaseAsync(
-                                alumnoId, tallerId, day, excedente, taller?.Nombre ?? "Taller", ct);
+                                alumnoId, tallerId, fechaClase, excedente, taller?.Nombre ?? "Taller", ct);
                         }
                     }
                 }
             }
 
             return new RegistrarClaseResult(
-                Fecha: day,
+                Fecha: fechaClase,
                 ClaseCreada: claseCreada,
                 CargoCreado: cargoCreado,
                 PagoCreado: pagoCreado,

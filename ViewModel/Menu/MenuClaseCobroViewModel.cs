@@ -12,7 +12,9 @@ using ControlTalleresMVP.Services.Picker;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,19 +22,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
 {
     public partial class MenuClaseCobroViewModel : ObservableObject
     {
+        private const int MaxClasesFuturas = 4;
+        private const decimal MinCostoClase = 1m;
+        private const decimal MaxCostoClase = 10000m;
+
         private readonly IClaseService _claseService;
         private readonly IInscripcionService _inscripcionService;
         private readonly IDialogService _dialogService;
         private readonly IConfiguracionService _configuracionService;
         private readonly IAlumnoPickerService _alumnoPicker;
 
-        // límites y control de recursión
-        private const int MaxClases = 4;
-        private const decimal MinCostoClase = 1m;
-        private const decimal MaxCostoClase = 10000m;
-        private bool _ajustandoCantidad;
-        private bool _ajustandoCosto;
-        private bool _ajustandoMonto;
+        private readonly decimal _costoClase;
 
         public MenuClaseCobroViewModel(
             IClaseService claseService,
@@ -42,139 +42,70 @@ namespace ControlTalleresMVP.ViewModel.Menu
             IAlumnoPickerService alumnoPicker)
         {
             _claseService = claseService;
-            _dialogService = dialogService;
-            _alumnoPicker = alumnoPicker;
-            _configuracionService = configuracionService;
             _inscripcionService = inscripcionService;
+            _dialogService = dialogService;
+            _configuracionService = configuracionService;
+            _alumnoPicker = alumnoPicker;
 
             FechaDeHoy = DateTime.Now.ToString("dd/MM/yyyy");
             var costoCfg = _configuracionService.GetValor<int>("costo_clase", 150);
-            CostoClase = ClampCosto(R2(costoCfg));
-            RecalcularSugeridoYQuizasMonto();
+            _costoClase = ClampCosto(Math.Round((decimal)costoCfg, 2, MidpointRounding.AwayFromZero));
         }
 
-        [ObservableProperty] private string fechaDeHoy = "";
-        [ObservableProperty] private string? alumnoNombre;
-        [ObservableProperty] private Alumno? alumnoSeleccionado;
+        [ObservableProperty]
+        private string fechaDeHoy = string.Empty;
+
+        [ObservableProperty]
+        private string? alumnoNombre;
+
+        [ObservableProperty]
+        private Alumno? alumnoSeleccionado;
+
         partial void OnAlumnoSeleccionadoChanged(Alumno? value)
         {
-            ActualizarMostrarAvisoClasesPendientes();
-            ActualizarInformacionFechasClases();
+            if (value is null)
+            {
+                LimpiarClases();
+            }
         }
-        [ObservableProperty] private ObservableCollection<Taller> talleresDelAlumno = new();
-        [ObservableProperty] private Taller? tallerSeleccionado;
+
+        [ObservableProperty]
+        private ObservableCollection<Taller> talleresDelAlumno = new();
+
+        [ObservableProperty]
+        private Taller? tallerSeleccionado;
+
         partial void OnTallerSeleccionadoChanged(Taller? value)
         {
-            if (AlumnoSeleccionado != null)
+            if (AlumnoSeleccionado is null || value is null)
             {
-                RecalcularSugeridoYQuizasMonto(forceSetMonto: true);
-            }
-            ActualizarMostrarAvisoClasesPendientes();
-            ActualizarInformacionFechasClases();
-        }
-
-        [ObservableProperty] private int cantidadSeleccionada = 1;
-        partial void OnCantidadSeleccionadaChanged(int value)
-        {
-            var clamped = value < 1 ? 1 : (value > MaxClases ? MaxClases : value);
-            if (clamped != value)
-            {
-                if (_ajustandoCantidad) return;
-                _ajustandoCantidad = true;
-                CantidadSeleccionada = clamped;
-                _ajustandoCantidad = false;
+                LimpiarClases();
                 return;
             }
-            RecalcularSugeridoYQuizasMonto();
-            ActualizarInformacionFechasClases();
+
+            _ = CargarClasesDisponiblesAsync();
         }
 
-        [ObservableProperty] private decimal costoClase;
-        partial void OnCostoClaseChanged(decimal value)
-        {
-            var clamped = ClampCosto(R2(value));
-            if (clamped != value)
-            {
-                if (_ajustandoCosto) return;
-                _ajustandoCosto = true;
-                CostoClase = clamped;
-                _ajustandoCosto = false;
-                return;
-            }
-            RecalcularSugeridoYQuizasMonto();
-        }
+        [ObservableProperty]
+        private ObservableCollection<ClasePagoItem> clasesParaPago = new();
 
-        [ObservableProperty] private decimal? montoIngresado;
-        partial void OnMontoIngresadoChanged(decimal? value)
-        {
-            if (_ajustandoMonto || value is null) return;
-            var v = R2(value.Value);
-            if (v < 0m) v = 0m;
-            
-            // Calcular el límite máximo basado en la cantidad de clases seleccionadas
-            var limiteMaximo = CantidadSeleccionada * CostoClase;
-            if (v > limiteMaximo) v = limiteMaximo;
-            
-            if (MontoIngresado != v)
-            {
-                _ajustandoMonto = true;
-                MontoIngresado = v;
-                _ajustandoMonto = false;
-            }
-            
-            // Actualizar mensaje de validación en tiempo real
-            if (value.HasValue && value > 0m)
-            {
-                if (!MostrarControlesCantidad)
-                {
-                    // Hay clases pendientes: validar contra el monto sugerido
-                    if (value > MontoSugerido)
-                    {
-                        MensajeValidacion = $"El monto no puede superar el necesario para pagar todas las clases pendientes ({MontoSugerido:C2}).";
-                    }
-                    else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
-                    {
-                        MensajeValidacion = null; // Limpiar mensaje si ya no aplica
-                    }
-                }
-                else
-                {
-                    // No hay clases pendientes: limpiar mensajes de validación de límite
-                    if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
-                    {
-                        MensajeValidacion = null; // Limpiar mensaje si ya no aplica
-                    }
-                }
-            }
-            else if (MensajeValidacion != null && MensajeValidacion.Contains("no puede superar"))
-            {
-                MensajeValidacion = null; // Limpiar mensaje si ya no aplica
-            }
-            
-            // Actualizar información de fechas cuando cambie el monto
-            ActualizarInformacionFechasClases();
-        }
+        [ObservableProperty]
+        private bool hayClasesParaPago;
 
-        [ObservableProperty] private decimal montoSugerido;
-        [ObservableProperty] private string? mensajeValidacion;
-        [ObservableProperty] private string? notificacionTalleresSinPagar;
-        [ObservableProperty] private bool tieneTalleresSinPagar;
-        [ObservableProperty] private string? informacionClasesPendientes;
-        [ObservableProperty] private bool mostrarControlesCantidad = true;
-        [ObservableProperty] private string? avisoClasesPendientes;
-        partial void OnAvisoClasesPendientesChanged(string? value)
-        {
-            ActualizarMostrarAvisoClasesPendientes();
-        }
-        
-        [ObservableProperty] private bool mostrarAvisoClasesPendientes;
-        [ObservableProperty] private string? informacionFechasClases;
-        [ObservableProperty] private bool mostrarInformacionFechas;
-        
-        private void ActualizarMostrarAvisoClasesPendientes()
-        {
-            MostrarAvisoClasesPendientes = !string.IsNullOrEmpty(AvisoClasesPendientes) && AlumnoSeleccionado != null;
-        }
+        [ObservableProperty]
+        private int totalClasesSeleccionadas;
+
+        [ObservableProperty]
+        private decimal totalSeleccionado;
+
+        [ObservableProperty]
+        private string? mensajeValidacion;
+
+        [ObservableProperty]
+        private string? notificacionTalleresSinPagar;
+
+        [ObservableProperty]
+        private bool tieneTalleresSinPagar;
 
         [RelayCommand]
 private async Task BuscarAlumno()
@@ -195,30 +126,23 @@ public async Task BuscarAlumnoConAlumno(Alumno alumno)
 private async Task ProcesarSeleccionAlumno(Alumno alumno)
 {
     var inscripciones = await _inscripcionService.ObtenerInscripcionesAlumnoAsync(alumno.AlumnoId);
-
-    // Activas (no eliminadas)
     var activas = inscripciones.Where(i => !i.Eliminado).ToArray();
 
-    // ÚNICO caso con diálogo: sin inscripciones
     if (activas.Length == 0)
     {
         _dialogService.Alerta("Este alumno no está inscrito en ningún taller.\nInscríbalo en alguno para poder registrar sus pagos a clases.");
         return;
     }
 
-    // Particionar por estado
-    var inscripcionesPagadas    = activas.Where(i => i.Estado == EstadoInscripcion.Pagada).ToArray();
     var inscripcionesPendientes = activas.Where(i => i.Estado == EstadoInscripcion.Pendiente).ToArray();
 
-    // ---- Notificación (no bloquea) de inscripciones pendientes con monto ----
-    // Si existiera más de una inscripción al mismo taller, agrupamos y sumamos saldos.
     var pendientesAgrupadas = inscripcionesPendientes
         .Where(i => i.Taller != null)
         .GroupBy(i => i.Taller!.Nombre)
         .Select(g => new
         {
             Taller = g.Key,
-            MontoPendiente = g.Sum(x => Math.Max(0m, x.SaldoActual)) // usa SaldoActual de tu modelo
+                    MontoPendiente = g.Sum(x => Math.Max(0m, x.SaldoActual))
         })
         .Where(x => x.MontoPendiente > 0m)
         .OrderBy(x => x.Taller)
@@ -236,7 +160,6 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
         TieneTalleresSinPagar = false;
     }
 
-    // Talleres disponibles: incluye pagadas y pendientes (no bloquea pagos de clase)
     var talleresDisponibles = new ObservableCollection<Taller>(
         activas
             .Where(i => i.Taller != null)
@@ -244,15 +167,12 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
             .GroupBy(t => t.TallerId)
             .Select(g => g.First())
             .OrderBy(t => t.Nombre)
-            .ToList()
-    );
+                    .ToList());
 
     TalleresDelAlumno = talleresDisponibles;
     AlumnoSeleccionado = alumno;
     AlumnoNombre = alumno.Nombre;
-    ActualizarMostrarAvisoClasesPendientes();
 
-    // Sugerir por defecto uno que "pueda pagar clase hoy" (opcional, no muestra diálogos)
     var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
     var estados = await _claseService.ObtenerEstadoPagoHoyAsync(alumno.AlumnoId, ids, DateTime.Today);
     var disponibles = estados.Where(e => e.PuedePagar).Select(e => e.TallerId).ToHashSet();
@@ -260,49 +180,23 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
     TallerSeleccionado = TalleresDelAlumno.FirstOrDefault(t => disponibles.Contains(t.TallerId))
                        ?? TalleresDelAlumno.FirstOrDefault();
 
-    // Recalcular monto sugerido basado en clases pendientes
-    RecalcularSugeridoYQuizasMonto(forceSetMonto: true);
+            // Forzar recarga del grid aunque TallerSeleccionado no cambie de referencia
+            await CargarClasesDisponiblesAsync();
 }
-
-
 
         [RelayCommand]
         private void LimpiarSeleccion()
         {
-            // Limpiar notificaciones primero
             NotificacionTalleresSinPagar = null;
             TieneTalleresSinPagar = false;
-            InformacionClasesPendientes = null;
-            MostrarControlesCantidad = true;
-            AvisoClasesPendientes = null;
+            MensajeValidacion = null;
             
-            // Limpiar selecciones
+            LimpiarClases();
+
             AlumnoSeleccionado = null;
             AlumnoNombre = string.Empty;
             TallerSeleccionado = null;
             TalleresDelAlumno = new();
-
-            // Actualizar visibilidad del aviso
-            ActualizarMostrarAvisoClasesPendientes();
-
-            if (!_ajustandoCantidad)
-            {
-                _ajustandoCantidad = true;
-                CantidadSeleccionada = 1;
-                _ajustandoCantidad = false;
-            }
-
-            RecalcularSugeridoYQuizasMonto(forceSetMonto: true);
-            MensajeValidacion = null;
-        }
-
-
-        [RelayCommand]
-        private void UsarMontoSugerido()
-        {
-            _ajustandoMonto = true;
-            MontoIngresado = MontoSugerido;
-            _ajustandoMonto = false;
         }
 
         [RelayCommand]
@@ -312,279 +206,73 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
             {
                 MensajeValidacion = null;
 
-                if (AlumnoSeleccionado is null) { MensajeValidacion = "Debes seleccionar un alumno."; return; }
-                if (TallerSeleccionado is null) { MensajeValidacion = "Debes seleccionar un taller."; return; }
-                if (MontoIngresado is null || MontoIngresado <= 0) { MensajeValidacion = "El monto debe ser mayor a 0."; return; }
-
-                var costo = Math.Round(CostoClase, 2, MidpointRounding.AwayFromZero);
-                var totalIngresado = Math.Round(MontoIngresado.Value, 2, MidpointRounding.AwayFromZero);
-
-                // Obtener clases pendientes de pago desde la fecha de inicio del taller
-                var clasesPendientes = await ObtenerClasesPendientesPagoAsync(AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId);
-
-                var resultados = new List<RegistrarClaseResult>();
-
-                if (clasesPendientes.Length > 0)
+                if (AlumnoSeleccionado is null)
                 {
-                    // HAY clases pendientes: permitir pagos con excedentes
-                    var montoNecesario = R2(clasesPendientes.Length * CostoClase);
-                    
-                    // Validar que el monto sea mayor a 0
-                    if (totalIngresado <= 0)
-                    {
-                        MensajeValidacion = "El monto debe ser mayor a 0.";
+                    MensajeValidacion = "Debes seleccionar un alumno.";
                         return;
                     }
                     
-                    // Aplicar pago a las clases pendientes en orden cronológico
-                    var montoRestante = totalIngresado;
-                    for (int i = 0; i < clasesPendientes.Length && montoRestante > 0; i++)
-                    {
-                        // Calcular cuánto pagar a esta clase
-                        var montoAPagar = Math.Min(montoRestante, costo);
-                        var r = await _claseService.RegistrarClaseAsync(
-                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, clasesPendientes[i], montoAPagar, ct);
-                        resultados.Add(r);
-                        montoRestante -= montoAPagar;
-                    }
-                    
-                    // Si queda monto restante después de pagar todas las clases pendientes, aplicarlo como excedente
-                    if (montoRestante > 0m)
-                    {
-                        // Calcular la siguiente clase después de la última clase pendiente
-                        var ultimaClasePendiente = clasesPendientes[clasesPendientes.Length - 1];
-                        var siguienteFecha = ultimaClasePendiente.AddDays(7);
-                        
-                        // Ajustar al día de la semana correcto del taller
-                        var objetivo = TallerSeleccionado.DiaSemana;
-                        int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                        var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                        
-                        // Aplicar el excedente a la siguiente clase (el ClaseService manejará la recursividad)
-                        var r = await _claseService.RegistrarClaseAsync(
-                            AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaSiguienteClase, montoRestante, ct);
-                        resultados.Add(r);
-                    }
-                }
-                else
+                if (TallerSeleccionado is null)
                 {
-                    // NO hay clases pendientes: aplicar reglas según fecha de fin del taller
-                    // Permitir pagos parciales sin validar cantidad de clases
+                    MensajeValidacion = "Debes seleccionar un taller.";
+                            return;
+                        }
+                        
+                var seleccion = ClasesParaPago
+                    .Where(c => c.IsSeleccionada && c.EstaHabilitada && c.MontoAplicar > 0m)
+                    .OrderBy(c => c.Fecha)
+                    .ToList();
 
-                    // Verificar si el taller tiene fecha de fin
-                    var fechaFin = TallerSeleccionado.FechaFin?.Date;
-                    var hoy = DateTime.Today;
-                    
-                    if (fechaFin.HasValue)
-                    {
-                        // CON fecha de fin: permitir pagos en conjunto hasta la fecha de fin
-                        if (hoy > fechaFin.Value)
-                        {
-                            MensajeValidacion = "El taller ya terminó. No se pueden registrar pagos para clases futuras.";
-                            return;
-                        }
-                        
-                        // Generar fechas a partir de la última clase pagada
-                        var fechas = await CalcularFechasDesdeUltimaClasePagada();
-                        if (fechas.Length == 0)
-                        {
-                            MensajeValidacion = "No se pueden generar clases futuras dentro del período del taller.";
-                            return;
-                        }
-                        
-                        // Validar que el monto no exceda las clases disponibles (permitir pagos parciales)
-                        var montoMaximo = R2(fechas.Length * CostoClase);
-                        if (totalIngresado > montoMaximo)
-                        {
-                            MensajeValidacion = $"El monto no puede superar el necesario para pagar {fechas.Length} clases disponibles ({montoMaximo:C2}).";
-                            return;
-                        }
-                        
-                        // Validar que el monto sea mayor a 0
-                        if (totalIngresado <= 0)
-                        {
-                            MensajeValidacion = "El monto debe ser mayor a 0.";
-                            return;
-                        }
-                        
-                        // Procesar pagos para las fechas generadas
-                        var clasesCompletas = (int)Math.Min(fechas.Length, Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo)));
-                        var sobrante = totalIngresado - (clasesCompletas * costo);
-                        
-                        for (int i = 0; i < clasesCompletas; i++)
-                        {
-                            var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[i], costo, ct);
-                            resultados.Add(r);
-                        }
-
-                        if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas < fechas.Length)
-                        {
-                            var abono = Math.Round(sobrante, 2, MidpointRounding.AwayFromZero);
-                            var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[clasesCompletas], abono, ct);
-                            resultados.Add(r);
-                        }
-                        else if (clasesCompletas == 0 && totalIngresado > 0m)
-                        {
-                            var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[0], totalIngresado, ct);
-                            resultados.Add(r);
-                        }
-                        else if (clasesCompletas > 0 && sobrante > 0m && clasesCompletas >= fechas.Length)
-                        {
-                            // Si se pagaron todas las clases disponibles y hay sobrante, aplicarlo a la siguiente clase
-                            var ultimaFecha = fechas[fechas.Length - 1];
-                            var siguienteFecha = ultimaFecha.AddDays(7);
-                            
-                            // Ajustar al día de la semana correcto del taller
-                            var objetivo = TallerSeleccionado.DiaSemana;
-                            int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                            var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                            
-                            var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaSiguienteClase, sobrante, ct);
-                            resultados.Add(r);
-                        }
-                    }
-                    else
-                    {
-                        // SIN fecha de fin: permitir pagos en paquetes como talleres con fecha fin
-                        // Permitir pagos parciales sin validar cantidad de clases
-
-                        // Generar fechas a partir de la última clase pagada
-                        var fechas = await CalcularFechasDesdeUltimaClasePagada();
-                        if (fechas.Length == 0)
-                        {
-                            MensajeValidacion = "No se pueden generar clases futuras para este taller.";
-                            return;
-                        }
-                        
-                        // Validar que el monto no exceda las clases solicitadas (permitir pagos parciales)
-                        var montoMaximo = R2(fechas.Length * CostoClase);
-                        if (totalIngresado > montoMaximo)
-                        {
-                            MensajeValidacion = $"El monto no puede superar el necesario para pagar {fechas.Length} clases ({montoMaximo:C2}).";
-                            return;
-                        }
-                        
-                        // Validar que el monto sea mayor a 0
-                        if (totalIngresado <= 0)
-                        {
-                            MensajeValidacion = "El monto debe ser mayor a 0.";
-                            return;
-                        }
-                        
-                        // Procesar pagos para las fechas generadas
-                        var clasesCompletas = (int)Math.Min(fechas.Length, Math.Truncate(totalIngresado / (costo == 0 ? 1 : costo)));
-                        var sobrante = totalIngresado - (clasesCompletas * costo);
-                        
-                        for (int i = 0; i < clasesCompletas; i++)
-                        {
-                            var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[i], costo, ct);
-                            resultados.Add(r);
-                        }
-                        
-                        // Si hay sobrante, aplicarlo a la siguiente clase
-                        if (sobrante > 0 && clasesCompletas > 0)
-                        {
-                            var ultimaClase = fechas[clasesCompletas - 1];
-                            var siguienteFecha = ultimaClase.AddDays(7);
-                            
-                            // Ajustar al día de la semana correcto del taller
-                            var objetivo = TallerSeleccionado.DiaSemana;
-                            int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                            var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                            
-                            var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechaSiguienteClase, sobrante, ct);
-                            resultados.Add(r);
-                        }
-                        else if (clasesCompletas == 0 && totalIngresado > 0m)
-                        {
-                            var r = await _claseService.RegistrarClaseAsync(
-                                AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId, fechas[0], totalIngresado, ct);
-                            resultados.Add(r);
-                        }
-                    }
-                }
-
-                string F(DateTime d) => d.ToString("dd/MM/yyyy");
-
-                bool huboCambios = resultados.Any(r => r.PagoCreado || r.CargoCreado || r.ClaseCreada || r.MontoAplicado > 0);
-                if (!huboCambios)
+                if (seleccion.Count == 0)
                 {
-                    if (resultados.Count > 0 && resultados.All(r => r.CargoYaPagado))
-                        _dialogService.Alerta("No se registró ningún movimiento: la(s) clase(s) ya estaban pagadas.");
-                    else
-                        _dialogService.Alerta("No se registró ningún movimiento.");
+                    MensajeValidacion = "Selecciona al menos una clase y un monto mayor a 0.";
+                            return;
+                        }
+                        
+                var resultados = new List<RegistrarClaseResult>();
+
+                foreach (var clase in seleccion)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var monto = Math.Round(clase.MontoAplicar, 2, MidpointRounding.AwayFromZero);
+                    if (monto <= 0m)
+                    {
+                        continue;
+                    }
+                            
+                            var r = await _claseService.RegistrarClaseAsync(
+                        AlumnoSeleccionado.AlumnoId,
+                        TallerSeleccionado.TallerId,
+                        clase.Fecha,
+                        monto,
+                        ct);
+
+                            resultados.Add(r);
+                        }
+                        
+                if (resultados.Count == 0)
+                {
+                    _dialogService.Alerta("No se registró ningún movimiento.", "Clases");
                     return;
                 }
 
-                var pagadasFull = resultados.Where(r => r.PagoCreado && r.MontoAplicado >= costo).Select(r => r.Fecha).OrderBy(d => d).ToList();
-                var parciales = resultados.Where(r => r.PagoCreado && r.MontoAplicado > 0m && r.MontoAplicado < costo)
-                                          .Select(r => new { r.Fecha, r.MontoAplicado }).OrderBy(x => x.Fecha).ToList();
-                var excedentes = resultados.Where(r => r.ExcedenteAplicado > 0m)
-                                          .Select(r => new { r.Fecha, r.ExcedenteAplicado }).OrderBy(x => x.Fecha).ToList();
+                var mensaje = ConstruirResumenPago(seleccion, resultados);
+                _dialogService.Info(mensaje, "Pago registrado");
 
-                // Construir mensaje de confirmación
-                var mensaje = new List<string>();
-
-                if (pagadasFull.Count > 0)
-                {
-                    var listado = string.Join(", ", pagadasFull.Select(F));
-                    mensaje.Add($"Se registraron {pagadasFull.Count} clase(s) pagada(s) ({listado})");
-                }
-
-                if (parciales.Count > 0)
-                {
-                    var p = parciales.Last();
-                    mensaje.Add($"Se registró un abono de {p.MontoAplicado:0.00} para la clase de {F(p.Fecha)}");
-                }
-
-                if (excedentes.Count > 0)
-                {
-                    var totalExcedente = excedentes.Sum(e => e.ExcedenteAplicado);
-                    var clasesConExcedente = excedentes.Count;
-                    if (clasesConExcedente == 1)
-                    {
-                        mensaje.Add($"Se aplicó un excedente de ${totalExcedente:0.00} a la siguiente clase");
-                    }
-                    else
-                    {
-                        mensaje.Add($"Se aplicaron excedentes de ${totalExcedente:0.00} a las siguientes clases");
-                    }
-                }
-
-                if (mensaje.Count > 0)
-                {
-                    _dialogService.Info(string.Join(".\n", mensaje) + ".", "Clases");
-                }
-
-                // Notifica a quien muestre el registro que hay cambios
                 WeakReferenceMessenger.Default.Send(new ClasesActualizadasMessage(AlumnoSeleccionado.AlumnoId));
 
-                // Preguntar si quiere registrar otro pago
-                var continuar = _dialogService.Confirmar("¿Desea registrar otro pago?", "Pago Registrado");
-                if (continuar)
+                await CargarClasesDisponiblesAsync();
+
+                var continuar = _dialogService.Confirmar("¿Desea registrar otro pago?", "Clases");
+                if (!continuar)
                 {
-                    // Mantener el alumno seleccionado y limpiar solo los campos de pago
-                    TallerSeleccionado = null;
-                    CantidadSeleccionada = 1;
-                    MontoIngresado = null;
-                    MontoSugerido = 0;
-                    MensajeValidacion = null;
-                    InformacionClasesPendientes = null;
-                    AvisoClasesPendientes = null;
-                    ActualizarMostrarAvisoClasesPendientes();
-                    RecalcularSugeridoYQuizasMonto(forceSetMonto: true);
-                }
-                else
-                {
-                    // Limpiar toda la selección
                     LimpiarSeleccion();
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                MensajeValidacion = "Operación cancelada.";
             }
             catch (Exception ex)
             {
@@ -602,516 +290,415 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
             }
         }
 
-        // ==== helpers ====
-        private async void RecalcularSugeridoYQuizasMonto(bool forceSetMonto = false)
+        private async Task CargarClasesDisponiblesAsync()
         {
-            decimal nuevoSugerido = 0m;
-            
-            // Si hay un taller seleccionado, verificar si hay clases pendientes
-            if (TallerSeleccionado != null && AlumnoSeleccionado != null)
-            {
-                try
-                {
-                    var clasesPendientes = await ObtenerClasesPendientesPagoAsync(AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId);
-                    
-                    if (clasesPendientes.Length > 0)
-                    {
-                        // HAY clases pendientes: actualizar la cantidad automáticamente
-                        if (!_ajustandoCantidad)
-                        {
-                            _ajustandoCantidad = true;
-                            CantidadSeleccionada = clasesPendientes.Length;
-                            _ajustandoCantidad = false;
-                        }
-                        
-                        // Sugerir monto para pagar todas las clases pendientes
-                        nuevoSugerido = R2(clasesPendientes.Length * CostoClase);
-                        
-                        var fechas = clasesPendientes.Select(f => f.ToString("dd/MM/yyyy")).ToArray();
-                        var fechasTexto = string.Join(", ", fechas);
-                        InformacionClasesPendientes = $"Clases pendientes ({clasesPendientes.Length}): {fechasTexto}";
-                        MostrarControlesCantidad = true; // Mostrar controles de cantidad para que el usuario vea la actualización
-                        
-                        // Mostrar aviso de que se están pagando clases no pagadas
-                        AvisoClasesPendientes = "⚠️ ATENCIÓN: Se están pagando clases que no fueron pagadas o no se terminaron de pagar anteriormente. El pago se aplicará a las clases pendientes en orden cronológico.";
-                        ActualizarMostrarAvisoClasesPendientes();
-                    }
-                    else
-                    {
-                        // NO hay clases pendientes: aplicar reglas según fecha de fin del taller
-                        var fechaFin = TallerSeleccionado.FechaFin?.Date;
-                        var hoy = DateTime.Today;
-                        
-                        if (fechaFin.HasValue)
-                        {
-                            // CON fecha de fin: permitir pagos en conjunto hasta la fecha de fin
-                            if (hoy <= fechaFin.Value)
-                            {
-                                // Generar fechas disponibles a partir de la última clase pagada
-                                var fechasDisponibles = await CalcularFechasDesdeUltimaClasePagada();
-                                if (fechasDisponibles.Length > 0)
-                                {
-                                    nuevoSugerido = R2(fechasDisponibles.Length * CostoClase);
-                                    InformacionClasesPendientes = $"Clases futuras disponibles ({fechasDisponibles.Length}): {string.Join(", ", fechasDisponibles.Select(f => f.ToString("dd/MM/yyyy")))}";
-                                }
-                                else
-                                {
-                                    nuevoSugerido = 0;
-                                    InformacionClasesPendientes = "No hay clases futuras disponibles dentro del período del taller.";
-                                }
-                            }
-                            else
-                            {
-                                nuevoSugerido = 0;
-                                InformacionClasesPendientes = "El taller ya terminó. No se pueden registrar pagos para clases futuras.";
-                            }
-                            MostrarControlesCantidad = true; // Mostrar controles de cantidad
-                            AvisoClasesPendientes = null; // Limpiar aviso
-                        }
-                        else
-                        {
-                            // SIN fecha de fin: permitir pagos en paquetes a partir de la última clase pagada
-                            var fechas = await CalcularFechasDesdeUltimaClasePagada();
-                            if (fechas.Length > 0)
-                            {
-                                nuevoSugerido = R2(fechas.Length * CostoClase);
-                                InformacionClasesPendientes = $"Taller sin fecha de fin - se pueden pagar {fechas.Length} clases";
-                            }
-                            else
-                            {
-                                nuevoSugerido = 0;
-                                InformacionClasesPendientes = "No se pueden generar clases futuras para este taller.";
-                            }
-                            MostrarControlesCantidad = true; // Mostrar controles de cantidad
-                            AvisoClasesPendientes = null; // Limpiar aviso
-                        }
-                        ActualizarMostrarAvisoClasesPendientes();
-                    }
-                }
-                catch
-                {
-                    // Si hay error, usar la lógica anterior
-                    nuevoSugerido = R2(CantidadSeleccionada * CostoClase);
-                    InformacionClasesPendientes = null;
-                    AvisoClasesPendientes = null;
-                    ActualizarMostrarAvisoClasesPendientes();
-                }
-            }
-            else
-            {
-                // Lógica anterior para cuando no hay taller seleccionado
-                nuevoSugerido = R2(CantidadSeleccionada * CostoClase);
-                InformacionClasesPendientes = null;
-                AvisoClasesPendientes = null;
-                ActualizarMostrarAvisoClasesPendientes();
-            }
+            MensajeValidacion = null;
+            LimpiarClases();
 
-            if (MontoSugerido != nuevoSugerido) MontoSugerido = nuevoSugerido;
-
-            if (forceSetMonto || !MontoIngresado.HasValue || MontoIngresado > MontoSugerido)
-            {
-                if (!_ajustandoMonto)
-                {
-                    _ajustandoMonto = true;
-                    MontoIngresado = MontoSugerido;
-                    _ajustandoMonto = false;
-                }
-            }
-            else if (MontoIngresado.HasValue && MontoIngresado.Value != MontoSugerido)
-            {
-                // Si el monto ingresado no coincide con el sugerido, actualizarlo
-                if (!_ajustandoMonto)
-                {
-                    _ajustandoMonto = true;
-                    MontoIngresado = MontoSugerido;
-                    _ajustandoMonto = false;
-                }
-            }
-            else if (MontoIngresado.HasValue)
-            {
-                var norm = MontoIngresado.Value;
-                if (norm < 0m) norm = 0m;
-                norm = R2(norm);
-                if (!_ajustandoMonto && norm != MontoIngresado.Value)
-                {
-                    _ajustandoMonto = true;
-                    MontoIngresado = norm;
-                    _ajustandoMonto = false;
-                }
-            }
-            
-            // Actualizar información de fechas después de recalcular
-            ActualizarInformacionFechasClases();
-        }
-
-        private DateTime[] GenerarFechasSemanas(DateTime desde, int cantidad)
-        {
-            if (TallerSeleccionado is null || cantidad <= 0)
-                return Array.Empty<DateTime>();
-
-            var objetivo = TallerSeleccionado.DiaSemana; // DayOfWeek del taller
-            var start = desde.Date;
-            var fechaFin = TallerSeleccionado.FechaFin?.Date;
-
-            // Próximo (o mismo) día objetivo respecto a 'desde'
-            int delta = ((int)objetivo - (int)start.DayOfWeek + 7) % 7;
-            var primera = start.AddDays(delta); // incluye 'hoy' si coincide
-
-            var clases = new List<DateTime>();
-            var fechaActual = primera;
-            
-            // Generar clases hasta la cantidad solicitada o hasta la fecha de fin (si existe)
-            for (int i = 0; i < cantidad; i++)
-            {
-                // Si hay fecha de fin, verificar que no la excedamos
-                if (fechaFin.HasValue && fechaActual > fechaFin.Value)
-                    break;
-                    
-                clases.Add(fechaActual.Date);
-                fechaActual = fechaActual.AddDays(7);
-            }
-
-            return clases.ToArray();
-        }
-
-        private DateTime[] GenerarFechasDesdeInicioTaller(int cantidad)
-        {
-            if (TallerSeleccionado is null || cantidad <= 0)
-                return Array.Empty<DateTime>();
-
-            var objetivo = TallerSeleccionado.DiaSemana;
-            var fechaInicio = TallerSeleccionado.FechaInicio.Date;
-            var hoy = DateTime.Today;
-
-            // Calcular la primera clase desde la fecha de inicio del taller
-            int delta = ((int)objetivo - (int)fechaInicio.DayOfWeek + 7) % 7;
-            var primeraClase = fechaInicio.AddDays(delta);
-
-            // Generar todas las clases desde la primera hasta hoy (o más si se especifica)
-            var clases = new List<DateTime>();
-            var fechaActual = primeraClase;
-            
-            while (fechaActual <= hoy && clases.Count < cantidad)
-            {
-                clases.Add(fechaActual);
-                fechaActual = fechaActual.AddDays(7);
-            }
-
-            return clases.ToArray();
-        }
-
-        private async Task<DateTime[]> ObtenerClasesPendientesPagoAsync(int alumnoId, int tallerId)
-        {
-            if (TallerSeleccionado is null) return Array.Empty<DateTime>();
-
-            var objetivo = TallerSeleccionado.DiaSemana;
-            var fechaInicio = TallerSeleccionado.FechaInicio.Date;
-            var hoy = DateTime.Today;
-
-            // Calcular la primera clase desde la fecha de inicio del taller
-            int delta = ((int)objetivo - (int)fechaInicio.DayOfWeek + 7) % 7;
-            var primeraClase = fechaInicio.AddDays(delta);
-
-            // Generar todas las clases desde la primera hasta hoy
-            var todasLasClases = new List<DateTime>();
-            var fechaActual = primeraClase;
-            
-            while (fechaActual <= hoy)
-            {
-                todasLasClases.Add(fechaActual);
-                fechaActual = fechaActual.AddDays(7);
-            }
-
-            // Obtener el estado de pago de cada clase
-            var estados = await _claseService.ObtenerEstadoPagoHoyAsync(alumnoId, new[] { tallerId }, hoy);
-            var estadoTaller = estados.FirstOrDefault(e => e.TallerId == tallerId);
-
-            // Si no hay estado, significa que no hay clases registradas aún
-            if (estadoTaller == null)
-            {
-                return todasLasClases.ToArray();
-            }
-
-            // Obtener clases ya pagadas desde la base de datos
-            var clasesPagadas = await _claseService.ObtenerClasesPagadasAsync(alumnoId, tallerId);
-            var fechasPagadas = clasesPagadas.Select(c => c.Fecha.Date).ToHashSet();
-
-            // Filtrar las clases pendientes
-            var clasesPendientes = todasLasClases
-                .Where(fecha => !fechasPagadas.Contains(fecha))
-                .ToArray();
-
-            return clasesPendientes;
-        }
-
-        private async void ActualizarInformacionFechasClases()
-        {
-            if (AlumnoSeleccionado == null || TallerSeleccionado == null)
-            {
-                InformacionFechasClases = null;
-                MostrarInformacionFechas = false;
+            if (AlumnoSeleccionado is null || TallerSeleccionado is null)
                 return;
-            }
 
             try
             {
-                // Verificar si hay clases pendientes
-                var clasesPendientes = await ObtenerClasesPendientesPagoAsync(AlumnoSeleccionado.AlumnoId, TallerSeleccionado.TallerId);
-                
-                if (clasesPendientes.Length > 0)
-                {
-                    // Hay clases pendientes: mostrar información precisa
-                    var montoIngresado = MontoIngresado ?? 0m;
-                    var mensaje = await GenerarMensajeClasesPendientes(clasesPendientes, montoIngresado);
-                    InformacionFechasClases = mensaje;
-                    MostrarInformacionFechas = true;
-                }
-                else
-                {
-                    // No hay clases pendientes: calcular fechas futuras
-                    var fechasFuturas = await CalcularFechasDesdeUltimaClasePagada();
-                    
-                    if (fechasFuturas.Length == 0)
-                    {
-                        InformacionFechasClases = "No se pueden generar clases para este taller.";
-                        MostrarInformacionFechas = true;
-                        return;
-                    }
+                var alumnoId = AlumnoSeleccionado.AlumnoId;
+                var tallerId = TallerSeleccionado.TallerId;
+                var hoy = DateTime.Today;
 
-                    var montoIngresado = MontoIngresado ?? 0m;
-                    var mensaje = await GenerarMensajeClasesFuturas(fechasFuturas, montoIngresado);
-                    InformacionFechasClases = mensaje;
-                    MostrarInformacionFechas = true;
+                var clasesFinancieras = await _claseService.ObtenerClasesFinancierasAsync(alumnoId, tallerId);
+
+                var fechasConCargo = clasesFinancieras
+                    .Select(c => c.FechaClase.Date)
+                    .ToHashSet();
+
+                var clasesConSaldo = clasesFinancieras
+                    .Where(c => c.SaldoActual > 0m)
+                    .OrderBy(c => c.FechaClase)
+                    .ToList();
+
+                // Hay pendientes si existe saldo en fecha <= hoy (incluye hoy).
+                bool hayPendientes = clasesConSaldo.Any(c => c.FechaClase.Date <= hoy);
+
+                // Si hay pendientes: no permitir futuras (> hoy).
+                bool permitirFuturas = !hayPendientes;
+
+                var agregadas = new HashSet<DateTime>();
+
+                // 1) PENDIENTES VENCIDAS O DE HOY (con cargo y saldo, fecha <= hoy) -> habilitadas y seleccionadas
+                foreach (var clase in clasesConSaldo.Where(c => c.FechaClase.Date <= hoy))
+                {
+                    var fecha = clase.FechaClase.Date;
+                    var item = new ClasePagoItem(
+                        fecha,
+                        clase.SaldoActual,
+                        esCargoExistente: true,
+                        estaHabilitada: true);
+
+                    AgregarClase(item, seleccionar: true);
+                    agregadas.Add(fecha);
                 }
+
+                // 2) FUTURAS CON SALDO (fecha > hoy)
+                //    Si hay pendientes: NO se pueden ingresar (deshabilitadas y no seleccionadas).
+                //    Si no hay pendientes: habilitadas y seleccionadas.
+                foreach (var clase in clasesConSaldo.Where(c => c.FechaClase.Date > hoy))
+                {
+                    var fecha = clase.FechaClase.Date;
+                    if (agregadas.Contains(fecha)) continue;
+
+                    var habilitada = permitirFuturas;      // false si hay pendientes
+                    var seleccionada = permitirFuturas;    // false si hay pendientes
+
+                    var item = new ClasePagoItem(
+                        fecha,
+                        clase.SaldoActual,
+                        esCargoExistente: true,
+                        estaHabilitada: habilitada);
+
+                    AgregarClase(item, seleccionar: seleccionada);
+                    agregadas.Add(fecha);
+                }
+
+                // 3) PASADAS ESPERADAS SIN CARGO (desde inicio hasta hoy o fin si es antes)
+                //    Estas sí se pueden pagar aun con pendientes.
+                {
+                    var inicio = TallerSeleccionado.FechaInicio.Date;
+                    var limite = TallerSeleccionado.FechaFin?.Date;
+                    var finCalculo = limite.HasValue && limite.Value < hoy ? limite.Value : hoy;
+
+                    var fechaBase = AjustarAlDia(inicio, TallerSeleccionado.DiaSemana);
+                    for (var f = fechaBase; f <= finCalculo; f = f.AddDays(7))
+                    {
+                        if (agregadas.Contains(f)) continue;
+                        if (fechasConCargo.Contains(f)) continue; // ya existe cargo (pagado o no)
+
+                        var item = new ClasePagoItem(
+                            f,
+                            _costoClase,
+                            esCargoExistente: false,
+                            estaHabilitada: true);
+
+                        AgregarClase(item, seleccionar: true);
+                        agregadas.Add(f);
+                    }
+                }
+
+                // 4) FUTURAS ESPERADAS SIN CARGO
+                //    Si hay pendientes: NO se pueden ingresar (deshabilitadas, no seleccionadas).
+                //    Si no hay pendientes: habilitadas y seleccionadas.
+                var futurasEsperadas = await GenerarClasesFuturasAsync();
+                foreach (var fecha in futurasEsperadas)
+                {
+                    if (agregadas.Contains(fecha)) continue;
+                    if (fechasConCargo.Contains(fecha)) continue;
+
+                    var habilitada = permitirFuturas;      // false si hay pendientes
+                    var seleccionada = permitirFuturas;    // false si hay pendientes
+
+                    var item = new ClasePagoItem(
+                        fecha,
+                        _costoClase,
+                        esCargoExistente: false,
+                        estaHabilitada: habilitada);
+
+                    AgregarClase(item, seleccionar: seleccionada);
+                    agregadas.Add(fecha);
+                }
+
+                // Marcar por defecto solo la clase de HOY (si está habilitada)
+                foreach (var item in ClasesParaPago)
+                {
+                    item.IsSeleccionada = item.EstaHabilitada && item.Fecha.Date == hoy;
+                }
+
+                // Nota: la clase de HOY ya queda cubierta:
+                // - si tiene cargo con saldo -> bloque 1
+                // - si no tiene cargo -> bloque 3 genera hoy al calcular hasta 'hoy'
+
+                ActualizarTotales();
             }
             catch (Exception ex)
             {
-                InformacionFechasClases = $"Error al calcular fechas: {ex.Message}";
-                MostrarInformacionFechas = true;
+                _dialogService.Error($"No se pudieron cargar las clases: {ex.Message}", "Clases");
             }
         }
 
-        private async Task<string> GenerarMensajeClasesPendientes(DateTime[] clasesPendientes, decimal montoIngresado)
-        {
-            var fechasTexto = string.Join(", ", clasesPendientes.Select(f => f.ToString("dd/MM/yyyy")));
-            var mensaje = $"Pagando clases pendientes del día: {fechasTexto}";
-            
-            // Obtener el monto pendiente real de la clase más lejana
-            var montoPendienteClaseLejana = await ObtenerMontoPendienteClaseAsync(clasesPendientes[clasesPendientes.Length - 1]);
-            
-            if (montoPendienteClaseLejana > 0)
-            {
-                var fechaLejana = clasesPendientes[clasesPendientes.Length - 1].ToString("dd/MM/yyyy");
-                mensaje += $"\nMonto pendiente real de la clase del {fechaLejana}: ${montoPendienteClaseLejana:F2}";
-            }
-            
-            if (montoIngresado > 0)
-            {
-                var montoNecesario = clasesPendientes.Length * CostoClase;
-                var excedente = montoIngresado - montoNecesario;
-                
-                if (excedente > 0)
-                {
-                    // Calcular la siguiente clase después de la última clase pendiente
-                    var ultimaClase = clasesPendientes[clasesPendientes.Length - 1];
-                    var siguienteFecha = ultimaClase.AddDays(7);
-                    var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
-                    int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                    var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                    
-                    mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
-                }
-            }
-            
-            return mensaje;
-        }
 
-        private async Task<string> GenerarMensajeClasesFuturas(DateTime[] fechasFuturas, decimal montoIngresado)
-        {
-            if (montoIngresado <= 0)
-            {
-                var fechasTexto = string.Join(", ", fechasFuturas.Select(f => f.ToString("dd/MM/yyyy")));
-                return $"Se pagarán clases del día: {fechasTexto}";
-            }
 
-            var clasesCompletas = (int)Math.Truncate(montoIngresado / CostoClase);
-            var montoRestante = montoIngresado - (clasesCompletas * CostoClase);
-            
-            if (clasesCompletas == 0)
-            {
-                // Solo pago parcial de la primera clase
-                var fechaParcial = fechasFuturas[0].ToString("dd/MM/yyyy");
-                var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[0]);
-                
-                var mensaje = $"Pagando ${montoIngresado:F2} de la clase del día {fechaParcial}";
-                
-                if (montoPendienteReal > 0)
-                {
-                    mensaje += $"\nMonto pendiente real: ${montoPendienteReal:F2}";
-                    
-                    var excedente = montoIngresado - montoPendienteReal;
-                    if (excedente > 0)
-                    {
-                        var siguienteFecha = fechasFuturas[0].AddDays(7);
-                        var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
-                        int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                        var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                        mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
-                    }
-                }
-                else
-                {
-                    // Si no hay monto pendiente, todo el monto es excedente
-                    var siguienteFecha = fechasFuturas[0].AddDays(7);
-                    var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
-                    int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                    var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                    mensaje += $"\nExcedente de ${montoIngresado:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
-                }
-                
-                return mensaje;
-            }
-            else if (clasesCompletas >= fechasFuturas.Length)
-            {
-                // Pago completo de todas las clases disponibles + excedente
-                var fechasTexto = string.Join(", ", fechasFuturas.Select(f => f.ToString("dd/MM/yyyy")));
-                var mensaje = $"Pagando clases del día: {fechasTexto}";
-                
-                // Verificar si hay monto pendiente en la última clase
-                var ultimaFecha = fechasFuturas[fechasFuturas.Length - 1];
-                var montoPendienteUltima = await ObtenerMontoPendienteClaseAsync(ultimaFecha);
-                
-                if (montoPendienteUltima > 0)
-                {
-                    mensaje += $"\nMonto pendiente real de la clase del {ultimaFecha:dd/MM/yyyy}: ${montoPendienteUltima:F2}";
-                }
-                
-                if (montoRestante > 0)
-                {
-                    var siguienteFecha = ultimaFecha.AddDays(7);
-                    var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
-                    int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                    var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                    mensaje += $"\nExcedente de ${montoRestante:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
-                }
-                
-                return mensaje;
-            }
-            else
-            {
-                // Pago parcial de algunas clases
-                var fechasCompletas = fechasFuturas.Take(clasesCompletas).Select(f => f.ToString("dd/MM/yyyy"));
-                var fechasTexto = string.Join(", ", fechasCompletas);
-                
-                if (montoRestante > 0)
-                {
-                    var fechaParcial = fechasFuturas[clasesCompletas].ToString("dd/MM/yyyy");
-                    var montoPendienteReal = await ObtenerMontoPendienteClaseAsync(fechasFuturas[clasesCompletas]);
-                    
-                    var mensaje = $"Pagando clases del día: {fechasTexto} y ${montoRestante:F2} de la clase del día {fechaParcial}";
-                    
-                    if (montoPendienteReal > 0)
-                    {
-                        mensaje += $"\nMonto pendiente real de la clase del {fechaParcial}: ${montoPendienteReal:F2}";
-                    }
-                    
-                    var excedente = montoRestante - montoPendienteReal;
-                    if (excedente > 0)
-                    {
-                        var siguienteFecha = fechasFuturas[clasesCompletas].AddDays(7);
-                        var objetivo = TallerSeleccionado?.DiaSemana ?? DayOfWeek.Monday;
-                        int delta = ((int)objetivo - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                        var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-                        mensaje += $"\nExcedente de ${excedente:F2} se aplicará a la clase del {fechaSiguienteClase:dd/MM/yyyy}";
-                    }
-                    
-                    return mensaje;
-                }
-                else
-                {
-                    return $"Pagando clases del día: {fechasTexto}";
-                }
-            }
-        }
-
-        private async Task<DateTime[]> CalcularFechasDesdeUltimaClasePagada()
+        private async Task<DateTime[]> GenerarClasesFuturasAsync()
         {
-            if (AlumnoSeleccionado == null || TallerSeleccionado == null)
+            if (AlumnoSeleccionado is null || TallerSeleccionado is null)
+            {
                 return Array.Empty<DateTime>();
+            }
 
             try
             {
-                // Obtener las clases ya pagadas del alumno para este taller
                 var clasesPagadas = await _claseService.ObtenerClasesPagadasAsync(
-                    AlumnoSeleccionado.AlumnoId, 
+                    AlumnoSeleccionado.AlumnoId,
                     TallerSeleccionado.TallerId);
 
-                DateTime fechaInicio;
-                
+                DateTime inicioBase;
                 if (clasesPagadas.Length > 0)
                 {
-                    // Encontrar la última clase pagada
-                    var ultimaClasePagada = clasesPagadas
+                    var ultima = clasesPagadas
                         .OrderByDescending(c => c.Fecha)
-                        .First();
-                    
-                    // Calcular la siguiente clase después de la última pagada
-                    var objetivo = TallerSeleccionado.DiaSemana;
-                    var ultimaFecha = ultimaClasePagada.Fecha.Date;
-                    
-                    // Calcular la siguiente clase (7 días después de la última)
-                    var siguienteClase = ultimaFecha.AddDays(7);
-                    
-                    // Ajustar al día de la semana correcto si es necesario
-                    int delta = ((int)objetivo - (int)siguienteClase.DayOfWeek + 7) % 7;
-                    fechaInicio = siguienteClase.AddDays(delta);
+                        .First()
+                        .Fecha.Date;
+
+                    inicioBase = ultima.AddDays(7);
                 }
                 else
                 {
-                    // No hay clases pagadas, empezar desde la fecha de inicio del taller
-                    var objetivo = TallerSeleccionado.DiaSemana;
-                    var fechaInicioTaller = TallerSeleccionado.FechaInicio.Date;
-                    
-                    // Calcular la primera clase desde la fecha de inicio
-                    int delta = ((int)objetivo - (int)fechaInicioTaller.DayOfWeek + 7) % 7;
-                    fechaInicio = fechaInicioTaller.AddDays(delta);
+                    inicioBase = TallerSeleccionado.FechaInicio.Date;
                 }
 
-                // Generar las fechas futuras desde la fecha calculada
-                return GenerarFechasSemanas(fechaInicio, CantidadSeleccionada);
-            }
-            catch (Exception)
-            {
-                // En caso de error, usar la lógica anterior (desde hoy)
-                return GenerarFechasSemanas(DateTime.Today, CantidadSeleccionada);
+                var objetivo = TallerSeleccionado.DiaSemana;
+                var fecha = AjustarAlDia(inicioBase, objetivo);
+                        var hoy = DateTime.Today;
+                var fin = TallerSeleccionado.FechaFin?.Date;
+
+                var fechas = new List<DateTime>();
+
+                while (fechas.Count < MaxClasesFuturas)
+                {
+                    if (fin.HasValue && fecha > fin.Value)
+                    {
+                        break;
+                    }
+
+                    if (fecha < hoy)
+                    {
+                        fecha = fecha.AddDays(7);
+                        continue;
+                    }
+
+                    if (!fechas.Contains(fecha))
+                    {
+                        fechas.Add(fecha);
+                    }
+
+                    fecha = fecha.AddDays(7);
+                }
+
+                return fechas.ToArray();
+                }
+                catch
+                {
+                return Array.Empty<DateTime>();
             }
         }
 
-        private async Task<decimal> ObtenerMontoPendienteClaseAsync(DateTime fechaClase)
+        private void AgregarClase(ClasePagoItem item, bool seleccionar)
         {
-            try
+            item.PropertyChanged += OnClaseItemPropertyChanged;
+            item.InicializarSeleccion(seleccionar);
+            ClasesParaPago.Add(item);
+        }
+
+        private void LimpiarClases()
+        {
+            foreach (var item in ClasesParaPago)
             {
-                if (AlumnoSeleccionado == null || TallerSeleccionado == null)
-                    return 0m;
-
-                // Obtener las clases financieras para encontrar el monto pendiente
-                var clasesFinancieras = await _claseService.ObtenerClasesFinancierasAsync(
-                    AlumnoSeleccionado.AlumnoId,
-                    TallerSeleccionado.TallerId,
-                    fechaClase,
-                    fechaClase);
-
-                var clase = clasesFinancieras.FirstOrDefault(c => c.FechaClase.Date == fechaClase.Date);
-                return clase?.SaldoActual ?? 0m;
+                item.PropertyChanged -= OnClaseItemPropertyChanged;
             }
-            catch
+
+            ClasesParaPago = new ObservableCollection<ClasePagoItem>();
+            HayClasesParaPago = false;
+            TotalClasesSeleccionadas = 0;
+            TotalSeleccionado = 0m;
+        }
+
+        private void OnClaseItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ClasePagoItem.IsSeleccionada) ||
+                e.PropertyName == nameof(ClasePagoItem.MontoAplicar))
             {
-                return 0m;
+                ActualizarTotales();
             }
         }
 
+        private void ActualizarTotales()
+        {
+            HayClasesParaPago = ClasesParaPago.Count > 0;
 
-        private static decimal R2(decimal v) => Math.Round(v, 2, MidpointRounding.AwayFromZero);
-        private static decimal ClampCosto(decimal v) => v < MinCostoClase ? MinCostoClase : (v > MaxCostoClase ? MaxCostoClase : v);
+            var seleccion = ClasesParaPago
+                .Where(c => c.IsSeleccionada && c.EstaHabilitada && c.MontoAplicar > 0m)
+                .ToList();
+
+            TotalClasesSeleccionadas = seleccion.Count;
+            TotalSeleccionado = Math.Round(seleccion.Sum(c => c.MontoAplicar), 2, MidpointRounding.AwayFromZero);
+
+            if (TotalClasesSeleccionadas > 0 && MensajeValidacion != null && MensajeValidacion.Contains("Selecciona"))
+            {
+                MensajeValidacion = null;
+            }
+        }
+
+        private bool FechaPerteneceAlTaller(DateTime fecha)
+        {
+            if (TallerSeleccionado is null)
+            {
+                return false;
+            }
+
+            var inicio = TallerSeleccionado.FechaInicio.Date;
+            if (fecha.Date < inicio)
+            {
+                return false;
+            }
+
+            var fin = TallerSeleccionado.FechaFin?.Date;
+            if (fin.HasValue && fecha.Date > fin.Value)
+            {
+                return false;
+            }
+
+            return TallerSeleccionado.DiaSemana == fecha.DayOfWeek;
+        }
+
+        private static DateTime AjustarAlDia(DateTime fecha, DayOfWeek objetivo)
+        {
+            var delta = ((int)objetivo - (int)fecha.DayOfWeek + 7) % 7;
+            return fecha.AddDays(delta);
+        }
+
+        private string ConstruirResumenPago(IReadOnlyList<ClasePagoItem> seleccion, IReadOnlyList<RegistrarClaseResult> resultados)
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < seleccion.Count && i < resultados.Count; i++)
+            {
+                var clase = seleccion[i];
+                var resultado = resultados[i];
+                var fecha = clase.Fecha.ToString("dd/MM/yyyy");
+
+                if (resultado.CargoYaPagado)
+                {
+                    sb.AppendLine($"- {fecha}: el cargo ya estaba pagado.");
+                    continue;
+                }
+
+                if (resultado.MontoAplicado > 0m)
+                {
+                    sb.AppendLine($"- {fecha}: se aplicaron {resultado.MontoAplicado:C2}.");
+                    if (resultado.ExcedenteAplicado > 0m)
+                    {
+                        sb.AppendLine($"  Excedente aplicado: {resultado.ExcedenteAplicado:C2}.");
+                    }
+                }
+                else if (resultado.ClaseCreada || resultado.CargoCreado || resultado.PagoCreado)
+                {
+                    sb.AppendLine($"- {fecha}: movimiento registrado.");
+                }
+                else
+                {
+                    sb.AppendLine($"- {fecha}: sin cambios.");
+                }
+            }
+
+            return sb.Length > 0 ? sb.ToString() : "Pago registrado.";
+        }
+
+        private static decimal ClampCosto(decimal valor)
+        {
+            if (valor < MinCostoClase) return MinCostoClase;
+            if (valor > MaxCostoClase) return MaxCostoClase;
+            return valor;
+        }
+    }
+
+    public partial class ClasePagoItem : ObservableObject
+    {
+        private bool _ajustandoMonto;
+        private bool _ajustandoSeleccion;
+
+        public ClasePagoItem(DateTime fecha, decimal saldoPendiente, bool esCargoExistente, bool estaHabilitada)
+        {
+            Fecha = fecha.Date;
+            SaldoPendiente = Math.Round(saldoPendiente, 2, MidpointRounding.AwayFromZero);
+            SaldoMaximo = SaldoPendiente;
+            EsCargoExistente = esCargoExistente;
+            EstaHabilitada = estaHabilitada;
+            montoAplicar = SaldoPendiente;
+        }
+
+        public DateTime Fecha { get; }
+        public decimal SaldoPendiente { get; }
+        public decimal SaldoMaximo { get; }
+        public bool EsCargoExistente { get; }
+        public bool EstaHabilitada { get; }
+
+        public string FechaTexto => Fecha.ToString("dd/MM/yyyy");
+
+        public string EstadoDescripcion
+            => !EstaHabilitada
+                ? "Futura bloqueada"
+                : (Fecha.Date < DateTime.Today
+                    ? "Pendiente"
+                    : (Fecha.Date == DateTime.Today ? "Actual" : "Futura"));
+
+        [ObservableProperty]
+        private bool isSeleccionada;
+
+        [ObservableProperty]
+        private decimal montoAplicar;
+
+        public bool PuedeEditarMonto => EstaHabilitada && IsSeleccionada;
+
+        public void InicializarSeleccion(bool seleccionar)
+        {
+            _ajustandoSeleccion = true;
+            _ajustandoSeleccion = false;
+            OnPropertyChanged(nameof(PuedeEditarMonto));
+        }
+
+        partial void OnIsSeleccionadaChanged(bool value)
+        {
+            if (_ajustandoSeleccion) return;
+
+            if (!EstaHabilitada && value)
+            {
+                _ajustandoSeleccion = true;
+                IsSeleccionada = false;
+                _ajustandoSeleccion = false;
+                return;
+            }
+
+            OnPropertyChanged(nameof(PuedeEditarMonto));
+
+            if (value && MontoAplicar <= 0m)
+            {
+                _ajustandoMonto = true;
+                MontoAplicar = SaldoMaximo;
+                _ajustandoMonto = false;
+            }
+        }
+
+        partial void OnMontoAplicarChanged(decimal value)
+        {
+            var clamped = ClampMonto(value);
+            if (clamped != value)
+            {
+                if (_ajustandoMonto) return;
+                _ajustandoMonto = true;
+                MontoAplicar = clamped;
+                _ajustandoMonto = false;
+                return;
+            }
+
+            if (MontoAplicar == 0m && IsSeleccionada)
+            {
+                _ajustandoSeleccion = true;
+                IsSeleccionada = false;
+                _ajustandoSeleccion = false;
+                OnPropertyChanged(nameof(PuedeEditarMonto));
+            }
+        }
+
+        private decimal ClampMonto(decimal valor)
+        {
+            if (valor < 0m) valor = 0m;
+            if (valor > SaldoMaximo) valor = SaldoMaximo;
+            return Math.Round(valor, 2, MidpointRounding.AwayFromZero);
+        }
     }
 }

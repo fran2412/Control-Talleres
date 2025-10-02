@@ -96,7 +96,7 @@
           }
         }
       },
-      "Extended.Wpf.Toolkit/4.7.25104.5739": {
+      "Extended.Wpf.Toolkit/5.0.0": {
         "type": "package",
         "compile": {
           "lib/net5.0/Xceed.Wpf.AvalonDock.Themes.Aero.dll": {},
@@ -2709,17 +2709,17 @@
         "lib/netstandard2.0/ExcelNumberFormat.xml"
       ]
     },
-    "Extended.Wpf.Toolkit/4.7.25104.5739": {
-      "sha512": "x6fCMLeExVZjyPl6f9/NRITW4uzT3xBZA40CBWA9YlH4/w6rKzsIeTDwYvavdmJLrl43p0LIFSQChISCnTSR6Q==",
+    "Extended.Wpf.Toolkit/5.0.0": {
+      "sha512": "8QStq5cQd+anGBbA5XXSlb/BxEk457xRQ/vraLXNvf5fHG1b4Bu4DOkvSqvvu9MLRUf+q29ceWsLRGtAw3CzDg==",
       "type": "package",
-      "path": "extended.wpf.toolkit/4.7.25104.5739",
+      "path": "extended.wpf.toolkit/5.0.0",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.txt",
         "Xceed_Logo_Retina-400x400.png",
-        "extended.wpf.toolkit.4.7.25104.5739.nupkg.sha512",
+        "extended.wpf.toolkit.5.0.0.nupkg.sha512",
         "extended.wpf.toolkit.nuspec",
         "lib/net40/Xceed.Wpf.AvalonDock.Themes.Aero.dll",
         "lib/net40/Xceed.Wpf.AvalonDock.Themes.Metro.dll",
@@ -7714,7 +7714,7 @@
       "Microsoft.EntityFrameworkCore.Tools >= 8.0.0",
       "Microsoft.Extensions.DependencyInjection >= 9.0.8",
       "SharpVectors.Wpf >= 1.8.5",
-      "extended.wpf.toolkit >= 4.7.25104.5739"
+      "extended.wpf.toolkit >= 5.0.0"
     ]
   },
   "packageFolders": {
@@ -7804,7 +7804,7 @@
           },
           "extended.wpf.toolkit": {
             "target": "Package",
-            "version": "[4.7.25104.5739, )"
+            "version": "[5.0.0, )"
           }
         },
         "imports": [

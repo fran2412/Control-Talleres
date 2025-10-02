@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "g6e0brLkiWA=",
+  "dgSpecHash": "rWNSqxhmwrM=",
   "success": true,
   "projectFilePath": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\ControlTalleresMVP.csproj",
   "expectedPackageFiles": [
@@ -10,7 +10,7 @@
     "C:\\Users\\panch\\.nuget\\packages\\documentformat.openxml\\2.16.0\\documentformat.openxml.2.16.0.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\efcore.namingconventions\\8.0.0\\efcore.namingconventions.8.0.0.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\excelnumberformat\\1.1.0\\excelnumberformat.1.1.0.nupkg.sha512",
-    "C:\\Users\\panch\\.nuget\\packages\\extended.wpf.toolkit\\4.7.25104.5739\\extended.wpf.toolkit.4.7.25104.5739.nupkg.sha512",
+    "C:\\Users\\panch\\.nuget\\packages\\extended.wpf.toolkit\\5.0.0\\extended.wpf.toolkit.5.0.0.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\irony.netcore\\1.0.11\\irony.netcore.1.0.11.nupkg.sha512",
     "C:\\Users\\panch\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
