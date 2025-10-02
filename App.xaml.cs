@@ -56,6 +56,34 @@ namespace ControlTalleresMVP
                 
             }
 
+            // Verificación de licencia antes de abrir la ventana principal
+            using (var scope = ServiceProvider.CreateScope())
+            {
+                var sp = scope.ServiceProvider;
+                var configService = sp.GetRequiredService<IConfiguracionService>();
+                var dialogService = sp.GetRequiredService<IDialogService>();
+
+                var verificada = configService.GetValor<bool>("licencia_verificada", false);
+                if (!verificada)
+                {
+                    var hoy = DateTime.Now.Day;
+                    var ayer = DateTime.Now.Day - 1;
+                    var codigoEsperado = $"STCV{hoy}{ayer}";
+                    var ingresado = dialogService.PedirTexto("Ingrese el código de verificación para este dispositivo:\n", "Verificación de licencia");
+
+                    if (!string.IsNullOrWhiteSpace(ingresado) && string.Equals(ingresado.Trim(), codigoEsperado, StringComparison.OrdinalIgnoreCase))
+                    {
+                        configService.SetValor("licencia_verificada", bool.TrueString);
+                    }
+                    else
+                    {
+                        dialogService.Error("Código inválido. La aplicación se cerrará.", "Verificación fallida");
+                        Shutdown();
+                        return;
+                    }
+                }
+            }
+
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
         

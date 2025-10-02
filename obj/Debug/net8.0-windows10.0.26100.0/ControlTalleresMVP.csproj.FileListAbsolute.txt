@@ -232,6 +232,7 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlTalleresMVP.AssemblyInfoInputs.cache
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlTalleresMVP.AssemblyInfo.cs
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlTalleresMVP.csproj.CoreCompileInputs.cache
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlTalleresMVP.sourcelink.json
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlT.9D682AF4.Up2Date
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\ControlTalleres.dll
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net8.0-windows10.0.26100.0\refint\ControlTalleres.dll
