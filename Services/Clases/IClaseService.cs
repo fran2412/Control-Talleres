@@ -32,5 +32,7 @@ namespace ControlTalleresMVP.Services.Clases
             int[] tallerIds,
             DateTime fecha,                // usa DateTime.Today al invocar
             CancellationToken ct = default);
+
+        Task<Clase[]> ObtenerClasesPagadasAsync(int alumnoId, int tallerId, CancellationToken ct = default);
     }
 }

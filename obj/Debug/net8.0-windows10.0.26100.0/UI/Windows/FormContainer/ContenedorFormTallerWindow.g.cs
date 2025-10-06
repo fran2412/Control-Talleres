@@ -85,8 +85,8 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri(("/ControlTalleres;V1.0.0.0;component/ui/windows/formcontainer/contenedorformtaller" +
-                    "window.xaml"), System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri(("/ControlTalleres;component/ui/windows/formcontainer/contenedorformtallerwindow.xa" +
+                    "ml"), System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Windows\FormContainer\ContenedorFormTallerWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

@@ -363,6 +363,21 @@ namespace ControlTalleresMVP.Services.Clases
             return dict.Values.OrderBy(v => v.TallerId).ToArray();
         }
 
+        public async Task<Clase[]> ObtenerClasesPagadasAsync(int alumnoId, int tallerId, CancellationToken ct = default)
+        {
+            var clases = await _escuelaContext.Cargos
+                .Include(c => c.Clase)
+                .Where(c => c.AlumnoId == alumnoId
+                            && c.ClaseId != null
+                            && c.Clase!.TallerId == tallerId
+                            && !c.Eliminado
+                            && c.Estado == EstadoCargo.Pagado)
+                .Select(c => c.Clase!)
+                .ToArrayAsync(ct);
+
+            return clases;
+        }
+
         private static DateTime SiguienteOElMismo(DateTime desde, DayOfWeek objetivo, bool incluirSiHoyCoincide)
         {
             desde = desde.Date;
