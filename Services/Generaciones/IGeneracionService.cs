@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Services.Generaciones
 {
-    public interface IGeneracionService: ICrudService<Generacion>
+    public interface IGeneracionService
     {
         public ObservableCollection<GeneracionDTO> RegistrosGeneraciones { get; set; }
         public Task NuevaGeneracion(CancellationToken ct = default);

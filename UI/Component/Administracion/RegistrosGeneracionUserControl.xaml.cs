@@ -118,7 +118,6 @@ namespace ControlTalleresMVP.UI.Component.Administracion
                 return;
             }
 
-
             _generacionService!.NuevaGeneracion();
         }
     }

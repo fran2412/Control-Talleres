@@ -16,7 +16,6 @@ namespace ControlTalleresMVP.Services.Generaciones
     public class GeneracionService : IGeneracionService
     {
 
-        //TODO Eliminar lo que no se usa
         public ObservableCollection<GeneracionDTO> RegistrosGeneraciones { get; set; } = new();
 
         private readonly EscuelaContext _context;
@@ -25,85 +24,10 @@ namespace ControlTalleresMVP.Services.Generaciones
             _context = context;
         }
 
-        public async Task<Generacion> GuardarAsync(Generacion generacion, CancellationToken ct = default)
-        {
-            _context.Generaciones.Add(generacion);
-            await _context.SaveChangesAsync(ct);
-            return generacion;
-        }
-
-        public async Task EliminarAsync(int id, CancellationToken ct = default)
-        {
-            var generacion = await _context.Generaciones.FirstOrDefaultAsync(a => a.GeneracionId == id);
-            if (generacion is null) return;
-
-            // Validar que no tenga inscripciones activas
-            var tieneInscripciones = await _context.Inscripciones
-                .AnyAsync(i => i.GeneracionId == id && !i.Eliminado, ct);
-            
-            if (tieneInscripciones)
-                throw new InvalidOperationException("No se puede eliminar una generación que tiene inscripciones activas.");
-
-            generacion.Eliminado = true;
-            generacion.EliminadoEn = DateTime.Now;
-
-            await _context.SaveChangesAsync(ct);
-
-            var dto = RegistrosGeneraciones
-                .FirstOrDefault(g => g.Id == generacion.GeneracionId);
-
-            if (dto is not null)
-            {
-                RegistrosGeneraciones.Remove(dto);
-            }
-        }
-
-        public async Task ActualizarAsync(Generacion generacion, CancellationToken ct = default)
-        {
-            if (generacion.GeneracionId <= 0)
-                throw new ArgumentException("El ID de la generación debe ser válido");
-
-            var generacionExistente = await _context.Generaciones
-                .FirstOrDefaultAsync(a => a.GeneracionId == generacion.GeneracionId, ct);
-
-            if (generacionExistente is null)
-                throw new InvalidOperationException($"No se encontró la generación con ID {generacion.GeneracionId}");
-
-            // Solo actualizas campos que quieres
-            generacionExistente.Nombre = generacion.Nombre;
-            generacionExistente.FechaInicio = generacion.FechaInicio;
-            generacionExistente.FechaFin = generacion.FechaFin;
-            generacionExistente.ActualizadoEn = DateTime.Now;
-
-            try
-            {
-                await _context.SaveChangesAsync(ct);
-
-                var dto = RegistrosGeneraciones
-                    .FirstOrDefault(g => g.Id == generacionExistente.GeneracionId);
-
-                if (dto is not null)
-                {
-                    dto.Nombre = generacionExistente.Nombre;
-                    dto.FechaInicio = generacionExistente.FechaInicio;
-                    dto.FechaFin = generacionExistente.FechaFin;
-
-                    RegistrosGeneraciones.Remove(dto);
-                    InsertarOrdenado(dto);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al actualizar la generación: " + ex.Message,
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
         public async Task InicializarRegistros(CancellationToken ct = default)
         {
             var generaciones = await ObtenerGeneracionesParaGridAsync(ct);
 
-            // Ordenar por fecha de inicio descendente (más recientes primero)
             var generacionesOrdenadas = generaciones.OrderByDescending(g => g.FechaInicio).ToList();
 
             RegistrosGeneraciones.Clear();
@@ -138,14 +62,6 @@ namespace ControlTalleresMVP.Services.Generaciones
             }).ToList();
         }
 
-        public List<Generacion> ObtenerTodos(CancellationToken ct = default)
-        {
-            return _context.Generaciones
-                .AsNoTracking()
-                .OrderByDescending(g => g.FechaInicio)
-                .ToList();
-        }
-
         public async Task NuevaGeneracion(CancellationToken ct = default)
         {
             var año = DateTime.Now.Year;
@@ -159,18 +75,18 @@ namespace ControlTalleresMVP.Services.Generaciones
                 .OrderByDescending(g => g.FechaInicio)
                 .FirstOrDefault();
 
-            if (ultimaGeneracion != null && ultimaGeneracion.FechaFin == null)
-            {
-                ultimaGeneracion.FechaFin = DateTime.Now;
+            if (ultimaGeneracion == null || ultimaGeneracion.FechaFin != null)
+                return;
 
-                var dtoUltima = RegistrosGeneraciones
-                    .FirstOrDefault(g => g.Id == ultimaGeneracion.GeneracionId);
+            ultimaGeneracion.FechaFin = DateTime.Now;
 
-                if (dtoUltima is not null)
-                {
-                    dtoUltima.FechaFin = ultimaGeneracion.FechaFin;
-                }
-            }
+            var dtoUltima = RegistrosGeneraciones
+                .FirstOrDefault(g => g.Id == ultimaGeneracion.GeneracionId);
+
+            if (dtoUltima is null) return;
+
+            dtoUltima.FechaFin = ultimaGeneracion.FechaFin;
+
 
             // Crear nueva generación
             var nuevaGeneracion = new Generacion
@@ -192,7 +108,8 @@ namespace ControlTalleresMVP.Services.Generaciones
                 FechaFin = nuevaGeneracion.FechaFin,
             };
 
-            InsertarOrdenado(nuevoDto);
+            int ultimoIndice = RegistrosGeneraciones.Count();
+            RegistrosGeneraciones.Insert(ultimoIndice, nuevoDto);
         }
 
         public Generacion? ObtenerGeneracionActual()
@@ -201,19 +118,6 @@ namespace ControlTalleresMVP.Services.Generaciones
                 .Where(g => g.FechaFin == null)
                 .OrderByDescending(g => g.FechaInicio)
                 .FirstOrDefault();
-        }
-
-        private void InsertarOrdenado(GeneracionDTO generacion)
-        {
-            var indice = 0;
-
-            while (indice < RegistrosGeneraciones.Count &&
-                   RegistrosGeneraciones[indice].FechaInicio >= generacion.FechaInicio)
-            {
-                indice++;
-            }
-
-            RegistrosGeneraciones.Insert(indice, generacion);
         }
     }
 }

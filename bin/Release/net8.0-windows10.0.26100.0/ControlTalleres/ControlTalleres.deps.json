@@ -16,7 +16,7 @@
           "Microsoft.EntityFrameworkCore.Tools": "8.0.0",
           "Microsoft.Extensions.DependencyInjection": "9.0.8",
           "SharpVectors.Wpf": "1.8.5",
-          "Extended.Wpf.Toolkit": "4.7.25104.5739",
+          "Extended.Wpf.Toolkit": "5.0.0",
           "runtimepack.Microsoft.Windows.SDK.NET.Ref": "10.0.26100.57"
         },
         "runtime": {
@@ -100,27 +100,27 @@
           }
         }
       },
-      "Extended.Wpf.Toolkit/4.7.25104.5739": {
+      "Extended.Wpf.Toolkit/5.0.0": {
         "runtime": {
           "lib/net5.0/Xceed.Wpf.AvalonDock.Themes.Aero.dll": {
-            "assemblyVersion": "4.7.0.0",
-            "fileVersion": "4.7.0.0"
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
           },
           "lib/net5.0/Xceed.Wpf.AvalonDock.Themes.Metro.dll": {
-            "assemblyVersion": "4.7.0.0",
-            "fileVersion": "4.7.0.0"
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
           },
           "lib/net5.0/Xceed.Wpf.AvalonDock.Themes.VS2010.dll": {
-            "assemblyVersion": "4.7.0.0",
-            "fileVersion": "4.7.0.0"
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
           },
           "lib/net5.0/Xceed.Wpf.AvalonDock.dll": {
-            "assemblyVersion": "4.7.0.0",
-            "fileVersion": "4.7.0.0"
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
           },
           "lib/net5.0/Xceed.Wpf.Toolkit.dll": {
-            "assemblyVersion": "4.7.0.0",
-            "fileVersion": "4.7.0.0"
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
           }
         },
         "resources": {
@@ -1375,12 +1375,12 @@
       "path": "excelnumberformat/1.1.0",
       "hashPath": "excelnumberformat.1.1.0.nupkg.sha512"
     },
-    "Extended.Wpf.Toolkit/4.7.25104.5739": {
+    "Extended.Wpf.Toolkit/5.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-x6fCMLeExVZjyPl6f9/NRITW4uzT3xBZA40CBWA9YlH4/w6rKzsIeTDwYvavdmJLrl43p0LIFSQChISCnTSR6Q==",
-      "path": "extended.wpf.toolkit/4.7.25104.5739",
-      "hashPath": "extended.wpf.toolkit.4.7.25104.5739.nupkg.sha512"
+      "sha512": "sha512-8QStq5cQd+anGBbA5XXSlb/BxEk457xRQ/vraLXNvf5fHG1b4Bu4DOkvSqvvu9MLRUf+q29ceWsLRGtAw3CzDg==",
+      "path": "extended.wpf.toolkit/5.0.0",
+      "hashPath": "extended.wpf.toolkit.5.0.0.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",

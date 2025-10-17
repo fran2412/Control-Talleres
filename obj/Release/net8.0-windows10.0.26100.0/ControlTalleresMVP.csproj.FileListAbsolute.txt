@@ -238,3 +238,4 @@ C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Release\ne
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Release\net8.0-windows10.0.26100.0\ControlTalleres.pdb
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Release\net8.0-windows10.0.26100.0\ControlTalleresMVP.genruntimeconfig.cache
 C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Release\net8.0-windows10.0.26100.0\ref\ControlTalleres.dll
+C:\Users\panch\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Release\net8.0-windows10.0.26100.0\ControlTalleresMVP.sourcelink.json

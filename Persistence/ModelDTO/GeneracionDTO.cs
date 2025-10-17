@@ -1,26 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Persistence.ModelDTO
 {
-    public class GeneracionDTO
+    public partial class GeneracionDTO : ObservableObject
     {
         [ScaffoldColumn(false)]
-        public int Id { get; set; }
+        [ObservableProperty]
+        private int id;
 
         [Display(Name = "Nombre de la generación")]
-        public string Nombre { get; set; } = "";
+        [ObservableProperty]
+        private string nombre = string.Empty;
 
         [Display(Name = "Fecha de inicio")]
-        public DateTime FechaInicio { get; set; }
+        [ObservableProperty]
+        private DateTime fechaInicio;
 
         [Display(Name = "Fecha de fin")]
-        public DateTime? FechaFin { get; set; }
-
-
+        [ObservableProperty]
+        private DateTime? fechaFin;
     }
 }
