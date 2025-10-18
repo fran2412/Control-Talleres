@@ -12,6 +12,5 @@ namespace ControlTalleresMVP.Services.Cargos
     {
         public Task<DestinoCargoDTO[]> ObtenerCargosPendientesActualesAsync(int alumnoId, CancellationToken ct = default);
         public Task<Cargo[]> ObtenerCargosAsync(int alumnoId, CancellationToken ct = default);
-        public Generacion? GetGeneracionActual();
     }
 }

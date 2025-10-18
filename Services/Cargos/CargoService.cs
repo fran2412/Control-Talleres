@@ -3,12 +3,6 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Generaciones;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace ControlTalleresMVP.Services.Cargos
 {
@@ -71,11 +65,6 @@ namespace ControlTalleresMVP.Services.Cargos
                 .ToArrayAsync(ct);
 
             return cargos;
-        }
-
-        public Generacion? GetGeneracionActual()
-        {
-            return _generacionService.ObtenerGeneracionActual();
         }
     }
 }

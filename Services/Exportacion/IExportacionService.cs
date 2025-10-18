@@ -9,6 +9,5 @@ namespace ControlTalleresMVP.Services.Exportacion
     {
         Task<string> ExportarEstadoPagosAsync(IEnumerable<EstadoPagoAlumnoDTO> datos, string formato = "csv");
         Task<string> ExportarInscripcionesAsync(IEnumerable<InscripcionReporteDTO> datos, string formato = "csv");
-        string ObtenerRutaDescargas();
     }
 }

@@ -13,11 +13,6 @@ namespace ControlTalleresMVP.Services.Exportacion
 {
     public class ExportacionService : IExportacionService
     {
-        public string ObtenerRutaDescargas()
-        {
-            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
-        }
-
         public async Task<string> ExportarEstadoPagosAsync(IEnumerable<EstadoPagoAlumnoDTO> datos, string formato = "csv")
         {
             var rutaDescargas = ObtenerRutaDescargas();
@@ -236,6 +231,11 @@ namespace ControlTalleresMVP.Services.Exportacion
         {
             if (clasesTotales == 0) return 0;
             return (decimal)clasesPagadas / clasesTotales * 100;
+        }
+
+        private string ObtenerRutaDescargas()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
         }
     }
 }

@@ -3,6 +3,7 @@ using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Cargos;
+using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,14 +22,16 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         private readonly EscuelaContext _context;
         private readonly ICargosService _cargosService;
+        private readonly IGeneracionService _generacionService;
         private readonly IInscripcionService _inscripcionService;
         private readonly IDialogService _dialogService;
-        public AlumnoService(EscuelaContext context, IDialogService dialogService, ICargosService cargosService, IInscripcionService inscripcionService)
+        public AlumnoService(EscuelaContext context, IDialogService dialogService, ICargosService cargosService, IInscripcionService inscripcionService, IGeneracionService generacionService)
         {
             _context = context;
             _cargosService = cargosService;
             _inscripcionService = inscripcionService;
             _dialogService = dialogService;
+            _generacionService = generacionService;
         }
 
         public async Task<Alumno> GuardarAsync(Alumno alumno, CancellationToken ct = default)
@@ -190,7 +193,7 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         public async Task<List<Alumno>> ObtenerAlumnosConDeudasPendientesAsync(CancellationToken ct = default)
         {
-            var generacion = _cargosService.GetGeneracionActual();
+            var generacion = _generacionService.ObtenerGeneracionActual();
             if (generacion == null) return new List<Alumno>();
 
             var alumnos = await _context.Cargos

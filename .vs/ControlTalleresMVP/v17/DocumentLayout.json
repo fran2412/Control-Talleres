@@ -1,7 +1,16 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\panch\\source\\repos\\controltalleresmvp\\controltalleresmvp\\services\\cargos\\cargoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:services\\cargos\\cargoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\panch\\source\\repos\\controltalleresmvp\\controltalleresmvp\\services\\cargos\\icargoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:services\\cargos\\icargoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 1,
@@ -9,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -18,6 +27,32 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ICargoService.cs",
+              "DocumentMoniker": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Cargos\\ICargoService.cs",
+              "RelativeDocumentMoniker": "Services\\Cargos\\ICargoService.cs",
+              "ToolTip": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Cargos\\ICargoService.cs",
+              "RelativeToolTip": "Services\\Cargos\\ICargoService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T16:55:39.439Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CargoService.cs",
+              "DocumentMoniker": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Cargos\\CargoService.cs",
+              "RelativeDocumentMoniker": "Services\\Cargos\\CargoService.cs",
+              "ToolTip": "C:\\Users\\panch\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\Services\\Cargos\\CargoService.cs",
+              "RelativeToolTip": "Services\\Cargos\\CargoService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T16:55:37.19Z",
+              "EditorCaption": ""
             }
           ]
         }
