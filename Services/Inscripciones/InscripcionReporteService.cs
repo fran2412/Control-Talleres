@@ -38,7 +38,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             System.Diagnostics.Debug.WriteLine($"Filtros aplicados - TallerId: {tallerId}, PromotorId: {promotorId}, GeneracionId: {generacionId}, Desde: {desdeFiltro}, Hasta: {hastaFiltroCompleto}");
             
             var query = from i in _escuelaContext.Inscripciones.AsNoTracking()
-                        where !i.Eliminado
+                        where (incluirTalleresEliminados || !i.Eliminado)
                               && (tallerId == null || i.TallerId == tallerId)
                               && (generacionId == null || i.GeneracionId == generacionId)
                               && (desde == null || i.Fecha >= desdeFiltro)
@@ -53,7 +53,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
                         select new InscripcionReporteDTO
                         {
                             InscripcionId = i.InscripcionId,
-                            NombreAlumno = a.Nombre,
+                            NombreAlumno = a.Eliminado ? $"{a.Nombre} (Eliminado)" : a.Nombre,
+                            AlumnoEliminado = a.Eliminado,
                             TallerEliminado = t.Eliminado,
                             NombreTaller = t.Eliminado ? $"{t.Nombre} (Eliminado)" : t.Nombre,
                             NombreSede = s != null ? s.Nombre : "Sin Sede",
@@ -61,7 +62,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                             FechaInscripcion = i.Fecha,
                             Costo = i.Costo,
                             SaldoActual = i.SaldoActual,
-                            Estado = i.Estado.ToString(),
+                            Estado = i.Eliminado ? "Cancelada" : i.Estado.ToString(),
                             EstadoPago = CalcularEstadoPago(i.Costo, i.SaldoActual),
                             MontoPagado = i.Costo - i.SaldoActual,
                             DiaSemana = t.DiaSemana.ToString(),
@@ -82,7 +83,10 @@ namespace ControlTalleresMVP.Services.Inscripciones
                     .FirstOrDefault());
             }
 
-            var resultados = await query.OrderByDescending(x => x.FechaInscripcion).ToArrayAsync(ct);
+            var resultados = await query
+                .OrderBy(x => x.AlumnoEliminado) // Alumnos activos primero (false), eliminados al final (true)
+                .ThenByDescending(x => x.FechaInscripcion) // Dentro de cada grupo, por fecha descendente
+                .ToArrayAsync(ct);
             System.Diagnostics.Debug.WriteLine($"Total de inscripciones encontradas: {resultados.Length}");
             return resultados;
         }

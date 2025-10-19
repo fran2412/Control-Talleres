@@ -65,5 +65,8 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Progreso %")]
         [DisplayFormat(DataFormatString = "{0:F1}%")]
         public decimal ProgresoPorcentaje { get; set; }
+        
+        [Display(Name = "Alumno Eliminado")]
+        public bool AlumnoEliminado { get; set; }
     }
 }
