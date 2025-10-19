@@ -16,6 +16,8 @@ namespace ControlTalleresMVP.Services.Talleres
         public Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(CancellationToken ct = default);
         public Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(bool incluirEliminados, CancellationToken ct = default);
         public Task InicializarRegistros(CancellationToken ct = default);
+        public List<TallerInscripcionDTO> ObtenerTalleresParaInscripcion(decimal costoInscripcion);
+
 
     }
 }

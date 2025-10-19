@@ -8,9 +8,7 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Configuracion;
-using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
-using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
@@ -40,18 +38,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private readonly ISedeService _sedeService;
         private readonly IConfiguracionService _configuracionService;
         private readonly ITallerService _tallerService;
-        private readonly IInscripcionService _inscripcionService;
-        private readonly ICargosService _cargoService;
 
-        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, ICargosService cargoService, IConfiguracionService configuracionService, IInscripcionService inscripcionesService)
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, IConfiguracionService configuracionService)
             : base(itemService, dialogService)
         {
             _promotorService = promotorService;
             _sedeService = sedeService;
             _configuracionService = configuracionService;
             _tallerService = tallerService;
-            _cargoService = cargoService;
-            _inscripcionService = inscripcionesService;
 
             OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             OpcionesSede = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
@@ -62,71 +56,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             itemService.InicializarRegistros();
             InicializarVista();
 
-            Application.Current.Dispatcher.Invoke(() => CargarTalleresDesdeBd());
+            CargarTalleresDesdeBd();
 
-        }
-
-        protected override async Task ActualizarAsync(AlumnoDTO? alumnoSeleccionado)
-        {
-            await Task.CompletedTask;
-            _dialogService.Info(alumnoSeleccionado!.Nombre);
-        }
-
-        private void CargarTalleresDesdeBd()
-        {
-            try
-            {
-                TalleresDisponibles.Clear();
-
-                int costoDefault = 600;
-                try
-                {
-                    costoDefault = _configuracionService.GetValor<int>("costo_inscripcion", 600);
-                }
-                catch (Exception ex)
-                {
-                    _dialogService.Error("No se pudo obtener el costo por defecto desde configuración.\n" + ex.Message);
-                }
-
-                var talleres = _tallerService.ObtenerTodos();
-
-                foreach (var taller in talleres)
-                {
-                    var item = new TallerInscripcionDTO
-                    {
-                        TallerId = taller.TallerId,
-                        Nombre = taller.Nombre,
-                        Costo  = costoDefault,
-                        EstaSeleccionado = false,
-                        Abono = 0
-                    };
-
-                    item.PropertyChanged += OnTallerPropertyChanged!;
-                    TalleresDisponibles.Add(item);
-                }
-
-                // Refresca totales
-                OnPropertyChanged(nameof(TotalCostos));
-                OnPropertyChanged(nameof(TotalAbonado));
-                OnPropertyChanged(nameof(SaldoPendienteTotal));
-            }
-            catch (Exception ex)
-            {
-                _dialogService.Error("No se pudieron cargar los talleres.\n" + ex.Message);
-            }
-        }
-
-
-        private void OnTallerPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(TallerInscripcionDTO.Abono) ||
-                e.PropertyName == nameof(TallerInscripcionDTO.SaldoPendiente) ||
-                e.PropertyName == nameof(TallerInscripcionDTO.EstaSeleccionado))
-            {
-                OnPropertyChanged(nameof(TotalCostos));
-                OnPropertyChanged(nameof(TotalAbonado));
-                OnPropertyChanged(nameof(SaldoPendienteTotal));
-            }
         }
 
         public decimal TotalCostos =>
@@ -142,14 +73,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public ObservableCollection<Promotor> OpcionesPromotor { get; }
 
-        protected override async Task EliminarAsync(AlumnoDTO? itemSeleccionado)
+        protected override async Task EliminarAsync(AlumnoDTO? alumnoSeleccionado)
         {
-            if (itemSeleccionado == null) return;
-            if (!_dialogService.Confirmar($"¿Está seguro de eliminar el item {itemSeleccionado.Nombre}?")) return;
+            if (alumnoSeleccionado == null) return;
+
+            if (!_dialogService.Confirmar($"¿Está seguro de eliminar el alumno {alumnoSeleccionado.Nombre}?")) return;
+
             try
             {
-                await _itemService.EliminarAsync(itemSeleccionado.Id);
-                _dialogService.Info("Item eliminado correctamente");
+                await _itemService.EliminarAsync(alumnoSeleccionado.Id);
+                _dialogService.Info("Alumno eliminado correctamente");
             }
             catch (Exception ex)
             {
@@ -157,25 +90,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-
         [RelayCommand]
         protected override async Task RegistrarItemAsync()
         {
-            if (string.IsNullOrWhiteSpace(CampoTextoNombre))
-            {
-                _dialogService.Alerta("El nombre del alumno es obligatorio");
-                return;
-            }
-
-            if (_dialogService.Confirmar(
-                $"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?") != true)
-            {
-                return;
-            }
+            if (!ValidarYConfirmarRegistro()) return;
 
             try
             {
-                // IMPORTANTE: capturamos el alumno guardado para obtener AlumnoId
+                // capturamos el alumno guardado para obtener AlumnoId
                 var alumnoGuardado = await _itemService.GuardarAsync(new Alumno
                 {
                     Nombre = CampoTextoNombre.Trim(),
@@ -187,7 +109,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 // Procesar inscripciones si está marcado
                 if (InscribirEnTaller)
                 {
-                    await ProcesarInscripcionesTalleres(alumnoGuardado.AlumnoId);
+                    var inscripcionesExitosas = await ProcesarInscripcionesTalleres(alumnoGuardado.AlumnoId);
+                    if (!inscripcionesExitosas) return;
                     
                     // Preguntar si desea registrar el pago de las clases del alumno
                     if (_dialogService.Confirmar(
@@ -196,10 +119,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                         "Si selecciona 'No', solo se registrará la inscripción.", 
                         "¿Registrar pago de clases?"))
                     {
-                        // Navegar al formulario de pagos de clases con el alumno preseleccionado
                         await AbrirFormularioPagoClasesConAlumno(alumnoGuardado.AlumnoId, alumnoGuardado.Nombre);
-                        // No mostrar mensaje aquí ya que se navega a otra pantalla
-                        return; // Salir del método para no limpiar campos ni mostrar mensaje
+
+                        return;
                     }
                 }
 
@@ -212,13 +134,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        private async Task ProcesarInscripcionesTalleres(int alumnoId)
+        private async Task <bool> ProcesarInscripcionesTalleres(int alumnoId)
         {
             var seleccionados = TalleresDisponibles?.Where(t => t.EstaSeleccionado).ToList();
             if (seleccionados == null || seleccionados.Count == 0)
             {
                 _dialogService.Alerta("Marcaste 'Inscribir en taller', pero no seleccionaste ningún taller.");
-                return;
+                return false;
             }
 
             var errores = new List<string>();
@@ -228,9 +150,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 try
                 {
-                    var abono = taller.Abono is decimal dec && dec > 0 ? dec : 0m;
+                    var abono = ObtenerAbonoValido(taller.Abono);
 
-                    // 👉 Crear un nuevo scope DI por cada inscripción
                     using var scope = App.ServiceProvider!.CreateScope();
                     var inscripcionService = scope.ServiceProvider.GetRequiredService<IInscripcionService>();
 
@@ -240,8 +161,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                         abonoInicial: abono
                     );
 
-                    inscripcionesOk++;
+                    inscripcionesOk += 1;
                 }
+
                 catch (Exception ex)
                 {
                     errores.Add($"Taller {taller.Nombre ?? taller.TallerId.ToString()}: {ex.Message}");
@@ -249,52 +171,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
 
             if (inscripcionesOk > 0)
+            {
                 _dialogService.Info($"Se registraron {inscripcionesOk} inscripción(es).");
+            }
 
             if (errores.Count > 0)
+            {
                 _dialogService.Alerta("Algunas inscripciones no se pudieron procesar:\n" + string.Join("\n", errores));
-        }
-
-        private async Task AbrirFormularioPagoClasesConAlumno(int alumnoId, string nombreAlumno)
-        {
-            try
-            {
-                var navigatorService = App.ServiceProvider?.GetRequiredService<INavigatorService>();
-                if (navigatorService == null) return;
-
-                navigatorService.NavigateTo<MenuClaseUserControl>();
-                
-                await Task.Delay(100);
-                
-                var claseUserControl = navigatorService.CurrentViewModel as MenuClaseUserControl;
-                if (claseUserControl?.MenuClaseCobroVM != null)
-                {
-                    var alumno = new Alumno { AlumnoId = alumnoId, Nombre = nombreAlumno };
-                    await claseUserControl.MenuClaseCobroVM.BuscarAlumnoConAlumno(alumno);
-                }
             }
-            catch (Exception ex)
-            {
-                _dialogService.Error($"Error al abrir el formulario de pagos de clases: {ex.Message}");
-            }
-        }
 
-
-        protected override void LimpiarCampos()
-        {
-            CampoTextoNombre = "";
-            CampoTextTelefono = "";
-            SedeSeleccionadaId = null;
-            PromotorSeleccionadoId = null;
-
-            if (TalleresDisponibles != null)
-            {
-                foreach (var taller in TalleresDisponibles)
-                {
-                    taller.EstaSeleccionado = false;
-                    taller.Abono = 0;
-                }
-            }
+            return inscripcionesOk > 0;
         }
 
         public override bool Filtro(object o)
@@ -322,6 +208,122 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
 
             return true;
+        }
+
+        protected override void LimpiarCampos()
+        {
+            CampoTextoNombre = "";
+            CampoTextTelefono = "";
+            SedeSeleccionadaId = null;
+            PromotorSeleccionadoId = null;
+
+            if (TalleresDisponibles != null)
+            {
+                foreach (var taller in TalleresDisponibles)
+                {
+                    taller.EstaSeleccionado = false;
+                    taller.Abono = 0;
+                }
+            }
+
+        }
+
+        protected override async Task ActualizarAsync(AlumnoDTO? alumnoSeleccionado)
+        {
+            await Task.CompletedTask;
+            _dialogService.Info(alumnoSeleccionado!.Nombre);
+        }
+
+        private void CargarTalleresDesdeBd()
+        {
+            try
+            {
+                // Desuscribir eventos ANTES de limpiar para evitar memory leak
+                DesuscribirEventosTalleres();
+                TalleresDisponibles.Clear();
+
+                var costoDefault = _configuracionService.GetValor<int>("costo_inscripcion", 600);
+                var talleres = _tallerService.ObtenerTalleresParaInscripcion(costoDefault);
+
+                foreach (var item in talleres)
+                {
+                    item.PropertyChanged += OnTallerPropertyChanged!;
+                    TalleresDisponibles.Add(item);
+                }
+
+                ActualizarTotales();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error("No se pudieron cargar los talleres.\n" + ex.Message);
+            }
+        }
+
+        private void OnTallerPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TallerInscripcionDTO.Abono) ||
+                e.PropertyName == nameof(TallerInscripcionDTO.SaldoPendiente) ||
+                e.PropertyName == nameof(TallerInscripcionDTO.EstaSeleccionado))
+            {
+                ActualizarTotales();
+            }
+        }
+        
+        private async Task AbrirFormularioPagoClasesConAlumno(int alumnoId, string nombreAlumno)
+        {
+            try
+            {
+                var navigatorService = App.ServiceProvider?.GetRequiredService<INavigatorService>();
+                if (navigatorService == null) return;
+
+                navigatorService.NavigateTo<MenuClaseUserControl>();
+                
+                await Task.Delay(100);
+                
+                var claseUserControl = navigatorService.CurrentViewModel as MenuClaseUserControl;
+                if (claseUserControl?.MenuClaseCobroVM != null)
+                {
+                    var alumno = new Alumno { AlumnoId = alumnoId, Nombre = nombreAlumno };
+                    await claseUserControl.MenuClaseCobroVM.BuscarAlumnoConAlumno(alumno);
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error($"Error al abrir el formulario de pagos de clases: {ex.Message}");
+            }
+        }
+        
+        private bool ValidarYConfirmarRegistro()
+        {
+            if (string.IsNullOrWhiteSpace(CampoTextoNombre))
+            {
+                _dialogService.Alerta("El nombre del alumno es obligatorio");
+                return false;
+            }
+
+            return _dialogService.Confirmar(
+                $"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?");
+        }
+        
+
+        private static decimal ObtenerAbonoValido(decimal abono)
+        {
+            return abono is decimal valorAbono && valorAbono > 0 ? valorAbono : 0m;
+        }
+
+        private void ActualizarTotales()
+        {
+            OnPropertyChanged(nameof(TotalCostos));
+            OnPropertyChanged(nameof(TotalAbonado));
+            OnPropertyChanged(nameof(SaldoPendienteTotal));
+        }
+
+        private void DesuscribirEventosTalleres()
+        {
+            foreach (var taller in TalleresDisponibles)
+            {
+                taller.PropertyChanged -= OnTallerPropertyChanged!;
+            }
         }
     }
 }

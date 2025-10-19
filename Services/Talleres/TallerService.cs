@@ -296,5 +296,21 @@ namespace ControlTalleresMVP.Services.Talleres
             RegistrosTalleres.Insert(indice, nuevo);
         }
 
+        public List<TallerInscripcionDTO> ObtenerTalleresParaInscripcion(decimal costoInscripcion)
+        {
+            return _context.Talleres
+                .AsNoTracking()
+                .Where(t => !t.Eliminado)
+                .Select(t => new TallerInscripcionDTO
+                {
+                    TallerId = t.TallerId,
+                    Nombre = t.Nombre,
+                    Costo = costoInscripcion,
+                    EstaSeleccionado = false,
+                    Abono = 0
+                })
+                .OrderBy(t => t.Nombre)
+                .ToList();
+        }
     }
 }

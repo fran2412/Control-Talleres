@@ -20,7 +20,6 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
             set { if (_estaSeleccionado != value) { _estaSeleccionado = value; OnPropertyChanged(nameof(EstaSeleccionado)); } }
         }
 
-        // Si es null, el servicio resolverá la generación automáticamente
         public int? GeneracionId { get; set; }
 
         private decimal _costo = 1200m;
