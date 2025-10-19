@@ -67,6 +67,10 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
+            "F23.StringSimilarity": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
               "version": "[8.0.0, )"

@@ -73,6 +73,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0" />
     <PackageReference Include="extended.wpf.toolkit" Version="5.0.0" />
+    <PackageReference Include="F23.StringSimilarity" Version="6.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

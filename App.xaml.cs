@@ -24,6 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
 using System.Data;
 using System.Windows;
+using ControlTalleresMVP.Validators;
 
 namespace ControlTalleresMVP
 {
@@ -154,6 +155,9 @@ namespace ControlTalleresMVP
             services.AddTransient<IAlumnoPickerService, AlumnoPickerService>();
             services.AddScoped<IBackupService, BackupService>();
             services.AddTransient<IExportacionService, ExportacionService>();
+
+            //Validators
+            services.AddScoped<IAlumnoValidator, AlumnoValidator>();
         }
     }
 }

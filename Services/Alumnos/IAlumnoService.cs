@@ -17,5 +17,6 @@ namespace ControlTalleresMVP.Services.Alumnos
         public Task InicializarRegistros(CancellationToken ct = default);
         public Task<List<Alumno>> ObtenerAlumnosConDeudasPendientesAsync(CancellationToken ct = default);
         public AlumnoDTO ConvertirADto(Alumno alumno);
+        public ObservableCollection<Alumno> ObtenerPorInicial(char inicial);
     }
 }

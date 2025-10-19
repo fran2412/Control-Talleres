@@ -5,18 +5,15 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
+using ControlTalleresMVP.Validators;
+using F23.StringSimilarity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.IO;
 
 namespace ControlTalleresMVP.Services.Alumnos
 {
-    public class AlumnoService: IAlumnoService
+    public class AlumnoService : IAlumnoService
     {
         public ObservableCollection<AlumnoDTO> RegistrosAlumnos { get; set; } = new();
 
@@ -25,32 +22,21 @@ namespace ControlTalleresMVP.Services.Alumnos
         private readonly IGeneracionService _generacionService;
         private readonly IInscripcionService _inscripcionService;
         private readonly IDialogService _dialogService;
-        public AlumnoService(EscuelaContext context, IDialogService dialogService, ICargosService cargosService, IInscripcionService inscripcionService, IGeneracionService generacionService)
+        private readonly IAlumnoValidator _alumnoValidator;
+        public AlumnoService(EscuelaContext context, IDialogService dialogService, ICargosService cargosService, IInscripcionService inscripcionService, IGeneracionService generacionService, IAlumnoValidator alumnoValidator)
         {
             _context = context;
             _cargosService = cargosService;
             _inscripcionService = inscripcionService;
             _dialogService = dialogService;
             _generacionService = generacionService;
+            _alumnoValidator = alumnoValidator;
         }
 
         public async Task<Alumno> GuardarAsync(Alumno alumno, CancellationToken ct = default)
         {
-            string nombreAlumno = alumno.Nombre;
-            int? idPromotor = alumno.PromotorId;
-            int? idSede = alumno.SedeId;
-
-            var alumnoYaRegistrado = await _context.Alumnos
-                .AsNoTracking()
-                .AnyAsync(a => a.Nombre == nombreAlumno
-                            && a.PromotorId == idPromotor
-                            && a.SedeId == idSede
-                            && !a.Eliminado, ct);
-
-            if (alumnoYaRegistrado)
-            {
-                throw new ArgumentException("Alumno ya registrado en misma sede.");
-            }
+            //Quitar esto de aquí, no debe de ir en el service
+            if (!_alumnoValidator.ConfirmarNombresSimilares(alumno.Nombre)) throw new OperationCanceledException("Operación cancelada por el usuario debido a nombres similares.");
 
             _context.Alumnos.Add(alumno);
             await _context.SaveChangesAsync(ct);
@@ -172,7 +158,6 @@ namespace ControlTalleresMVP.Services.Alumnos
         {
             var alumnos = await ObtenerAlumnosDto(ct);
 
-            // Ordenar por fecha de creación descendente (más recientes primero)
             var alumnosOrdenados = alumnos.OrderByDescending(a => a.CreadoEn).ToList();
 
             RegistrosAlumnos.Clear();
@@ -216,7 +201,7 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         public void ActualizarAlumnoPorIdReemplazo(int id, AlumnoDTO nuevoAlumno)
         {
-            var alumnoOC = RegistrosAlumnos.FirstOrDefault(a  => a.Id == id);
+            var alumnoOC = RegistrosAlumnos.FirstOrDefault(a => a.Id == id);
 
             if (alumnoOC is null) return;
 
@@ -227,5 +212,16 @@ namespace ControlTalleresMVP.Services.Alumnos
                 RegistrosAlumnos[index] = nuevoAlumno; // reemplazo completo
             }
         }
+
+        public ObservableCollection<Alumno> ObtenerPorInicial(char inicial)
+        {
+            string inicialLower = inicial.ToString().ToLower();
+
+            return new ObservableCollection<Alumno>(_context.Alumnos
+                .Where(a => a.Nombre.ToLower().StartsWith(inicialLower))
+                .AsNoTracking()
+                .ToList());
+        }
+
     }
 }
