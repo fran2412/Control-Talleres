@@ -14,6 +14,7 @@ namespace ControlTalleresMVP.UI.Windows
     {
         private readonly IDialogService _dialogService;
         private DispatcherTimer? _timerInactividad;
+        private PreProcessInputEventHandler? _actividadHandler;
 
         public MenuWindow()
         {
@@ -29,19 +30,30 @@ namespace ControlTalleresMVP.UI.Windows
         {
             _timerInactividad = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMinutes(5),
+                Interval = TimeSpan.FromMinutes(0.1),
             };
-            _timerInactividad.Tick += (_, __) => VolverAlLogin(true);
+            _timerInactividad.Tick += TimerInactividad_Tick;
             _timerInactividad.Start();
         }
 
+        private void TimerInactividad_Tick(object? sender, EventArgs e)
+            => VolverAlLogin(true);
+
         private void RegistrarActividadGlobal()
         {
-            InputManager.Current.PreProcessInput += (_, __) =>
-            {
-                _timerInactividad?.Stop();
-                _timerInactividad?.Start();
-            };
+            _actividadHandler = InputManager_PreProcessInput;
+            InputManager.Current.PreProcessInput += _actividadHandler;
+        }
+
+        private void InputManager_PreProcessInput(object sender, PreProcessInputEventArgs e)
+            => ReiniciarTemporizador();
+
+        private void ReiniciarTemporizador()
+        {
+            if (_timerInactividad is null) return;
+
+            _timerInactividad.Stop();
+            _timerInactividad.Start();
         }
 
         private void VolverAlLogin(bool porInactividad)
@@ -49,11 +61,6 @@ namespace ControlTalleresMVP.UI.Windows
             try
             {
                 _timerInactividad?.Stop();
-
-                if (porInactividad)
-                {
-                    _dialogService.Info("Su sesión se ha cerrado debido a inactividad. Por favor, inicie sesión nuevamente.", "Sesión cerrada");
-                }
 
                 var ventanaLogin = App.ServiceProvider!.GetRequiredService<MainWindow>();
 
@@ -65,17 +72,43 @@ namespace ControlTalleresMVP.UI.Windows
                 ventanaLogin.Show();
                 ventanaLogin.Activate();
 
-                this.Close();
+                Close();
+
+                if (porInactividad)
+                {
+                    _dialogService.Info("Su sesión se ha cerrado debido a inactividad. Por favor, inicie sesión nuevamente.", "Sesión cerrada");
+                    return;
+                }
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"No se pudo volver al login: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
         }
 
         private void BotonCerrarSesion_Click(object sender, RoutedEventArgs e)
         {
             VolverAlLogin(false);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            if (_actividadHandler is not null)
+            {
+                InputManager.Current.PreProcessInput -= _actividadHandler;
+                _actividadHandler = null;
+            }
+
+            if (_timerInactividad is not null)
+            {
+                _timerInactividad.Tick -= TimerInactividad_Tick;
+                _timerInactividad.Stop();
+                _timerInactividad = null;
+            }
+
+            base.OnClosed(e);
         }
     }
 }
