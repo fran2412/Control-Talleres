@@ -101,7 +101,7 @@ namespace ControlTalleresMVP.UI.Component.Administracion
             }
         }
 
-        private void IniciarGeneracionButton_Click(object sender, RoutedEventArgs e)
+        private async void IniciarGeneracionButton_Click(object sender, RoutedEventArgs e)
         {
             string? input = _dialogService!.PedirTexto(
                     "ATENCIÓN\n\n" +
@@ -118,7 +118,15 @@ namespace ControlTalleresMVP.UI.Component.Administracion
                 return;
             }
 
-            _generacionService!.NuevaGeneracion();
+            try
+            {
+                await _generacionService!.NuevaGeneracion();
+                _dialogService.Info("Se inició la nueva generación correctamente.");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error($"No fue posible iniciar la nueva generación.\n{ex.Message}");
+            }
         }
     }
 }

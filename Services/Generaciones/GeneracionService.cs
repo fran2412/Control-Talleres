@@ -66,29 +66,28 @@ namespace ControlTalleresMVP.Services.Generaciones
         {
             var año = DateTime.Now.Year;
 
-            var count = _context.Generaciones
-                .Count(g => g.FechaInicio.Year == año);
+            var count = await _context.Generaciones
+                .CountAsync(g => g.FechaInicio.Year == año, ct);
 
             string nombre = $"GEN-{año}-{(count + 1):00}";
 
-            var ultimaGeneracion = _context.Generaciones
+            var ultimaGeneracion = await _context.Generaciones
                 .OrderByDescending(g => g.FechaInicio)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync(ct);
 
-            if (ultimaGeneracion == null || ultimaGeneracion.FechaFin != null)
-                return;
+            if (ultimaGeneracion != null && ultimaGeneracion.FechaFin == null)
+            {
+                ultimaGeneracion.FechaFin = DateTime.Now;
 
-            ultimaGeneracion.FechaFin = DateTime.Now;
+                var dtoUltima = RegistrosGeneraciones
+                    .FirstOrDefault(g => g.Id == ultimaGeneracion.GeneracionId);
 
-            var dtoUltima = RegistrosGeneraciones
-                .FirstOrDefault(g => g.Id == ultimaGeneracion.GeneracionId);
+                if (dtoUltima != null)
+                {
+                    dtoUltima.FechaFin = ultimaGeneracion.FechaFin;
+                }
+            }
 
-            if (dtoUltima is null) return;
-
-            dtoUltima.FechaFin = ultimaGeneracion.FechaFin;
-
-
-            // Crear nueva generación
             var nuevaGeneracion = new Generacion
             {
                 Nombre = nombre,
@@ -108,8 +107,7 @@ namespace ControlTalleresMVP.Services.Generaciones
                 FechaFin = nuevaGeneracion.FechaFin,
             };
 
-            int ultimoIndice = RegistrosGeneraciones.Count();
-            RegistrosGeneraciones.Insert(ultimoIndice, nuevoDto);
+            RegistrosGeneraciones.Insert(0, nuevoDto);
         }
 
         public Generacion? ObtenerGeneracionActual()

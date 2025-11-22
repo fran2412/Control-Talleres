@@ -352,9 +352,9 @@ namespace ControlTalleresMVP.Services.Clases
 
             var day = fecha.Date;
 
-            var resumen = await (
+            var resumenDia = await (
                 from clases in _escuelaContext.Clases.AsNoTracking()
-                where clases.Fecha == day && ids.Contains(clases.TallerId)
+                where clases.Fecha == day
                 join cargos in _escuelaContext.Cargos.AsNoTracking()
                     on clases.ClaseId equals cargos.ClaseId into caGroup
                 from cargos in caGroup
@@ -372,6 +372,10 @@ namespace ControlTalleresMVP.Services.Clases
                                         .Sum()) ?? 0.0)
                 })
                 .ToListAsync(ct);
+
+            var resumen = resumenDia
+                .Where(r => ids.Contains(r.TallerId))
+                .ToList();
 
             // Armar mapa por taller
             var dict = resumen.ToDictionary(

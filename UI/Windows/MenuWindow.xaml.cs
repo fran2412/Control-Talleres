@@ -29,7 +29,7 @@ namespace ControlTalleresMVP.UI.Windows
         {
             _timerInactividad = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMinutes(0.1),
+                Interval = TimeSpan.FromMinutes(5),
             };
             _timerInactividad.Tick += (_, __) => VolverAlLogin(true);
             _timerInactividad.Start();
