@@ -1,19 +1,8 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.ViewModel.Navigation;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace ControlTalleresMVP.UI.Windows
@@ -23,13 +12,14 @@ namespace ControlTalleresMVP.UI.Windows
     /// </summary>
     public partial class MenuWindow : Window
     {
-
+        private readonly IDialogService _dialogService;
         private DispatcherTimer? _timerInactividad;
 
         public MenuWindow()
         {
             InitializeComponent();
             DataContext = App.ServiceProvider!.GetRequiredService<ShellViewModel>();
+            _dialogService = App.ServiceProvider!.GetRequiredService<IDialogService>();
 
             InicializarTemporizador();
             RegistrarActividadGlobal();
@@ -39,7 +29,7 @@ namespace ControlTalleresMVP.UI.Windows
         {
             _timerInactividad = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMinutes(5)
+                Interval = TimeSpan.FromMinutes(0.1),
             };
             _timerInactividad.Tick += (_, __) => VolverAlLogin();
             _timerInactividad.Start();
@@ -60,13 +50,13 @@ namespace ControlTalleresMVP.UI.Windows
             {
                 _timerInactividad?.Stop();
 
+                _dialogService.Info("Su sesión se ha cerrado debido a inactividad. Por favor, inicie sesión nuevamente.", "Sesión cerrada");
+
                 var ventanaLogin = App.ServiceProvider!.GetRequiredService<MainWindow>();
 
                 if (!ventanaLogin.IsVisible)
                 {
-                    ventanaLogin = new MainWindow(
-                        App.ServiceProvider!.GetRequiredService<IDialogService>()
-                    );
+                    ventanaLogin = new MainWindow(_dialogService);
                 }
 
                 ventanaLogin.Show();
