@@ -126,11 +126,18 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTextColumn Header="Fecha" Binding="{Binding FechaTexto}" Width="120"/>
+                                    <DataGridTextColumn Header="Fecha"
+                                                        Binding="{Binding FechaTexto, Mode=OneWay}"
+                                                        Width="120"
+                                                        IsReadOnly="True"/>
 
-                                    <DataGridTextColumn Header="Saldo pendiente" Width="140">
+                                    <DataGridTextColumn Header="Saldo pendiente"
+                                                        Width="140"
+                                                        IsReadOnly="True">
                                         <DataGridTextColumn.Binding>
-                                            <Binding Path="SaldoPendiente" StringFormat="{}{0:C2}"/>
+                                            <Binding Path="SaldoPendiente"
+                                                     Mode="OneWay"
+                                                     StringFormat="{}{0:C2}"/>
                                         </DataGridTextColumn.Binding>
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
@@ -154,7 +161,10 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTextColumn Header="Estado" Binding="{Binding EstadoDescripcion}" Width="*">
+                                    <DataGridTextColumn Header="Estado"
+                                                        Binding="{Binding EstadoDescripcion, Mode=OneWay}"
+                                                        Width="*"
+                                                        IsReadOnly="True">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Foreground" Value="#374151"/>
