@@ -1,5 +1,7 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.ViewModel.Menu;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,11 +28,18 @@ namespace ControlTalleresMVP.UI.Component.Alumno
     public partial class FormularioAlumnoUserControl : UserControl
     {
         private static readonly Regex regexCaracteres = new(@"^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s']+$");
+        private readonly decimal _maxDescuentoPorClase;
 
         public bool InscribirEnTaller { get; set; } = false;
         public FormularioAlumnoUserControl()
         {
             InitializeComponent();
+
+            var configService = App.ServiceProvider!.GetRequiredService<IConfiguracionService>();
+            var costoClase = Math.Max(1, configService.GetValor<int>("costo_clase", 150));
+            _maxDescuentoPorClase = Math.Max(0, costoClase - 1);
+
+            Loaded += (_, __) => AjustarControlDescuento();
         }
 
         // Validar que Abono sea numérico
@@ -115,6 +124,18 @@ namespace ControlTalleresMVP.UI.Component.Alumno
 
             NombreTextBox.Text = string.Join(" ",
                 palabras.Select(p => char.ToUpper(p[0]) + p.Substring(1).ToLower()));
+        }
+
+        private void AjustarControlDescuento()
+        {
+            if (DescuentoUpDown is null)
+                return;
+
+            DescuentoUpDown.Maximum = _maxDescuentoPorClase;
+            if (DescuentoUpDown.Value.HasValue && DescuentoUpDown.Value.Value > _maxDescuentoPorClase)
+            {
+                DescuentoUpDown.Value = _maxDescuentoPorClase;
+            }
         }
     }
 }

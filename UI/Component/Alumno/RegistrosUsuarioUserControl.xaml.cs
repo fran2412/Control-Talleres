@@ -132,7 +132,9 @@ namespace ControlTalleresMVP.UI.Component.Alumno
             Nombre   = alumnoDto.Nombre,
             Telefono = alumnoDto.Telefono,
             Sede     = alumnoDto.Sede,
-            Promotor = alumnoDto.Promotor
+            Promotor = alumnoDto.Promotor,
+            EsBecado = alumnoDto.EsBecado,
+            DescuentoPorClase = alumnoDto.DescuentoPorClase
         };
 
         // --- Tu handler actual de editar; ignora clicks en modo selector:

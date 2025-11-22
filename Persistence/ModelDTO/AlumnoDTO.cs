@@ -31,6 +31,13 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Teléfono")]
         public string? Telefono { get; set; } = "";
 
+        [Display(Name = "Becado")]
+        public bool EsBecado { get; set; }
+
+        [Display(Name = "Descuento por clase")]
+        [DisplayFormat(DataFormatString = "{0:C}")]
+        public decimal DescuentoPorClase { get; set; }
+
         [Display(Name = "Fecha de alta")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime CreadoEn { get; set; }

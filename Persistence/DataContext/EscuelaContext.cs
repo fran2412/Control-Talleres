@@ -70,6 +70,15 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(e => e.Telefono).HasColumnName("telefono");
 
+                entity.Property(e => e.EsBecado)
+                    .HasColumnName("es_becado")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.DescuentoPorClase)
+                    .HasColumnName("descuento_por_clase")
+                    .HasPrecision(10, 2)
+                    .HasDefaultValue(0);
+
                 // 🔹 FK a Sede
                 entity.Property(e => e.SedeId).HasColumnName("id_sede");
                 entity.HasOne(e => e.Sede)

@@ -71,7 +71,9 @@ namespace ControlTalleresMVP.Services.Picker
                     Telefono = alumno.Telefono ?? "",
                     Sede = alumno.Sede,
                     Promotor = alumno.Promotor,
-                    CreadoEn = alumno.CreadoEn
+                    CreadoEn = alumno.CreadoEn,
+                    EsBecado = alumno.EsBecado,
+                    DescuentoPorClase = alumno.DescuentoPorClase
                 };
                 registrosVM.Registros.Add(alumnoDTO);
             }

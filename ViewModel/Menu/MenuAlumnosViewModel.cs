@@ -33,6 +33,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private int? sedeSeleccionadaId;
         [ObservableProperty] private int? promotorSeleccionadoId;
         [ObservableProperty] private bool inscribirEnTaller;
+        [ObservableProperty] private bool esBecado;
+        [ObservableProperty] private decimal descuentoPorClase;
 
         private readonly IPromotorService _promotorService;
         private readonly ISedeService _sedeService;
@@ -42,9 +44,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, IConfiguracionService configuracionService)
             : base(itemService, dialogService)
         {
+            _configuracionService = configuracionService;
             _promotorService = promotorService;
             _sedeService = sedeService;
-            _configuracionService = configuracionService;
             _tallerService = tallerService;
 
             OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
@@ -104,6 +106,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     Telefono = CampoTextTelefono?.Trim(),
                     SedeId = SedeSeleccionadaId,
                     PromotorId = PromotorSeleccionadoId,
+                    DescuentoPorClase = DescuentoPorClase,
+                    EsBecado = EsBecado
                 });
 
                 // Procesar inscripciones si está marcado
@@ -216,6 +220,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
             CampoTextTelefono = "";
             SedeSeleccionadaId = null;
             PromotorSeleccionadoId = null;
+            EsBecado = false;
+            DescuentoPorClase = 0m;
 
             if (TalleresDisponibles != null)
             {
@@ -301,6 +307,21 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return false;
             }
 
+            if (DescuentoPorClase < 0)
+            {
+                _dialogService.Alerta("El descuento por clase no puede ser negativo.");
+                return false;
+            }
+
+            var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+            var maxDescuento = Math.Max(0, costoClase - 1);
+
+            if (!EsBecado && DescuentoPorClase > maxDescuento)
+            {
+                _dialogService.Alerta($"El descuento por clase debe ser menor o igual a {maxDescuento:C} (costo de la clase menos 1).");
+                return false;
+            }
+
             return _dialogService.Confirmar(
                 $"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?");
         }
@@ -323,6 +344,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
             foreach (var taller in TalleresDisponibles)
             {
                 taller.PropertyChanged -= OnTallerPropertyChanged!;
+            }
+        }
+
+        partial void OnEsBecadoChanged(bool value)
+        {
+            if (value)
+            {
+                DescuentoPorClase = 0m;
             }
         }
     }

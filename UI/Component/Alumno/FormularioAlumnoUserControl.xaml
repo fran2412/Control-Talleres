@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ControlTalleresMVP.UI.Component.Alumno"
              xmlns:sys="clr-namespace:System;assembly=netstandard"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" d:DesignWidth="900">
     <Grid>
         <Border Style="{StaticResource BorderGridBase}" VerticalAlignment="Top" Height="auto"
@@ -71,6 +72,32 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                           SelectedValue="{Binding PromotorSeleccionadoId, Mode=TwoWay}"
                                           Width="260" Height="30"
                                           Style="{StaticResource MinimalComboBoxStyle}"/>
+                            </StackPanel>
+
+                            <!-- Información de beca -->
+                            <StackPanel Margin="0,20,20,0">
+                                <TextBlock Text="Beca" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <CheckBox x:Name="EsBecadoCheckBox"
+                                          Content="Alumno becado"
+                                          IsChecked="{Binding EsBecado, Mode=TwoWay}"
+                                          FontSize="14"
+                                          Height="30"
+                                          VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Descuento por clase -->
+                            <StackPanel Margin="0,20,20,0">
+                                <TextBlock Text="Descuento por clase" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
+                                <xctk:CalculatorUpDown x:Name="DescuentoUpDown"
+                                                       Value="{Binding DescuentoPorClase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                       FormatString="C2"
+                                                       CultureInfo="es-MX"
+                                                       Minimum="0"
+                                                       ClipValueToMinMax="True"
+                                                       Height="30" Width="260"
+                                                       HorizontalContentAlignment="Right"
+                                                       ToolTip="Monto que se descontará de cada clase"
+                                                       IsEnabled="{Binding EsBecado, Converter={StaticResource InverseBooleanConverter}}"/>
                             </StackPanel>
                         </WrapPanel>
 

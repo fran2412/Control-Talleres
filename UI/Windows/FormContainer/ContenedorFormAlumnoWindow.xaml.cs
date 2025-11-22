@@ -1,6 +1,7 @@
 ﻿using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
+using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +32,9 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         private readonly IDialogService _dialogService;
         private readonly IPromotorService _promotorService;
         private readonly ISedeService _sedeService;
+        private readonly IConfiguracionService _configuracionService;
         private readonly Alumno _alumnoOriginal;
+        private readonly decimal _maxDescuentoPorClase;
 
         public ContenedorFormAlumnoWindow(Alumno alumno)
         {
@@ -41,7 +44,11 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             _dialogService = App.ServiceProvider!.GetRequiredService<IDialogService>();
             _promotorService = App.ServiceProvider!.GetRequiredService<IPromotorService>();
             _sedeService = App.ServiceProvider!.GetRequiredService<ISedeService>();
+            _configuracionService = App.ServiceProvider!.GetRequiredService<IConfiguracionService>();
             _alumnoOriginal = alumno;
+
+            var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+            _maxDescuentoPorClase = Math.Max(0, costoClase - 1);
 
             ConfigurarValidaciones();
             CargarDatos();
@@ -63,11 +70,18 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.SedeId;
             PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.PromotorId;
+            EsBecadoCheckBox.IsChecked = _alumnoOriginal.EsBecado;
+            DescuentoUpDown.Maximum = _maxDescuentoPorClase;
+            DescuentoUpDown.Value = Math.Min(_alumnoOriginal.DescuentoPorClase, _maxDescuentoPorClase);
+            DescuentoUpDown.IsEnabled = !_alumnoOriginal.EsBecado;
         }
 
         private bool ValidarFormulario()
         {
-            return BaseFormHelper.ValidarCampoObligatorio(NombreTextBox, "El nombre", _dialogService);
+            if (!BaseFormHelper.ValidarCampoObligatorio(NombreTextBox, "El nombre", _dialogService))
+                return false;
+
+            return ValidarDescuento();
         }
 
         private async void EditarAlumno_Click(object sender, RoutedEventArgs e)
@@ -105,8 +119,45 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 Telefono = string.IsNullOrWhiteSpace(TelefonoTextBox.Text) ? null : TelefonoTextBox.Text.Trim(),
                 SedeId = SedeComboBox.SelectedValue as int?,
                 PromotorId = PromotorComboBox.SelectedValue as int?,
+                EsBecado = EsBecadoCheckBox.IsChecked ?? false,
+                DescuentoPorClase = ObtenerDescuentoPorClase(),
                 CreadoEn = _alumnoOriginal.CreadoEn
             };
+        }
+
+        private bool ValidarDescuento()
+        {
+            if (EsBecadoCheckBox.IsChecked == true)
+                return true;
+
+            var descuento = ObtenerDescuentoPorClase();
+
+            if (descuento > _maxDescuentoPorClase)
+            {
+                _dialogService.Alerta($"El descuento máximo permitido es {_maxDescuentoPorClase:C} (costo de la clase menos 1).");
+                return false;
+            }
+
+            return true;
+        }
+
+        private decimal ObtenerDescuentoPorClase()
+        {
+            if (EsBecadoCheckBox.IsChecked == true)
+                return 0m;
+
+            return (decimal)(DescuentoUpDown.Value ?? 0m);
+        }
+
+        private void EsBecadoCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            DescuentoUpDown.Value = 0m;
+            DescuentoUpDown.IsEnabled = false;
+        }
+
+        private void EsBecadoCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            DescuentoUpDown.IsEnabled = true;
         }
     }
 }

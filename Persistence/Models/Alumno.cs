@@ -14,6 +14,8 @@ namespace ControlTalleresMVP.Persistence.Models
         public string Nombre { get; set; } = null!;
         public string? Telefono { get; set; }
 
+        public bool EsBecado { get; set; }
+        public decimal DescuentoPorClase { get; set; }
 
         public DateTime CreadoEn { get; set; }
         public DateTime ActualizadoEn { get; set; }
