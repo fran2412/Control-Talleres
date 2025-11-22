@@ -7,7 +7,9 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Title="Iniciar sesión" Height="502" Width="520">
+        Title="Iniciar sesión" Height="502" Width="520"
+        FocusManager.FocusedElement="{Binding ElementName=txtUsuario}"
+        >
 
     <Grid Background="{StaticResource BrushFondo}">
         <Rectangle HorizontalAlignment="Center" Height="405" Stroke="White" VerticalAlignment="Center" Width="350" RadiusX="38" RadiusY="38" Fill="White"/>
@@ -31,9 +33,9 @@
                 <TextBox x:Name="txtUsuario"
                          ToolTip="Ingrese su nombre de usuario"
                          Style="{DynamicResource UserLoginTextBox}" 
+
                          HorizontalAlignment="Center" Height="35" Margin="0,25,0,0" 
-                         Tag="Nombre de usuario" VerticalAlignment="Top" Width="211"
-                         KeyDown="txtUsuario_KeyDown"/>
+                         Tag="Nombre de usuario" VerticalAlignment="Top" Width="211"/>
                 <Label Style="{StaticResource LoginLabel}" Content="Usuario" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="84" Foreground="#FF333333"/>
             </Grid>
 
@@ -45,7 +47,6 @@
                              VerticalAlignment="Top" Width="211"
                              ToolTip="Ingrese su contraseña"
                              PasswordChanged="txtPassword_PasswordChanged"
-                             KeyDown="txtPassword_KeyDown"
                              Tag="Contraseña"/>
                 <Label Style="{StaticResource LoginLabel}" Content="Contraseña" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="84" Foreground="#FF333333"/>
             </Grid>
@@ -53,7 +54,8 @@
             <!-- Botón -->
             <Button x:Name="btnIniciarSesion" Style="{StaticResource FeaturedButton}" Content="Iniciar sesión" 
                     HorizontalAlignment="Left" Height="43" Margin="6,286,0,0" VerticalAlignment="Top" Width="222"
-                    Click="LoginButton_Click"/>
+                    Click="LoginButton_Click"
+                    IsDefault="True"/>
         </Grid>
     </Grid>
 </Window>

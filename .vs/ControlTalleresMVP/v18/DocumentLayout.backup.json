@@ -1,0 +1,66 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\pancho\\source\\repos\\controltalleresmvp\\controltalleresmvp\\ui\\component\\alumno\\formularioalumnousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:ui\\component\\alumno\\formularioalumnousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\pancho\\source\\repos\\controltalleresmvp\\controltalleresmvp\\ui\\component\\alumno\\registrosusuariousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:ui\\component\\alumno\\registrosusuariousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\pancho\\source\\repos\\controltalleresmvp\\controltalleresmvp\\ui\\component\\alumno\\alumnousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:ui\\component\\alumno\\alumnousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RegistrosUsuarioUserControl.xaml",
+              "DocumentMoniker": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Alumno\\RegistrosUsuarioUserControl.xaml",
+              "RelativeDocumentMoniker": "UI\\Component\\Alumno\\RegistrosUsuarioUserControl.xaml",
+              "ToolTip": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Alumno\\RegistrosUsuarioUserControl.xaml",
+              "RelativeToolTip": "UI\\Component\\Alumno\\RegistrosUsuarioUserControl.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-22T16:17:53.918Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "FormularioAlumnoUserControl.xaml",
+              "DocumentMoniker": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Alumno\\FormularioAlumnoUserControl.xaml",
+              "RelativeDocumentMoniker": "UI\\Component\\Alumno\\FormularioAlumnoUserControl.xaml",
+              "ToolTip": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Alumno\\FormularioAlumnoUserControl.xaml",
+              "RelativeToolTip": "UI\\Component\\Alumno\\FormularioAlumnoUserControl.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-22T16:17:54.142Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AlumnoUserControl.xaml",
+              "DocumentMoniker": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Alumno\\AlumnoUserControl.xaml",
+              "RelativeDocumentMoniker": "UI\\Component\\Alumno\\AlumnoUserControl.xaml",
+              "ToolTip": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Alumno\\AlumnoUserControl.xaml",
+              "RelativeToolTip": "UI\\Component\\Alumno\\AlumnoUserControl.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-22T16:17:54.193Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

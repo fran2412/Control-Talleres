@@ -22,16 +22,6 @@ namespace ControlTalleresMVP.UI.Windows
         {
             InitializeComponent();
             _dialogService = dialogService;
-            
-            // Configurar el foco inicial en el TextBox de usuario
-            this.Loaded += MainWindow_Loaded;
-        }
-
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Dar foco al TextBox de usuario y seleccionar todo el texto
-            txtUsuario.Focus();
-            txtUsuario.SelectAll();
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
@@ -45,7 +35,7 @@ namespace ControlTalleresMVP.UI.Windows
             {
 
                 new MenuWindow().Show();
-                this.Close();
+                Close();
             }
             else
             {
@@ -60,24 +50,6 @@ namespace ControlTalleresMVP.UI.Windows
                 var placeholder = (TextBlock)pb.Template.FindName("Placeholder", pb);
                 if (placeholder != null)
                     placeholder.Visibility = string.IsNullOrEmpty(pb.Password) ? Visibility.Visible : Visibility.Collapsed;
-            }
-        }
-
-        private void txtUsuario_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                // Siempre permitir Enter para iniciar sesión y recibir retroalimentación
-                LoginButton_Click(sender, e);
-            }
-        }
-
-        private void txtPassword_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                // Siempre permitir Enter para iniciar sesión y recibir retroalimentación
-                LoginButton_Click(sender, e);
             }
         }
     }
