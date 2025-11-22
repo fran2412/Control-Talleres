@@ -31,7 +31,7 @@ namespace ControlTalleresMVP.UI.Windows
             {
                 Interval = TimeSpan.FromMinutes(0.1),
             };
-            _timerInactividad.Tick += (_, __) => VolverAlLogin();
+            _timerInactividad.Tick += (_, __) => VolverAlLogin(true);
             _timerInactividad.Start();
         }
 
@@ -44,13 +44,16 @@ namespace ControlTalleresMVP.UI.Windows
             };
         }
 
-        private void VolverAlLogin()
+        private void VolverAlLogin(bool porInactividad)
         {
             try
             {
                 _timerInactividad?.Stop();
 
-                _dialogService.Info("Su sesión se ha cerrado debido a inactividad. Por favor, inicie sesión nuevamente.", "Sesión cerrada");
+                if (porInactividad)
+                {
+                    _dialogService.Info("Su sesión se ha cerrado debido a inactividad. Por favor, inicie sesión nuevamente.", "Sesión cerrada");
+                }
 
                 var ventanaLogin = App.ServiceProvider!.GetRequiredService<MainWindow>();
 
@@ -68,6 +71,11 @@ namespace ControlTalleresMVP.UI.Windows
             {
                 MessageBox.Show($"No se pudo volver al login: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void BotonCerrarSesion_Click(object sender, RoutedEventArgs e)
+        {
+            VolverAlLogin(false);
         }
     }
 }
