@@ -1,12 +1,36 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|c:\\users\\pancho\\source\\repos\\controltalleresmvp\\controltalleresmvp\\ui\\component\\pago\\formulariopagousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6379FBBE-8F2F-E2DE-14E8-CEF5CD02DBCA}|ControlTalleresMVP.csproj|solutionrelative:ui\\component\\pago\\formulariopagousercontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 1,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "FormularioPagoUserControl.xaml",
+              "DocumentMoniker": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Pago\\FormularioPagoUserControl.xaml",
+              "RelativeDocumentMoniker": "UI\\Component\\Pago\\FormularioPagoUserControl.xaml",
+              "ToolTip": "C:\\Users\\pancho\\source\\repos\\ControlTalleresMVP\\ControlTalleresMVP\\UI\\Component\\Pago\\FormularioPagoUserControl.xaml",
+              "RelativeToolTip": "UI\\Component\\Pago\\FormularioPagoUserControl.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-22T22:42:13.513Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -6,20 +6,11 @@ using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ControlTalleresMVP.UI.Windows.FormContainer
 {
@@ -35,6 +26,15 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         private readonly IConfiguracionService _configuracionService;
         private readonly Alumno _alumnoOriginal;
         private readonly decimal _maxDescuentoPorClase;
+
+        public static readonly DependencyProperty DescuentoVisualProperty =
+            DependencyProperty.Register(nameof(DescuentoVisual), typeof(decimal), typeof(ContenedorFormAlumnoWindow), new PropertyMetadata(0m));
+
+        public decimal DescuentoVisual
+        {
+            get => (decimal)GetValue(DescuentoVisualProperty);
+            set => SetValue(DescuentoVisualProperty, value);
+        }
 
         public ContenedorFormAlumnoWindow(Alumno alumno)
         {
@@ -71,9 +71,10 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.PromotorId;
             EsBecadoCheckBox.IsChecked = _alumnoOriginal.EsBecado;
-            DescuentoUpDown.Maximum = _maxDescuentoPorClase;
-            DescuentoUpDown.Value = Math.Min(_alumnoOriginal.DescuentoPorClase, _maxDescuentoPorClase);
-            DescuentoUpDown.IsEnabled = !_alumnoOriginal.EsBecado;
+            var descuento = Math.Min(_alumnoOriginal.DescuentoPorClase, _maxDescuentoPorClase);
+            DescuentoTextBox.Text = descuento.ToString("0.##", CultureInfo.InvariantCulture);
+            DescuentoTextBox.IsEnabled = !_alumnoOriginal.EsBecado;
+            DescuentoVisual = descuento;
         }
 
         private bool ValidarFormulario()
@@ -146,18 +147,111 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             if (EsBecadoCheckBox.IsChecked == true)
                 return 0m;
 
-            return (decimal)(DescuentoUpDown.Value ?? 0m);
+            var texto = DescuentoTextBox.Text?.Replace(',', '.') ?? "0";
+            if (!decimal.TryParse(texto, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var valor))
+            {
+                return 0m;
+            }
+
+            return Math.Min(valor, _maxDescuentoPorClase);
         }
 
         private void EsBecadoCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            DescuentoUpDown.Value = 0m;
-            DescuentoUpDown.IsEnabled = false;
+            DescuentoTextBox.Text = "0";
+            DescuentoTextBox.IsEnabled = false;
+            DescuentoVisual = 0m;
         }
 
         private void EsBecadoCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            DescuentoUpDown.IsEnabled = true;
+            DescuentoTextBox.IsEnabled = true;
+            DescuentoTextBox.Focus();
+            DescuentoTextBox.CaretIndex = DescuentoTextBox.Text.Length;
+            ActualizarDescuentoVisualDesdeTexto();
+        }
+
+        private void DescuentoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (EsBecadoCheckBox.IsChecked == true)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (sender is not TextBox textBox)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (!char.IsDigit(e.Text, 0) && e.Text != "." && e.Text != ",")
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var textoPropuesto = ObtenerTextoPropuesto(textBox, e.Text);
+            if (string.IsNullOrWhiteSpace(textoPropuesto))
+                return;
+
+            var normalizado = textoPropuesto.Replace(',', '.');
+            if (!decimal.TryParse(normalizado, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var valor))
+            {
+                e.Handled = true;
+                return;
+            }
+
+        }
+
+        private void DescuentoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox textBox)
+                return;
+
+            var textoActual = string.IsNullOrWhiteSpace(textBox.Text) ? "0" : textBox.Text;
+            var normalizado = textoActual.Replace(',', '.');
+
+            if (!decimal.TryParse(normalizado, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var valor))
+            {
+                valor = 0m;
+                textBox.Text = "0";
+                textBox.CaretIndex = textBox.Text.Length;
+            }
+
+            var valorNormalizado = Math.Min(valor, _maxDescuentoPorClase);
+
+            if (valorNormalizado != valor)
+            {
+                textBox.Text = valorNormalizado.ToString("0.##", CultureInfo.InvariantCulture);
+                textBox.CaretIndex = textBox.Text.Length;
+            }
+
+            DescuentoVisual = valorNormalizado;
+        }
+
+        private void ActualizarDescuentoVisualDesdeTexto()
+        {
+            var texto = DescuentoTextBox.Text?.Replace(',', '.') ?? "0";
+            if (!decimal.TryParse(texto, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var valor))
+            {
+                valor = 0m;
+            }
+
+            DescuentoVisual = Math.Min(valor, _maxDescuentoPorClase);
+        }
+
+        private static string ObtenerTextoPropuesto(TextBox textBox, string input)
+        {
+            var textoActual = textBox.Text ?? string.Empty;
+            if (!string.IsNullOrEmpty(textBox.SelectedText))
+            {
+                var inicio = textBox.SelectionStart;
+                var fin = textoActual.Remove(inicio, textBox.SelectionLength);
+                return fin.Insert(inicio, input);
+            }
+
+            return textoActual.Insert(textBox.CaretIndex, input);
         }
     }
 }

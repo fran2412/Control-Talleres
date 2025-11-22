@@ -76,18 +76,18 @@
                         <DataGridTemplateColumn Header="Monto a aplicar" Width="130">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Monto, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" TextAlignment="Right"/>
+                                    <TextBlock Text="{Binding Monto, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" TextAlignment="Left"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <TextBox Text="{Binding Monto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}"
-                           Height="26" Padding="4,0" HorizontalContentAlignment="Right"
+                                    <TextBox Text="{Binding Monto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N0}}"
+                           Height="26" Padding="4,0" HorizontalContentAlignment="Left"
                            ToolTip="≤ saldo del cargo y ≤ disponible del pago"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Saldo resultante" Binding="{Binding SaldoResultante, UpdateSourceTrigger=PropertyChanged, StringFormat=C}"
+                        <DataGridTextColumn Header="Saldo resultante" Binding="{Binding SaldoResultante, UpdateSourceTrigger=PropertyChanged, StringFormat=C0}"
                                 Width="130" IsReadOnly="True"/>
                     </DataGrid.Columns>
                 </DataGrid>

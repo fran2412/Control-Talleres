@@ -1,24 +1,13 @@
-﻿using ControlTalleresMVP.Helpers.Dialogs;
-using ControlTalleresMVP.Services.Configuracion;
+﻿using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.ViewModel.Menu;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ControlTalleresMVP.UI.Component.Alumno
 {
@@ -128,14 +117,87 @@ namespace ControlTalleresMVP.UI.Component.Alumno
 
         private void AjustarControlDescuento()
         {
-            if (DescuentoUpDown is null)
+            if (DataContext is MenuAlumnosViewModel vm && vm.DescuentoPorClase > _maxDescuentoPorClase)
+            {
+                vm.DescuentoPorClase = _maxDescuentoPorClase;
+            }
+        }
+
+        private void DescuentoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (EsAlumnoBecado())
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (sender is not TextBox textBox)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (!char.IsDigit(e.Text, 0) && e.Text != "." && e.Text != ",")
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var textoPropuesto = ObtenerTextoPropuesto(textBox, e.Text);
+            if (string.IsNullOrWhiteSpace(textoPropuesto))
                 return;
 
-            DescuentoUpDown.Maximum = _maxDescuentoPorClase;
-            if (DescuentoUpDown.Value.HasValue && DescuentoUpDown.Value.Value > _maxDescuentoPorClase)
+            var normalizado = textoPropuesto.Replace(',', '.');
+            if (!decimal.TryParse(normalizado, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var valor))
             {
-                DescuentoUpDown.Value = _maxDescuentoPorClase;
+                e.Handled = true;
+                return;
             }
+
+        }
+
+        private void DescuentoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            var textoActual = string.IsNullOrWhiteSpace(textBox.Text) ? "0" : textBox.Text;
+            var normalizado = textoActual.Replace(',', '.');
+
+            if (!decimal.TryParse(normalizado, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var valor))
+            {
+                valor = 0m;
+                textBox.Text = "0";
+                textBox.CaretIndex = textBox.Text.Length;
+            }
+
+            var valorNormalizado = Math.Min(valor, _maxDescuentoPorClase);
+
+            if (valorNormalizado != valor)
+            {
+                textBox.Text = valorNormalizado.ToString("0.##", CultureInfo.InvariantCulture);
+                textBox.CaretIndex = textBox.Text.Length;
+            }
+        }
+
+        private static string ObtenerTextoPropuesto(TextBox textBox, string input)
+        {
+            var textoActual = textBox.Text ?? string.Empty;
+            if (!string.IsNullOrEmpty(textBox.SelectedText))
+            {
+                var inicio = textBox.SelectionStart;
+                var fin = textoActual.Remove(inicio, textBox.SelectionLength);
+                return fin.Insert(inicio, input);
+            }
+
+            return textoActual.Insert(textBox.CaretIndex, input);
+        }
+
+        private bool EsAlumnoBecado()
+        {
+            return DataContext is MenuAlumnosViewModel vm && vm.EsBecado;
         }
     }
 }
