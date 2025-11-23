@@ -61,6 +61,7 @@
                     <!-- Checkbox para incluir talleres eliminados -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
                         <CheckBox Content="Incluir talleres eliminados" 
+                                  Style="{StaticResource ModernCheckBox}"
                                   IsChecked="{Binding MenuInscripcionRegistrosVM.IncluirTalleresEliminados, Mode=TwoWay}"
                                   FontWeight="SemiBold"
                                   Foreground="#495057"/>

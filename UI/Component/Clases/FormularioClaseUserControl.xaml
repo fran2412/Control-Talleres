@@ -120,6 +120,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox IsChecked="{Binding IsSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          Style="{StaticResource ModernCheckBox}"
                                                           HorizontalAlignment="Center"
                                                           IsEnabled="{Binding EstaHabilitada, UpdateSourceTrigger=PropertyChanged}"/>
                                             </DataTemplate>

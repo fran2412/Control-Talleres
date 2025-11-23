@@ -79,8 +79,16 @@
                                   Margin="0,0,0,8">
                             <DataGrid.Columns>
                                 <!-- Seleccionar -->
-                                <DataGridCheckBoxColumn Binding="{Binding EstaSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Header="Seleccionar" Width="100"/>
+                                <DataGridTemplateColumn Header="Seleccionar" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding EstaSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      Style="{StaticResource ModernCheckBox}"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
 
                                 <!-- Taller -->
                                 <DataGridTextColumn Binding="{Binding Nombre}" Header="Taller" Width="2*"

@@ -239,3 +239,4 @@ C:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net
 C:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net10.0-windows10.0.26100.0\ControlTalleres.pdb
 C:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net10.0-windows10.0.26100.0\ControlTalleresMVP.genruntimeconfig.cache
 C:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net10.0-windows10.0.26100.0\ref\ControlTalleres.dll
+C:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net10.0-windows10.0.26100.0\Resources\Styles\CheckBox.baml

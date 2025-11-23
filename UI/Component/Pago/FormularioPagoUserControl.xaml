@@ -68,8 +68,16 @@
                   HeadersVisibility="Column" CanUserAddRows="False" CanUserDeleteRows="False"
                   RowHeaderWidth="0" Margin="0,0,0,6">
                     <DataGrid.Columns>
-                        <DataGridCheckBoxColumn Header="Aplicar" Width="80"
-              Binding="{Binding Seleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <DataGridTemplateColumn Header="Aplicar" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding Seleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource ModernCheckBox}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="125" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="2*" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Saldo actual" Binding="{Binding SaldoPendiente, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" Width="120" IsReadOnly="True"/>

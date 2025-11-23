@@ -56,6 +56,7 @@
                     <!-- Toggle filtro por día -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
                         <CheckBox Content="Filtrar por día específico"
+                                  Style="{StaticResource ModernCheckBox}"
                                   IsChecked="{Binding FiltrarPorDiaEspecifico}"
                                   VerticalAlignment="Center"/>
                     </StackPanel>

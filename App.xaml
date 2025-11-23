@@ -29,6 +29,7 @@
                 <ResourceDictionary Source="Resources/Styles/Borders.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/ComboBoxs.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/DataGridDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/CheckBox.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate DataType="{x:Type vmmenu:MenuAlumnosViewModel}">
