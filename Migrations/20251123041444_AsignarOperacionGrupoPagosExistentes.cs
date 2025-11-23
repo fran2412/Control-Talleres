@@ -31,7 +31,7 @@ namespace ControlTalleresMVP.Migrations
                 WHEN seg_actual - seg_prev > 2 THEN 1 
                 ELSE 0 
             END AS es_nuevo
-        FROM pagos_ordenadosame
+        FROM pagos_ordenados
     ),
     acumulado AS (
         SELECT 
