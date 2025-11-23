@@ -23,10 +23,13 @@ namespace ControlTalleresMVP.Services.Picker
             _sp = sp;
         }
 
-        public Alumno? Pick()
+        public Alumno? Pick(bool excluirBecados = false)
         {
             // Resuelve tu VM de registros (el mismo que ya usas en el UC):
             var registrosVM = _sp.GetRequiredService<MenuAlumnosViewModel>();
+
+            var estadoAnteriorFiltroBecados = registrosVM.OcultarBecadosEnPicker;
+            registrosVM.OcultarBecadosEnPicker = excluirBecados;
 
             var win = new SeleccionarAlumnoWindow(registrosVM); // tu ventana host
             win.RegistrosUC.IsPickerMode = true;
@@ -40,11 +43,18 @@ namespace ControlTalleresMVP.Services.Picker
                 win.Close();
             };
 
-            var ok = win.ShowDialog() == true;
-            return ok ? elegido : null;
+            try
+            {
+                var ok = win.ShowDialog() == true;
+                return ok ? elegido : null;
+            }
+            finally
+            {
+                registrosVM.OcultarBecadosEnPicker = estadoAnteriorFiltroBecados;
+            }
         }
 
-        public async Task<Alumno?> PickConDeudasAsync()
+        public async Task<Alumno?> PickConDeudasAsync(bool excluirBecados = false)
         {
             var alumnoService = _sp.GetRequiredService<IAlumnoService>();
             var alumnosConDeudas = await alumnoService.ObtenerAlumnosConDeudasPendientesAsync();
@@ -64,6 +74,11 @@ namespace ControlTalleresMVP.Services.Picker
             registrosVM.Registros.Clear();
             foreach (var alumno in alumnosConDeudas)
             {
+                if (excluirBecados && alumno.EsBecado)
+                {
+                    continue;
+                }
+
                 var alumnoDTO = new AlumnoDTO
                 {
                     Id = alumno.AlumnoId,
@@ -78,6 +93,9 @@ namespace ControlTalleresMVP.Services.Picker
                 registrosVM.Registros.Add(alumnoDTO);
             }
 
+            var estadoAnteriorFiltroBecados = registrosVM.OcultarBecadosEnPicker;
+            registrosVM.OcultarBecadosEnPicker = excluirBecados;
+
             var win = new SeleccionarAlumnoWindow(registrosVM);
             win.RegistrosUC.IsPickerMode = true;
             win.RegistrosUC.DataContext = registrosVM;
@@ -90,8 +108,15 @@ namespace ControlTalleresMVP.Services.Picker
                 win.Close();
             };
 
-            var ok = win.ShowDialog() == true;
-            return ok ? elegido : null;
+            try
+            {
+                var ok = win.ShowDialog() == true;
+                return ok ? elegido : null;
+            }
+            finally
+            {
+                registrosVM.OcultarBecadosEnPicker = estadoAnteriorFiltroBecados;
+            }
         }
     }
 

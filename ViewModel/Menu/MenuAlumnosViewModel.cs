@@ -75,6 +75,19 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public ObservableCollection<Promotor> OpcionesPromotor { get; }
 
+        private bool _ocultarBecadosEnPicker;
+        public bool OcultarBecadosEnPicker
+        {
+            get => _ocultarBecadosEnPicker;
+            set
+            {
+                if (SetProperty(ref _ocultarBecadosEnPicker, value))
+                {
+                    RegistrosView?.Refresh();
+                }
+            }
+        }
+
         protected override async Task EliminarAsync(AlumnoDTO? alumnoSeleccionado)
         {
             if (alumnoSeleccionado == null) return;
@@ -193,7 +206,18 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return false;
 
             if (string.IsNullOrWhiteSpace(FiltroRegistros))
+            {
+                if (OcultarBecadosEnPicker && a.EsBecado)
+                {
+                    return false;
+                }
                 return true;
+            }
+
+            if (OcultarBecadosEnPicker && a.EsBecado)
+            {
+                return false;
+            }
 
             var nombreCompleto = a.Nombre ?? "";
             var telefono = a.Telefono ?? "";

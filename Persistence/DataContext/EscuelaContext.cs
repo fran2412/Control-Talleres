@@ -79,7 +79,6 @@ namespace ControlTalleresMVP.Persistence.DataContext
                     .HasPrecision(10, 2)
                     .HasDefaultValue(0);
 
-                // 🔹 FK a Sede
                 entity.Property(e => e.SedeId).HasColumnName("id_sede");
                 entity.HasOne(e => e.Sede)
                     .WithMany(s => s.Alumnos)

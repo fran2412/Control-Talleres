@@ -9,8 +9,8 @@ namespace ControlTalleresMVP.Services.Picker
 {
     public interface IAlumnoPickerService
     {
-        Alumno? Pick();
-        Task<Alumno?> PickConDeudasAsync();
+        Alumno? Pick(bool excluirBecados = false);
+        Task<Alumno?> PickConDeudasAsync(bool excluirBecados = false);
     }
 
 }

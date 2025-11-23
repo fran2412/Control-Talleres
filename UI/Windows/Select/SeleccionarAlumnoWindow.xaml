@@ -8,8 +8,9 @@
         mc:Ignorable="d"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        SizeToContent="Height"
-        Title="Seleccionar alumno" MaxHeight="450" Width="1000"
+        Height="520"
+        Title="Seleccionar alumno"
+        Width="1000"
         KeyDown="Window_KeyDown">
     <registros:RegistrosUsuarioUserControl x:Name="RegistrosUC"
                                            IsPickerMode="True"

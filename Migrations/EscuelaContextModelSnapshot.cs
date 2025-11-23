@@ -36,6 +36,13 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnName("creado_en")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<decimal>("DescuentoPorClase")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(10, 2)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("descuento_por_clase");
+
                     b.Property<bool>("Eliminado")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -45,6 +52,12 @@ namespace ControlTalleresMVP.Migrations
                     b.Property<DateTime?>("EliminadoEn")
                         .HasColumnType("TEXT")
                         .HasColumnName("eliminado_en");
+
+                    b.Property<bool>("EsBecado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("es_becado");
 
                     b.Property<string>("Nombre")
                         .IsRequired()

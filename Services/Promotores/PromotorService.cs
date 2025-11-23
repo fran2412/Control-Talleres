@@ -27,10 +27,6 @@ namespace ControlTalleresMVP.Services.Promotores
             _context.Promotores.Add(promotor);
             await _context.SaveChangesAsync(ct);
 
-            await _context.Entry(promotor)
-                .Collection(p => p.Alumnos)
-                .LoadAsync(ct);
-
             var dto = MapToDto(promotor);
             InsertOrUpdateRegistro(dto);
             return promotor;
@@ -73,10 +69,6 @@ namespace ControlTalleresMVP.Services.Promotores
             {
                 await _context.SaveChangesAsync(ct);
 
-                await _context.Entry(promotorExistente)
-                    .Collection(p => p.Alumnos)
-                    .LoadAsync(ct);
-
                 var dtoActualizado = MapToDto(promotorExistente);
                 InsertOrUpdateRegistro(dtoActualizado);
             }
@@ -86,6 +78,7 @@ namespace ControlTalleresMVP.Services.Promotores
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        
         public async Task<List<PromotorDTO>> ObtenerPromotoresParaGridAsync(CancellationToken ct = default)
         {
 

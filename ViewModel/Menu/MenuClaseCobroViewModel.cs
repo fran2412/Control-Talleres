@@ -108,9 +108,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private bool tieneTalleresSinPagar;
 
         [RelayCommand]
-private async Task BuscarAlumno()
-{
-    var alumno = _alumnoPicker.Pick();
+        private async Task BuscarAlumno()
+        {
+            var alumno = _alumnoPicker.Pick(excluirBecados: true);
     if (alumno is null) return;
 
     await ProcesarSeleccionAlumno(alumno);
