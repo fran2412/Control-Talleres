@@ -101,8 +101,6 @@ namespace ControlTalleresMVP.Services.Clases
                                        && !c.Eliminado
                                        && c.Estado != EstadoCargo.Anulado, ct);
 
-            var cargoAjustado = false;
-
             if (cargo is null)
             {
                 cargo = new Cargo
@@ -119,10 +117,6 @@ namespace ControlTalleresMVP.Services.Clases
                 _escuelaContext.Cargos.Add(cargo);
                 await _escuelaContext.SaveChangesAsync(ct);
                 cargoCreado = true;
-            }
-            else
-            {
-                cargoAjustado = AjustarCargoAlCosto(cargo, costoClaseConDescuento);
             }
 
             // 4) Aplicar abono (si hay)
@@ -176,7 +170,6 @@ namespace ControlTalleresMVP.Services.Clases
 
                         pagoCreado = true;
                         aplicado = aAplicar;
-                        cargoAjustado = false;
 
                         // 5) Verificar si hay excedente y aplicarlo a la siguiente clase
                         // El excedente es la diferencia entre lo que se pagó y lo que se aplicó a esta clase
@@ -195,12 +188,6 @@ namespace ControlTalleresMVP.Services.Clases
                     }
                 }
             }
-            if (cargoAjustado)
-            {
-                await _escuelaContext.SaveChangesAsync(ct);
-                cargoAjustado = false;
-            }
-
             return new RegistrarClaseResult(
                 Fecha: fechaClase,
                 ClaseCreada: claseCreada,
@@ -903,11 +890,6 @@ namespace ControlTalleresMVP.Services.Clases
                     _escuelaContext.Cargos.Add(cargoSiguiente);
                     await _escuelaContext.SaveChangesAsync(ct);
                 }
-                else
-                {
-                    AjustarCargoAlCosto(cargoSiguiente, costoClaseAlumno);
-                }
-
                 // Si la clase siguiente ya está pagada, no aplicar excedente
                 if (cargoSiguiente.SaldoActual <= 0m)
                     return 0m;
@@ -981,22 +963,6 @@ namespace ControlTalleresMVP.Services.Clases
         {
             var costo = Math.Max(1m, costoBase - descuento);
             return Math.Round(costo, 2, MidpointRounding.AwayFromZero);
-        }
-
-        private static bool AjustarCargoAlCosto(Cargo cargo, decimal costoDeseado)
-        {
-            var costoNormalizado = Math.Round(costoDeseado, 2, MidpointRounding.AwayFromZero);
-            var montoNormalizado = Math.Round(cargo.Monto, 2, MidpointRounding.AwayFromZero);
-            if (montoNormalizado == costoNormalizado)
-            {
-                return false;
-            }
-
-            var pagado = Math.Max(0m, cargo.Monto - cargo.SaldoActual);
-            cargo.Monto = costoNormalizado;
-            cargo.SaldoActual = Math.Max(0m, costoNormalizado - pagado);
-            cargo.Estado = cargo.SaldoActual == 0m ? EstadoCargo.Pagado : EstadoCargo.Pendiente;
-            return true;
         }
 
         private async Task<EstadoPagoAlumnoDTO[]> ObtenerEstadosPagoTodasGeneracionesAsync(

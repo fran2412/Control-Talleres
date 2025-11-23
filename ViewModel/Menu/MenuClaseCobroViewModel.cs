@@ -318,11 +318,11 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     .Select(c => new
                     {
                         Fecha = c.FechaClase.Date,
-                        SaldoAjustado = CalcularSaldoConDescuento(c, costoClaseAlumno)
+                        SaldoPendiente = NormalizarMonto(c.SaldoActual)
                     })
                     .ToList();
 
-                bool hayPendientes = clasesConSaldo.Any(c => c.SaldoAjustado > 0m && c.Fecha <= hoy);
+                bool hayPendientes = clasesConSaldo.Any(c => c.SaldoPendiente > 0m && c.Fecha <= hoy);
                 bool permitirFuturas = !hayPendientes;
 
                 var agregadas = new HashSet<DateTime>();
@@ -333,14 +333,14 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     var fecha = clase.Fecha;
                     agregadas.Add(fecha);
 
-                    if (clase.SaldoAjustado <= 0m)
+                    if (clase.SaldoPendiente <= 0m)
                     {
                         continue;
                     }
 
                     var item = new ClasePagoItem(
                         fecha,
-                        clase.SaldoAjustado,
+                        clase.SaldoPendiente,
                         esCargoExistente: true,
                         estaHabilitada: true);
 
@@ -356,7 +356,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     if (agregadas.Contains(fecha)) continue;
 
                     agregadas.Add(fecha);
-                    if (clase.SaldoAjustado <= 0m)
+                    if (clase.SaldoPendiente <= 0m)
                     {
                         continue;
                     }
@@ -366,7 +366,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
 
                     var item = new ClasePagoItem(
                         fecha,
-                        clase.SaldoAjustado,
+                        clase.SaldoPendiente,
                         esCargoExistente: true,
                         estaHabilitada: habilitada);
 
@@ -620,14 +620,9 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
             return Math.Round(costoConDescuento, 2, MidpointRounding.AwayFromZero);
         }
 
-        private decimal CalcularSaldoConDescuento(ClaseFinancieraDTO clase, decimal costoClaseAlumno)
+        private static decimal NormalizarMonto(decimal valor)
         {
-            var saldoActual = Math.Round(clase.SaldoActual, 2, MidpointRounding.AwayFromZero);
-            var montoOriginal = Math.Round(clase.Monto, 2, MidpointRounding.AwayFromZero);
-            var pagado = Math.Max(0m, montoOriginal - saldoActual);
-            var saldoDeseado = Math.Max(0m, costoClaseAlumno - pagado);
-            var saldo = Math.Min(saldoActual, saldoDeseado);
-            return Math.Round(saldo, 2, MidpointRounding.AwayFromZero);
+            return Math.Round(Math.Max(0m, valor), 2, MidpointRounding.AwayFromZero);
         }
 
         private static decimal ClampCosto(decimal valor)
