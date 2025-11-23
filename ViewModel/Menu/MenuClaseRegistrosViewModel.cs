@@ -158,8 +158,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     return false;
             }
 
-            if (FechaDesdeRegistros.HasValue && dto.FechaClase.Date < FechaDesdeRegistros.Value.Date) return false;
-            if (FechaHastaRegistros.HasValue && dto.FechaClase.Date > FechaHastaRegistros.Value.Date) return false;
+            if (FechaDesdeRegistros.HasValue)
+            {
+                if (!dto.UltimoPagoFecha.HasValue || dto.UltimoPagoFecha.Value.Date < FechaDesdeRegistros.Value.Date)
+                    return false;
+            }
+
+            if (FechaHastaRegistros.HasValue)
+            {
+                if (!dto.UltimoPagoFecha.HasValue || dto.UltimoPagoFecha.Value.Date > FechaHastaRegistros.Value.Date)
+                    return false;
+            }
 
             if (AlumnoSeleccionadoId.HasValue && dto.AlumnoId != AlumnoSeleccionadoId.Value) return false;
 

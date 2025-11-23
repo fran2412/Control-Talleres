@@ -278,8 +278,6 @@ namespace ControlTalleresMVP.Services.Clases
                           && (!alumnoId.HasValue || ca.AlumnoId == alumnoId.Value)
                     join cl in _escuelaContext.Clases.AsNoTracking() on ca.ClaseId equals cl.ClaseId
                     where (!tallerId.HasValue || cl.TallerId == tallerId.Value)
-                       && (!desde.HasValue || cl.Fecha >= desde.Value.Date)
-                       && (!hasta.HasValue || cl.Fecha <= hasta.Value.Date)
                     join ta in _escuelaContext.Talleres.AsNoTracking() on cl.TallerId equals ta.TallerId
                     join al in _escuelaContext.Alumnos.AsNoTracking() on ca.AlumnoId equals al.AlumnoId
                     join pa in _escuelaContext.PagoAplicaciones.AsNoTracking()
@@ -328,9 +326,28 @@ namespace ControlTalleresMVP.Services.Clases
                     UltimoPagoFecha  = g.Where(z => z.pa != null)
                                         .Max(z => (DateTime?)z.pa.Pago.Fecha)
                 })
-                .OrderByDescending(r => r.FechaClase)
+                .OrderByDescending(r => r.UltimoPagoFecha ?? r.FechaClase)
                 .ThenBy(r => r.TallerNombre)
                 .ToListAsync(ct);
+
+            if (desde.HasValue)
+            {
+                lista = lista
+                    .Where(r => r.UltimoPagoFecha.HasValue && r.UltimoPagoFecha.Value.Date >= desde.Value.Date)
+                    .ToList();
+            }
+
+            if (hasta.HasValue)
+            {
+                lista = lista
+                    .Where(r => r.UltimoPagoFecha.HasValue && r.UltimoPagoFecha.Value.Date <= hasta.Value.Date)
+                    .ToList();
+            }
+
+            lista = lista
+                .OrderByDescending(r => r.UltimoPagoFecha ?? r.FechaClase)
+                .ThenBy(r => r.TallerNombre)
+                .ToList();
 
             // Redondeamos importes por consistencia visual
             foreach (var r in lista)
@@ -345,7 +362,8 @@ namespace ControlTalleresMVP.Services.Clases
 
         // ====================
         // Verificación de duplicados
-        // ====================
+        // ====================min
+        
         private async Task<bool> ExisteCargoClaseAsync(int alumnoId, int claseId, DateTime fecha, CancellationToken ct = default)
             => await _escuelaContext.Cargos.AnyAsync(i =>
                    i.AlumnoId == alumnoId
