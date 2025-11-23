@@ -55,7 +55,7 @@
 
                     <!-- Toggle filtro por día -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
-                        <CheckBox Content="Filtrar día"
+                        <CheckBox Content="Filtrar por día específico"
                                   IsChecked="{Binding FiltrarPorDiaEspecifico}"
                                   VerticalAlignment="Center"/>
                     </StackPanel>
@@ -96,8 +96,9 @@
                         <DataGridTextColumn Header="Taller"       Binding="{Binding TallerNombre}" Width="*"/>
                         <DataGridTextColumn Header="Alumno"       Binding="{Binding AlumnoNombre}" Width="200"/>
                         <DataGridTextColumn Header="Estado"       Binding="{Binding EstadoTexto}" Width="110"/>
-                        <DataGridTextColumn Header="Costo"        Binding="{Binding Monto, StringFormat=C}" Width="110"/>
-                        <DataGridTextColumn Header="Pagado"       Binding="{Binding MontoPagado, StringFormat=C}" Width="110"/>
+                        <DataGridTextColumn Header="Valor Total"  Binding="{Binding MontoTotal, StringFormat=C}" Width="110"/>
+                        <DataGridTextColumn Header="Ingreso del día" Binding="{Binding IngresoPorFecha, StringFormat=C}" Width="110" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Pagado Acum." Binding="{Binding MontoPagado, StringFormat=C}" Width="110"/>
                         <DataGridTextColumn Header="Saldo"        Binding="{Binding SaldoActual, StringFormat=C}" Width="110"/>
                         <DataGridTextColumn Header="%"            Binding="{Binding PorcentajePagado}" Width="60"/>
                         <DataGridTextColumn Header="Último Pago"  Binding="{Binding UltimoPagoFecha, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
@@ -106,8 +107,9 @@
 
                 <!-- Totales -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0,20,20">
-                    <TextBlock Text="{Binding TotalMontoClases, StringFormat=Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                    <TextBlock Text="{Binding TotalPagadoClases, StringFormat=Pagado: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
+                    <TextBlock Text="{Binding TotalMontoClases, StringFormat=Valor Total: {0:C}}"  FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0" Foreground="Gray"/>
+                    <TextBlock Text="{Binding TotalIngresoReal, StringFormat=Ingreso del día: {0:C}}" FontSize="16" FontWeight="Bold" Margin="0,0,24,0" Foreground="#2E7D32"/>
+                    <TextBlock Text="{Binding TotalPagadoClases, StringFormat=Pagado Acum: {0:C}}" FontSize="16" FontWeight="SemiBold" Margin="0,0,24,0"/>
                     <TextBlock Text="{Binding TotalSaldoClases, StringFormat=Saldo: {0:C}}"  FontSize="16" FontWeight="SemiBold"/>
                 </StackPanel>
             </Grid>

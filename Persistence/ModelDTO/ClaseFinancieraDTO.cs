@@ -28,11 +28,15 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         public string AlumnoNombre { get; set; } = string.Empty;
 
         // Importes
-        [Display(Name = "Costo")]
+        [Display(Name = "Valor Total (Devengado)")]
         [DisplayFormat(DataFormatString = "{0:C}")]
-        public decimal Monto { get; set; }
+        public decimal MontoTotal { get; set; }
 
-        [Display(Name = "Pagado")]
+        [Display(Name = "Ingreso del día")]
+        [DisplayFormat(DataFormatString = "{0:C}")]
+        public decimal IngresoPorFecha { get; set; }
+
+        [Display(Name = "Pagado Acumulado")]
         [DisplayFormat(DataFormatString = "{0:C}")]
         public decimal MontoPagado { get; set; }
 

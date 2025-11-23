@@ -286,10 +286,17 @@ namespace ControlTalleresMVP.Services.Clases
                     from pa in pagos.DefaultIfEmpty()
                     select new { ca, cl, ta, al, pa };
 
+            // Normalizar fechas para comparaciones
+            var fechaDesde = desde?.Date;
+            var fechaHasta = hasta?.Date;
+
             // Agrupamos por cargo (una fila por clase/alumno)
-            var lista = await (
-                from x in q
-                group x by new
+            // Nota: EF Core 3.x/5.x+ a veces requiere traer los datos a memoria antes de agrupar si la consulta es compleja
+            // Pero intentaremos mantenerlo eficiente. Si falla, traeremos q.ToListAsync() primero.
+            var listaRaw = await q.ToListAsync(ct); 
+            
+            var lista = listaRaw
+                .GroupBy(x => new
                 {
                     x.ca.CargoId,
                     x.cl.ClaseId,
@@ -301,9 +308,8 @@ namespace ControlTalleresMVP.Services.Clases
                     x.ca.Monto,
                     x.ca.SaldoActual,
                     x.ca.Estado
-                }
-                into g
-                select new ClaseFinancieraDTO
+                })
+                .Select(g => new ClaseFinancieraDTO
                 {
                     CargoId        = g.Key.CargoId,
                     ClaseId        = g.Key.ClaseId,
@@ -312,11 +318,28 @@ namespace ControlTalleresMVP.Services.Clases
                     FechaClase     = g.Key.Fecha,
                     TallerNombre   = g.Key.TallerNombre,
                     AlumnoNombre   = g.Key.AlumnoNombre,
-                    Monto          = g.Key.Monto,
+                    MontoTotal     = g.Key.Monto, // Renombrado de Monto
                     SaldoActual    = g.Key.SaldoActual,
+                    
+                    // Total histórico pagado
                     MontoPagado    = (decimal)((g.Where(z => z.pa != null)
                                                 .Select(z => (double?)z.pa.MontoAplicado)
-                                                .Sum()) ?? 0.0), // <- SQLite REAL
+                                                .Sum()) ?? 0.0),
+                    
+                    // Nuevo: Cash Basis - Ingreso estrictamente en el rango de fechas consultado
+                    IngresoPorFecha = (decimal)((g.Where(z => 
+                    {
+                        if (z.pa == null || z.pa.Pago == null) return false;
+                        var fechaPago = z.pa.Pago.Fecha.Date;
+                        
+                        if (fechaDesde.HasValue && fechaPago < fechaDesde.Value) return false;
+                        if (fechaHasta.HasValue && fechaPago > fechaHasta.Value) return false;
+                        
+                        return true;
+                    })
+                    .Select(z => (double?)z.pa!.MontoAplicado)
+                    .Sum()) ?? 0.0),
+
                     PorcentajePagado = g.Key.Monto > 0
                         ? (int)Math.Round((double)((g.Key.Monto - g.Key.SaldoActual) / g.Key.Monto * 100m))
                         : 0,
@@ -326,35 +349,37 @@ namespace ControlTalleresMVP.Services.Clases
                     UltimoPagoFecha  = g.Where(z => z.pa != null)
                                         .Max(z => (DateTime?)z.pa.Pago.Fecha)
                 })
-                .OrderByDescending(r => r.UltimoPagoFecha ?? r.FechaClase)
-                .ThenBy(r => r.TallerNombre)
-                .ToListAsync(ct);
+                .ToList();
 
-            if (desde.HasValue)
+            // Filtrado final:
+            // Incluir si la CLASE ocurrió en el rango (Devengado)
+            // O SI hubo PAGOS en el rango (Cash Flow)
+            if (fechaDesde.HasValue || fechaHasta.HasValue)
             {
                 lista = lista
-                    .Where(r => r.UltimoPagoFecha.HasValue && r.UltimoPagoFecha.Value.Date >= desde.Value.Date)
-                    .ToList();
-            }
-
-            if (hasta.HasValue)
-            {
-                lista = lista
-                    .Where(r => r.UltimoPagoFecha.HasValue && r.UltimoPagoFecha.Value.Date <= hasta.Value.Date)
+                    .Where(r => 
+                        // Condición 1: La clase es del día (o rango)
+                        ((!fechaDesde.HasValue || r.FechaClase.Date >= fechaDesde.Value) && 
+                         (!fechaHasta.HasValue || r.FechaClase.Date <= fechaHasta.Value))
+                        ||
+                        // Condición 2: Hubo ingreso de dinero real en esa fecha (aunque la clase sea vieja)
+                        r.IngresoPorFecha > 0
+                    )
                     .ToList();
             }
 
             lista = lista
-                .OrderByDescending(r => r.UltimoPagoFecha ?? r.FechaClase)
+                .OrderByDescending(r => r.FechaClase) // Ordenar por fecha de clase es más lógico para registros, o por pago
                 .ThenBy(r => r.TallerNombre)
                 .ToList();
 
             // Redondeamos importes por consistencia visual
             foreach (var r in lista)
             {
-                r.Monto        = Math.Round(r.Monto, 2, MidpointRounding.AwayFromZero);
-                r.MontoPagado  = Math.Round(r.MontoPagado, 2, MidpointRounding.AwayFromZero);
-                r.SaldoActual  = Math.Round(r.SaldoActual, 2, MidpointRounding.AwayFromZero);
+                r.MontoTotal     = Math.Round(r.MontoTotal, 2, MidpointRounding.AwayFromZero);
+                r.MontoPagado    = Math.Round(r.MontoPagado, 2, MidpointRounding.AwayFromZero);
+                r.SaldoActual    = Math.Round(r.SaldoActual, 2, MidpointRounding.AwayFromZero);
+                r.IngresoPorFecha = Math.Round(r.IngresoPorFecha, 2, MidpointRounding.AwayFromZero);
             }
 
             return lista;
