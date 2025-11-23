@@ -339,19 +339,12 @@ namespace ControlTalleresMVP.Services.Clases
                 .ToList();
 
             // Filtrado final:
-            // Incluir si la CLASE ocurrió en el rango (Devengado)
-            // O SI hubo PAGOS en el rango (Cash Flow)
+            // Incluir SOLO SI hubo PAGOS en el rango (Cash Flow Estricto)
+            // El usuario indicó que no quiere ver clases del día si no tuvieron pagos ese día.
             if (fechaDesde.HasValue || fechaHasta.HasValue)
             {
                 lista = lista
-                    .Where(r => 
-                        // Condición 1: La clase es del día (o rango)
-                        ((!fechaDesde.HasValue || r.FechaClase.Date >= fechaDesde.Value) && 
-                         (!fechaHasta.HasValue || r.FechaClase.Date <= fechaHasta.Value))
-                        ||
-                        // Condición 2: Hubo ingreso de dinero real en esa fecha (aunque la clase sea vieja)
-                        r.IngresoPorFecha > 0
-                    )
+                    .Where(r => r.IngresoPorFecha > 0)
                     .ToList();
             }
 
