@@ -44,6 +44,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private decimal totalPagadoClases;
         [ObservableProperty] private decimal totalSaldoClases;
         [ObservableProperty] private decimal totalIngresoReal;
+        
+        // Título dinámico para la columna y el total
+        public string TituloIngreso => FiltrarPorDiaEspecifico ? "Ingreso del día" : "Ingreso del periodo";
 
         private CancellationTokenSource? _ctsCarga;
 
@@ -74,6 +77,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             OnPropertyChanged(nameof(PuedeEditarRangoFechas));
             OnPropertyChanged(nameof(PuedeEditarDia));
+            OnPropertyChanged(nameof(TituloIngreso)); // Notificar cambio de título
 
             if (value)
                 SincronizarRangoConDia();

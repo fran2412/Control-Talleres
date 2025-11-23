@@ -1,20 +1,20 @@
 ﻿ControlTalleres
-1.0.0.0
+
 
 winexe
 C#
 .cs
-c:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net10.0-windows10.0.26100.0\
+C:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\obj\Debug\net10.0-windows10.0.26100.0\
 ControlTalleresMVP
 none
 false
 TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS10_0_26100_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS10_0_26100_0_OR_GREATER;WINDOWS10_0_22621_0_OR_GREATER;WINDOWS10_0_22000_0_OR_GREATER;WINDOWS10_0_20348_0_OR_GREATER;WINDOWS10_0_19041_0_OR_GREATER;WINDOWS10_0_18362_0_OR_GREATER;WINDOWS10_0_17763_0_OR_GREATER;WINDOWS8_0_OR_GREATER;WINDOWS7_0_OR_GREATER
-c:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\App.xaml
+C:\Users\pancho\source\repos\ControlTalleresMVP\ControlTalleresMVP\App.xaml
 43-910098580
 2-1703908715
-159-244338189
+157-1150449335
 247-216397076
 Resources\Styles\Borders.xaml;Resources\Styles\Buttons.xaml;Resources\Styles\Colors.xaml;Resources\Styles\ComboBoxs.xaml;Resources\Styles\DataGridDictionary.xaml;Resources\Styles\Labels.xaml;Resources\Styles\PasswordBox.xaml;Resources\Styles\TextBox.xaml;UI\Component\Administracion\AdministracionUserControl.xaml;UI\Component\Administracion\ConfiguracionesUserControl.xaml;UI\Component\Administracion\RegistrosGeneracionUserControl.xaml;UI\Component\Alumno\AlumnoUserControl.xaml;UI\Component\Alumno\FormularioAlumnoUserControl.xaml;UI\Component\Alumno\RegistrosUsuarioUserControl.xaml;UI\Component\Backup\BackupUserControl.xaml;UI\Component\Backup\MenuBackupUserControl.xaml;UI\Component\Clases\ClaseUserControl.xaml;UI\Component\Clases\FormularioClaseUserControl.xaml;UI\Component\Clases\RegistrosClasesUserControl.xaml;UI\Component\Inicio\InicioUserControl.xaml;UI\Component\Inscripcion\FormularioInscripcionUserControl.xaml;UI\Component\Inscripcion\InscripcionTallerUserControl.xaml;UI\Component\Inscripcion\RegistrosInscripcionUserControl.xaml;UI\Component\Pago\FormularioPagoUserControl.xaml;UI\Component\Pago\PagoUserControl.xaml;UI\Component\Promotor\FormularioPromotorUserControl.xaml;UI\Component\Promotor\PromotorUserControl.xaml;UI\Component\Promotor\RegistrosPromotorUserControl.xaml;UI\Component\Reportes\MenuReporteEstadoPagosUserControl.xaml;UI\Component\Reportes\MenuReporteInscripcionesUserControl.xaml;UI\Component\Sede\FormularioSedeUserControl.xaml;UI\Component\Sede\RegistrosSedeUserControl.xaml;UI\Component\Sede\SedeUserControl.xaml;UI\Component\Taller\FormularioTallerUserControl.xaml;UI\Component\Taller\RegistrosTallerUserControl.xaml;UI\Component\Taller\TallerUserControl.xaml;UI\Windows\FormContainer\ContenedorFormAlumnoWindow.xaml;UI\Windows\FormContainer\ContenedorFormPromotorWindow.xaml;UI\Windows\FormContainer\ContenedorFormSedeWindow.xaml;UI\Windows\FormContainer\ContenedorFormTallerWindow.xaml;UI\Windows\MainWindow.xaml;UI\Windows\MenuWindow.xaml;UI\Windows\Select\SeleccionarAlumnoWindow.xaml;
 
-True
+False
 

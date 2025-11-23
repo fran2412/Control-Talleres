@@ -81,7 +81,6 @@ namespace ControlTalleresMVP.Services.Clases
             bool claseCreada = false, cargoCreado = false, pagoCreado = false;
             decimal aplicado = 0m;
             bool yaPagado = false;
-            decimal excedenteAplicado = 0m;
             var operacionGrupoId = grupoOperacionId ?? Guid.NewGuid();
 
             // 2) Buscar o crear CLASE (única por Taller+Fecha)
@@ -174,21 +173,9 @@ namespace ControlTalleresMVP.Services.Clases
                         pagoCreado = true;
                         aplicado = aAplicar;
 
-                        // 5) Verificar si hay excedente y aplicarlo a la siguiente clase
-                        // El excedente es la diferencia entre lo que se pagó y lo que se aplicó a esta clase
-                        var excedente = montoAbono - aAplicar;
-                        if (excedente > 0m)
-                        {
-                            excedenteAplicado = await AplicarExcedenteASiguienteClaseAsync(
-                                alumnoId,
-                                tallerId,
-                                fechaClase,
-                                excedente,
-                                taller?.Nombre ?? "Taller",
-                                costoClaseConDescuento,
-                                operacionGrupoId,
-                                ct);
-                        }
+                        // 5) Excedentes eliminados: el pago es exacto o parcial hasta cubrir el saldo.
+                        // Cualquier monto "extra" enviado por el usuario simplemente se ignora en la aplicación
+                        // (ya que aAplicar = Min(montoAbono, cargo.SaldoActual)).
                     }
                 }
             }
@@ -199,7 +186,7 @@ namespace ControlTalleresMVP.Services.Clases
                 PagoCreado: pagoCreado,
                 MontoAplicado: aplicado,
                 CargoYaPagado: yaPagado,
-                ExcedenteAplicado: excedenteAplicado
+                ExcedenteAplicado: 0m // Siempre 0 al no haber excedentes
             );
         }
 
@@ -863,141 +850,6 @@ namespace ControlTalleresMVP.Services.Clases
                 DayOfWeek.Sunday => "Domingo",
                 _ => "Lunes"
             };
-        }
-
-        // ====================
-        // Aplicar excedente a la siguiente clase
-        // ====================
-        private async Task<decimal> AplicarExcedenteASiguienteClaseAsync(
-            int alumnoId,
-            int tallerId,
-            DateTime fechaClaseActual,
-            decimal excedente,
-            string nombreTaller,
-            decimal costoClaseAlumno,
-            Guid operacionGrupoId,
-            CancellationToken ct = default)
-        {
-            try
-            {
-                // Calcular la siguiente clase (7 días después)
-                var siguienteFecha = fechaClaseActual.AddDays(7);
-                
-                // Obtener información del taller para validar el día de la semana
-                var taller = await _escuelaContext.Talleres
-                    .Where(t => t.TallerId == tallerId && !t.Eliminado)
-                    .Select(t => new { t.DiaSemana, t.FechaFin })
-                    .FirstOrDefaultAsync(ct);
-
-                if (taller == null)
-                    return 0m;
-
-                // Ajustar la fecha al día correcto de la semana
-                var diaSemana = taller.DiaSemana;
-                int delta = ((int)diaSemana - (int)siguienteFecha.DayOfWeek + 7) % 7;
-                var fechaSiguienteClase = siguienteFecha.AddDays(delta);
-
-                // Verificar si el taller tiene fecha de fin y si la siguiente clase está dentro del rango
-                if (taller.FechaFin.HasValue && fechaSiguienteClase > taller.FechaFin.Value)
-                {
-                    // Si la siguiente clase está fuera del rango del taller, no aplicar excedente
-                    return 0m;
-                }
-
-                // Buscar o crear la clase siguiente
-                var claseSiguiente = await _escuelaContext.Clases
-                    .FirstOrDefaultAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Fecha.Date == fechaSiguienteClase, ct);
-
-                if (claseSiguiente == null)
-                {
-                    claseSiguiente = new Clase { TallerId = tallerId, Fecha = fechaSiguienteClase };
-                    _escuelaContext.Clases.Add(claseSiguiente);
-                    await _escuelaContext.SaveChangesAsync(ct);
-                }
-
-                // Buscar o crear el cargo para la clase siguiente
-                var cargoSiguiente = await _escuelaContext.Cargos
-                    .FirstOrDefaultAsync(c => c.AlumnoId == alumnoId
-                                           && c.ClaseId == claseSiguiente.ClaseId
-                                           && !c.Eliminado
-                                           && c.Estado != EstadoCargo.Anulado, ct);
-
-                if (cargoSiguiente == null)
-                {
-                    cargoSiguiente = new Cargo
-                    {
-                        AlumnoId = alumnoId,
-                        ClaseId = claseSiguiente.ClaseId,
-                        Tipo = TipoCargo.Clase,
-                        Fecha = fechaSiguienteClase,
-                        Monto = costoClaseAlumno,
-                        SaldoActual = costoClaseAlumno,
-                        Estado = EstadoCargo.Pendiente,
-                        Eliminado = false
-                    };
-                    _escuelaContext.Cargos.Add(cargoSiguiente);
-                    await _escuelaContext.SaveChangesAsync(ct);
-                }
-                // Si la clase siguiente ya está pagada, no aplicar excedente
-                if (cargoSiguiente.SaldoActual <= 0m)
-                    return 0m;
-
-                // Aplicar el excedente a la clase siguiente
-                var montoAplicar = Math.Min(excedente, cargoSiguiente.SaldoActual);
-                if (montoAplicar <= 0m)
-                    return 0m;
-
-                // Crear el pago para el excedente
-                var diaSemanaTexto = ConvertirDiaSemanaASpanol(diaSemana);
-                var descripcion = $"Excedente aplicado a clase - {nombreTaller} ({diaSemanaTexto} {fechaSiguienteClase:dd/MM/yyyy}) - Monto: ${montoAplicar:F2}";
-                
-                var pagoExcedente = new Pago
-                {
-                    AlumnoId = alumnoId,
-                    Fecha = DateTime.Now,
-                    Metodo = MetodoPago.Efectivo,
-                    MontoTotal = montoAplicar,
-                    Notas = descripcion,
-                    OperacionGrupoId = operacionGrupoId
-                };
-                _escuelaContext.Pagos.Add(pagoExcedente);
-                await _escuelaContext.SaveChangesAsync(ct);
-
-                // Crear la aplicación del pago
-                var paExcedente = new PagoAplicacion
-                {
-                    PagoId = pagoExcedente.PagoId,
-                    CargoId = cargoSiguiente.CargoId,
-                    MontoAplicado = montoAplicar,
-                    Estado = EstadoAplicacionCargo.Vigente
-                };
-                _escuelaContext.PagoAplicaciones.Add(paExcedente);
-
-                // Actualizar el saldo del cargo
-                cargoSiguiente.SaldoActual -= montoAplicar;
-                cargoSiguiente.Estado = cargoSiguiente.SaldoActual == 0m
-                    ? EstadoCargo.Pagado
-                    : EstadoCargo.Pendiente;
-
-                await _escuelaContext.SaveChangesAsync(ct);
-
-                // Verificar si hay excedente restante y aplicarlo recursivamente
-                var excedenteRestante = excedente - montoAplicar;
-                if (excedenteRestante > 0m)
-                {
-                    // Aplicar el excedente restante a la siguiente clase
-                    var excedenteAdicional = await AplicarExcedenteASiguienteClaseAsync(
-                        alumnoId, tallerId, fechaSiguienteClase, excedenteRestante, nombreTaller, costoClaseAlumno, operacionGrupoId, ct);
-                    return montoAplicar + excedenteAdicional;
-                }
-
-                return montoAplicar;
-            }
-            catch (Exception)
-            {
-                // En caso de error, retornar 0 para no afectar el flujo principal
-                return 0m;
-            }
         }
 
         private async Task<decimal> ObtenerDescuentoPorClaseAsync(int alumnoId, CancellationToken ct)
