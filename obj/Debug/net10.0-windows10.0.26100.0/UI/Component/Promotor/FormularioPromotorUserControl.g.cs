@@ -76,8 +76,8 @@ namespace ControlTalleresMVP.UI.Component.Promotor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri(("/ControlTalleres;component/ui/component/promotor/formulariopromotorusercontrol.xa" +
-                    "ml"), System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri(("/ControlTalleres;V1.0.0.0;component/ui/component/promotor/formulariopromotoruserc" +
+                    "ontrol.xaml"), System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\..\UI\Component\Promotor\FormularioPromotorUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
