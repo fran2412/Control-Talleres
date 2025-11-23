@@ -310,52 +310,67 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     .Select(c => c.FechaClase.Date)
                     .ToHashSet();
 
+                var costoClaseAlumno = ObtenerCostoClaseAlumno();
+
                 var clasesConSaldo = clasesFinancieras
                     .Where(c => c.SaldoActual > 0m)
                     .OrderBy(c => c.FechaClase)
+                    .Select(c => new
+                    {
+                        Fecha = c.FechaClase.Date,
+                        SaldoAjustado = CalcularSaldoConDescuento(c, costoClaseAlumno)
+                    })
                     .ToList();
 
-                // Hay pendientes si existe saldo en fecha <= hoy (incluye hoy).
-                bool hayPendientes = clasesConSaldo.Any(c => c.FechaClase.Date <= hoy);
-
-                // Si hay pendientes: no permitir futuras (> hoy).
+                bool hayPendientes = clasesConSaldo.Any(c => c.SaldoAjustado > 0m && c.Fecha <= hoy);
                 bool permitirFuturas = !hayPendientes;
 
                 var agregadas = new HashSet<DateTime>();
 
                 // 1) PENDIENTES VENCIDAS O DE HOY (con cargo y saldo, fecha <= hoy) -> habilitadas y seleccionadas
-                foreach (var clase in clasesConSaldo.Where(c => c.FechaClase.Date <= hoy))
+                foreach (var clase in clasesConSaldo.Where(c => c.Fecha <= hoy))
                 {
-                    var fecha = clase.FechaClase.Date;
+                    var fecha = clase.Fecha;
+                    agregadas.Add(fecha);
+
+                    if (clase.SaldoAjustado <= 0m)
+                    {
+                        continue;
+                    }
+
                     var item = new ClasePagoItem(
                         fecha,
-                        clase.SaldoActual,
+                        clase.SaldoAjustado,
                         esCargoExistente: true,
                         estaHabilitada: true);
 
                     AgregarClase(item, seleccionar: true);
-                    agregadas.Add(fecha);
                 }
 
                 // 2) FUTURAS CON SALDO (fecha > hoy)
                 //    Si hay pendientes: NO se pueden ingresar (deshabilitadas y no seleccionadas).
                 //    Si no hay pendientes: habilitadas y seleccionadas.
-                foreach (var clase in clasesConSaldo.Where(c => c.FechaClase.Date > hoy))
+                foreach (var clase in clasesConSaldo.Where(c => c.Fecha > hoy))
                 {
-                    var fecha = clase.FechaClase.Date;
+                    var fecha = clase.Fecha;
                     if (agregadas.Contains(fecha)) continue;
+
+                    agregadas.Add(fecha);
+                    if (clase.SaldoAjustado <= 0m)
+                    {
+                        continue;
+                    }
 
                     var habilitada = permitirFuturas;      // false si hay pendientes
                     var seleccionada = permitirFuturas;    // false si hay pendientes
 
                     var item = new ClasePagoItem(
                         fecha,
-                        clase.SaldoActual,
+                        clase.SaldoAjustado,
                         esCargoExistente: true,
                         estaHabilitada: habilitada);
 
                     AgregarClase(item, seleccionar: seleccionada);
-                    agregadas.Add(fecha);
                 }
 
                 // 3) PASADAS ESPERADAS SIN CARGO (desde inicio hasta hoy o fin si es antes)
@@ -373,7 +388,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
 
                         var item = new ClasePagoItem(
                             f,
-                            _costoClase,
+                            costoClaseAlumno,
                             esCargoExistente: false,
                             estaHabilitada: true);
 
@@ -396,7 +411,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
 
                     var item = new ClasePagoItem(
                         fecha,
-                        _costoClase,
+                        costoClaseAlumno,
                         esCargoExistente: false,
                         estaHabilitada: habilitada);
 
@@ -596,6 +611,23 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
             }
 
             return sb.Length > 0 ? sb.ToString() : "Pago registrado.";
+        }
+
+        private decimal ObtenerCostoClaseAlumno()
+        {
+            var descuento = AlumnoSeleccionado?.DescuentoPorClase ?? 0m;
+            var costoConDescuento = Math.Max(1m, _costoClase - descuento);
+            return Math.Round(costoConDescuento, 2, MidpointRounding.AwayFromZero);
+        }
+
+        private decimal CalcularSaldoConDescuento(ClaseFinancieraDTO clase, decimal costoClaseAlumno)
+        {
+            var saldoActual = Math.Round(clase.SaldoActual, 2, MidpointRounding.AwayFromZero);
+            var montoOriginal = Math.Round(clase.Monto, 2, MidpointRounding.AwayFromZero);
+            var pagado = Math.Max(0m, montoOriginal - saldoActual);
+            var saldoDeseado = Math.Max(0m, costoClaseAlumno - pagado);
+            var saldo = Math.Min(saldoActual, saldoDeseado);
+            return Math.Round(saldo, 2, MidpointRounding.AwayFromZero);
         }
 
         private static decimal ClampCosto(decimal valor)
