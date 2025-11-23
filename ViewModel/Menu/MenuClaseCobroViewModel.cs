@@ -230,6 +230,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                         }
                         
                 var resultados = new List<RegistrarClaseResult>();
+                var operacionGrupoId = Guid.NewGuid();
 
                 foreach (var clase in seleccion)
                 {
@@ -241,15 +242,16 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                         continue;
                     }
                             
-                            var r = await _claseService.RegistrarClaseAsync(
+                    var r = await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
                         clase.Fecha,
                         monto,
+                        operacionGrupoId,
                         ct);
 
-                            resultados.Add(r);
-                        }
+                    resultados.Add(r);
+                }
                         
                 if (resultados.Count == 0)
                 {

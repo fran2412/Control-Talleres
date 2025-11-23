@@ -42,6 +42,7 @@ namespace ControlTalleresMVP.Services.Clases
     int tallerId,
     DateTime fecha,
     decimal montoAbono,
+    Guid? grupoOperacionId = null,
     CancellationToken ct = default)
         {
             // 0) Resolver datos del taller y validar la fecha indicada
@@ -81,6 +82,7 @@ namespace ControlTalleresMVP.Services.Clases
             decimal aplicado = 0m;
             bool yaPagado = false;
             decimal excedenteAplicado = 0m;
+            var operacionGrupoId = grupoOperacionId ?? Guid.NewGuid();
 
             // 2) Buscar o crear CLASE (única por Taller+Fecha)
             var clase = await _escuelaContext.Clases
@@ -147,7 +149,8 @@ namespace ControlTalleresMVP.Services.Clases
                             Fecha = DateTime.Now,
                             Metodo = MetodoPago.Efectivo, // ajusta según tu UI
                             MontoTotal = aAplicar,
-                            Notas = descripcion
+                            Notas = descripcion,
+                            OperacionGrupoId = operacionGrupoId
                         };
                         _escuelaContext.Pagos.Add(pago);
                         await _escuelaContext.SaveChangesAsync(ct);
@@ -183,6 +186,7 @@ namespace ControlTalleresMVP.Services.Clases
                                 excedente,
                                 taller?.Nombre ?? "Taller",
                                 costoClaseConDescuento,
+                                operacionGrupoId,
                                 ct);
                         }
                     }
@@ -828,6 +832,7 @@ namespace ControlTalleresMVP.Services.Clases
             decimal excedente,
             string nombreTaller,
             decimal costoClaseAlumno,
+            Guid operacionGrupoId,
             CancellationToken ct = default)
         {
             try
@@ -909,7 +914,8 @@ namespace ControlTalleresMVP.Services.Clases
                     Fecha = DateTime.Now,
                     Metodo = MetodoPago.Efectivo,
                     MontoTotal = montoAplicar,
-                    Notas = descripcion
+                    Notas = descripcion,
+                    OperacionGrupoId = operacionGrupoId
                 };
                 _escuelaContext.Pagos.Add(pagoExcedente);
                 await _escuelaContext.SaveChangesAsync(ct);
@@ -938,7 +944,7 @@ namespace ControlTalleresMVP.Services.Clases
                 {
                     // Aplicar el excedente restante a la siguiente clase
                     var excedenteAdicional = await AplicarExcedenteASiguienteClaseAsync(
-                        alumnoId, tallerId, fechaSiguienteClase, excedenteRestante, nombreTaller, costoClaseAlumno, ct);
+                        alumnoId, tallerId, fechaSiguienteClase, excedenteRestante, nombreTaller, costoClaseAlumno, operacionGrupoId, ct);
                     return montoAplicar + excedenteAdicional;
                 }
 

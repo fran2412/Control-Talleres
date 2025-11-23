@@ -411,6 +411,12 @@ namespace ControlTalleresMVP.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("notas");
 
+                    b.Property<string>("OperacionGrupoId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("operacion_grupo_id");
+
                     b.Property<string>("Referencia")
                         .HasColumnType("TEXT")
                         .HasColumnName("referencia");
@@ -418,6 +424,9 @@ namespace ControlTalleresMVP.Migrations
                     b.HasKey("PagoId");
 
                     b.HasIndex("AlumnoId");
+
+                    b.HasIndex("OperacionGrupoId")
+                        .HasDatabaseName("IX_pagos_operacion_grupo");
 
                     b.ToTable("pagos", (string)null);
                 });

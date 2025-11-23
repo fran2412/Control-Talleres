@@ -9,6 +9,7 @@
         public MetodoPago Metodo { get; set; } = MetodoPago.Efectivo;
         public string? Referencia { get; set; }
         public string? Notas { get; set; }
+        public Guid OperacionGrupoId { get; set; } = Guid.NewGuid();
 
         // Auditoría
         public DateTime CreadoEn { get; set; } = DateTime.Now;

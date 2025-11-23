@@ -15,6 +15,7 @@ namespace ControlTalleresMVP.Services.Clases
         int tallerId,
         DateTime fecha,
         decimal montoAbono,
+        Guid? grupoOperacionId = null,
         CancellationToken ct = default);
 
         Task<List<ClaseFinancieraDTO>> ObtenerClasesFinancierasAsync(

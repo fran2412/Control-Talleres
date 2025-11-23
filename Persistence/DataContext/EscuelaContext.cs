@@ -421,6 +421,11 @@ namespace ControlTalleresMVP.Persistence.DataContext
                 entity.Property(p => p.Notas)
                       .HasColumnName("notas");
 
+                entity.Property(p => p.OperacionGrupoId)
+                      .HasColumnName("operacion_grupo_id")
+                      .HasConversion<string>()
+                      .HasMaxLength(36);
+
                 entity.Property(p => p.CreadoEn)
                       .HasColumnName("creado_en")
                       .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -439,6 +444,9 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .HasColumnName("eliminado_en");
 
                 entity.Property(p => p.AlumnoId).HasColumnName("alumno_id");
+
+                entity.HasIndex(p => p.OperacionGrupoId)
+                      .HasDatabaseName("IX_pagos_operacion_grupo");
 
                 // Relaciones
                 entity.HasOne(p => p.Alumno)
