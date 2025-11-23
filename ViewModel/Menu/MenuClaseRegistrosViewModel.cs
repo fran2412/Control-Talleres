@@ -30,6 +30,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         [ObservableProperty] private DateTime? fechaDesdeRegistros;
         [ObservableProperty] private DateTime? fechaHastaRegistros;
+        [ObservableProperty] private DateTime? fechaFiltroDia = DateTime.Today;
+        [ObservableProperty] private bool filtrarPorDiaEspecifico;
 
         private string _filtroRegistrosClases = string.Empty;
         public string FiltroRegistrosClases
@@ -52,6 +54,21 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             NormalizarRangoFechas();
             _ = CargarRegistrosClasesAsync();
+        }
+
+        partial void OnFechaFiltroDiaChanged(DateTime? value)
+        {
+            if (FiltrarPorDiaEspecifico)
+                SincronizarRangoConDia();
+        }
+
+        partial void OnFiltrarPorDiaEspecificoChanged(bool value)
+        {
+            OnPropertyChanged(nameof(PuedeEditarRangoFechas));
+            OnPropertyChanged(nameof(PuedeEditarDia));
+
+            if (value)
+                SincronizarRangoConDia();
         }
 
         private void NormalizarRangoFechas()
@@ -119,6 +136,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public IAsyncRelayCommand<int> CancelarClaseAsyncCommand { get; }
 
+        public bool PuedeEditarRangoFechas => !FiltrarPorDiaEspecifico;
+        public bool PuedeEditarDia => FiltrarPorDiaEspecifico;
+
         private async Task CancelarClaseAsync(int claseId)
         {
             System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Comando ejecutado para claseId: {claseId}");
@@ -143,6 +163,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Error: {ex.Message}");
                 _dialogService.Error("No se pudo cancelar la clase.\n" + ex.Message);
             }
+        }
+
+        private void SincronizarRangoConDia()
+        {
+            if (!FechaFiltroDia.HasValue) return;
+
+            var fecha = FechaFiltroDia.Value.Date;
+
+            if (FechaDesdeRegistros != fecha) FechaDesdeRegistros = fecha;
+            if (FechaHastaRegistros != fecha) FechaHastaRegistros = fecha;
         }
 
         private bool FiltroRegistrosPredicate(object o)

@@ -41,14 +41,31 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
                         <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <DatePicker SelectedDate="{Binding FechaDesdeRegistros, Mode=TwoWay}"
-                                    Width="140"/>
+                                    Width="140"
+                                    IsEnabled="{Binding PuedeEditarRangoFechas}"/>
                     </StackPanel>
 
                     <!-- Fecha HASTA -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
                         <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <DatePicker SelectedDate="{Binding FechaHastaRegistros, Mode=TwoWay}"
-                                    Width="140"/>
+                                    Width="140"
+                                    IsEnabled="{Binding PuedeEditarRangoFechas}"/>
+                    </StackPanel>
+
+                    <!-- Toggle filtro por día -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <CheckBox Content="Filtrar día"
+                                  IsChecked="{Binding FiltrarPorDiaEspecifico}"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Día específico -->
+                    <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Día:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <DatePicker SelectedDate="{Binding FechaFiltroDia, Mode=TwoWay}"
+                                    Width="140"
+                                    IsEnabled="{Binding PuedeEditarDia}"/>
                     </StackPanel>
                 </Grid>
 
