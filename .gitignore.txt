@@ -43,6 +43,7 @@ build/
 .idea/
 *.iml
 *.suo
+*.vs/
 *.user
 *.userosscache
 *.sln.docstates
