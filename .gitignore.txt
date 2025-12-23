@@ -1,0 +1,92 @@
+# =========================
+# Sistema operativo
+# =========================
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Archivos temporales
+# =========================
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.swp
+*.swo
+*~
+
+# =========================
+# Logs y dumps
+# =========================
+*.log
+*.trace
+*.stackdump
+*.dump
+
+# =========================
+# Archivos de compilación / salida genérica
+# =========================
+bin/
+obj/
+out/
+dist/
+build/
+
+# =========================
+# IDEs / Editores
+# =========================
+.vscode/
+.idea/
+*.iml
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# =========================
+# Archivos de configuración locales
+# =========================
+.env
+.env.*
+*.local.json
+*.secrets.json
+
+# =========================
+# Backups y copias accidentales
+# =========================
+backup/
+backups/
+*.backup
+*.bkp
+
+# =========================
+# Archivos comprimidos (no suelen ir al repo)
+# =========================
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# =========================
+# Documentos y basura común (ajusta si sí los necesitas)
+# =========================
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+
+
+
+# =========================
+# Otros
+# =========================
+node_modules/
+__pycache__/
