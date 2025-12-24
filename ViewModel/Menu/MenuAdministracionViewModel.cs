@@ -28,10 +28,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private int CostoPorClaseAlmacenado;
 
         [ObservableProperty]
-        private string costoInscripcion;
+        private string costoInscripcion = "";
 
         [ObservableProperty]
-        private string costoPorClase;
+        private string costoPorClase = "";
 
         public static readonly int CostoClaseMinimo = 50;
         public static readonly int CostoInscripcionMinimo = 100;
