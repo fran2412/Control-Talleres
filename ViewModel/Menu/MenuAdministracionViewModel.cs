@@ -6,30 +6,39 @@ using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
-using System.Text;
 using System.Windows.Data;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
     public partial class MenuAdministracionViewModel : ObservableObject
     {
-        public string TituloEncabezado { get; set; } = "Administración del sistema";
 
         public ObservableCollection<GeneracionDTO> Registros => _generacionService.RegistrosGeneraciones;
         public ICollectionView? RegistrosView { get; set; }
+
         protected readonly IGeneracionService _generacionService;
         protected readonly IDialogService _dialogService;
         private readonly IConfiguracionService _configuracionService;
 
-        // ViewModel para el sistema de backup
         public MenuBackupViewModel MenuBackupVM { get; }
 
-        [ObservableProperty]
-        private string costoInscripcion = "";
+        public string TituloEncabezado { get; set; } = "Administración del sistema";
+
+        private int CostoInscripcionAlmacenado;
+        private int CostoPorClaseAlmacenado;
 
         [ObservableProperty]
-        private string costoPorClase = "";
+        private string costoInscripcion;
+
+        [ObservableProperty]
+        private string costoPorClase;
+
+        public static readonly int CostoClaseMinimo = 50;
+        public static readonly int CostoInscripcionMinimo = 100;
+        public static readonly int CostoInscripcionMaximo = 2000;
+
+        public static readonly int CostoDefaultInscripcion = 600;
+        public static readonly int CostoDefaultClase = 150;
 
         public MenuAdministracionViewModel(IGeneracionService generacionService, IConfiguracionService configuracionService, IDialogService dialogService, MenuBackupViewModel menuBackupVM)
         {
@@ -39,54 +48,27 @@ namespace ControlTalleresMVP.ViewModel.Menu
             MenuBackupVM = menuBackupVM;
 
             _generacionService.InicializarRegistros();
-            InicializarVista();
-            CostoInscripcion = _configuracionService.GetValor<int>("costo_inscripcion", 600).ToString();
-            CostoPorClase = _configuracionService.GetValor<int>("costo_clase", 150).ToString();
+            InicializarVista(Registros, Filtro);
+            InicializarCostos();
         }
 
-
-        private string _filtroRegistros = "";
-        // Propiedad manual para controlar el refresh
-        public string FiltroRegistros
+        [ObservableProperty]
+        private string filtroRegistros = "";
+        partial void OnFiltroRegistrosChanged(string value)
         {
-            get => _filtroRegistros;
-            set
-            {
-                if (SetProperty(ref _filtroRegistros, value))
-                {
-                    // Refrescar la vista cuando cambie el filtro
-                    RegistrosView?.Refresh();
-                }
-            }
+            RegistrosView?.Refresh();
         }
 
         public bool Filtro(object o)
         {
-            if (o is GeneracionDTO dto)
-            {
-                if (string.IsNullOrWhiteSpace(FiltroRegistros))
-                {
-                    return true; // Mostrar si el filtro está vacío
-                }
-                return dto.Nombre.Contains(FiltroRegistros, StringComparison.OrdinalIgnoreCase);
-            }
-            return false;
+            if (o is not GeneracionDTO dto) return false;
+
+            if (string.IsNullOrWhiteSpace(FiltroRegistros)) return true;
+
+            return dto.Nombre.Contains(FiltroRegistros, StringComparison.OrdinalIgnoreCase);
         }
 
-        protected static string Normalizar(string s)
-        {
-            var formD = s.Normalize(NormalizationForm.FormD);
-            var stringBuilder = new StringBuilder(formD.Length);
-            foreach (var ch in formD)
-            {
-                var unicode = CharUnicodeInfo.GetUnicodeCategory(ch);
-                if (unicode != UnicodeCategory.NonSpacingMark)
-                    stringBuilder.Append(char.ToLowerInvariant(ch));
-            }
-            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
-        }
-
-        protected void InitializeView(ObservableCollection<GeneracionDTO> registros, Predicate<object> filtro)
+        protected void InicializarVista(ObservableCollection<GeneracionDTO> registros, Predicate<object> filtro)
         {
             RegistrosView = CollectionViewSource.GetDefaultView(registros);
             RegistrosView.Filter = filtro;
@@ -97,27 +79,28 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             if (!int.TryParse(CostoInscripcion, out int valor))
             {
-                // Aquí podrías usar tu IDialogService en lugar de Exception
-                throw new InvalidOperationException("El costo de inscripción debe ser un número entero válido.");
-            }
-
-            if (valor < 100 || valor > 2000)
-            {
-                _dialogService.Alerta($"El costo de inscripción debe estar entre $100 y $2,000.");
+                _dialogService.Alerta("El costo de inscripción debe ser un número entero válido.");
                 return;
             }
 
-            bool confirmacion = _dialogService.ConfirmarOkCancel($"¿Estás seguro de que deseas actualizar el costo de inscripción a {valor}?", "Confirmar actualización");
-
-            if (confirmacion == false)
+            if (valor < CostoInscripcionMinimo || valor > CostoInscripcionMaximo)
             {
+                _dialogService.Alerta($"El costo de inscripción debe estar entre ${CostoInscripcionMinimo} y ${CostoInscripcionMaximo}.");
                 return;
             }
 
+            if (!ConfirmarActualizacionCosto(nombreCampo: "costo de inscripción", nuevoValor: valor)) return;
 
-            _configuracionService.SetValor("costo_inscripcion", valor.ToString());
+            bool resultadoActualizarValor = _configuracionService.SetValor("costo_inscripcion", valor.ToString());
+
+            if (!resultadoActualizarValor)
+            {
+                _dialogService.Error("No se pudo actualizar el costo de inscripción. Por favor, inténtalo de nuevo.");
+                return;
+            }
 
             _dialogService.Info("Costo de inscripción actualizado correctamente.");
+            InicializarCostoPorInscripcion();
         }
 
         [RelayCommand]
@@ -125,41 +108,51 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             if (!int.TryParse(CostoPorClase, out int valor))
             {
-                // Aquí podrías usar tu IDialogService en lugar de Exception
-                throw new InvalidOperationException("El costo por clase debe ser un número entero válido.");
-            }
-
-            if (valor < 50 || valor > 500)
-            {
-                _dialogService.Alerta($"El costo por clase debe estar entre $50 y $500.");
+                _dialogService.Alerta("El costo por clase debe ser un número entero válido.");
                 return;
             }
 
-            // Validar que el costo por clase no sea mayor que el costo de inscripción
-            var costoInscripcion = _configuracionService.GetValor<int>("costo_inscripcion", 600);
-            if (valor > costoInscripcion)
+            if (valor < CostoClaseMinimo || valor > CostoInscripcionAlmacenado)
             {
-                _dialogService.Alerta($"El costo por clase (${valor}) no puede ser mayor que el costo de inscripción (${costoInscripcion}).");
+                _dialogService.Alerta($"El costo por clase debe de ser mayor a ${CostoClaseMinimo} y menor a ${CostoInscripcionAlmacenado}.");
                 return;
             }
 
-            bool confirmacion = _dialogService.ConfirmarOkCancel($"¿Estás seguro de que deseas actualizar el costo por clase a {valor}?", "Confirmar actualización");
+            if (!ConfirmarActualizacionCosto(nombreCampo: "costo por clase", nuevoValor: valor)) return;
 
-            if (confirmacion == false)
+            bool resultadoActualizarValor = _configuracionService.SetValor("costo_clase", valor.ToString());
+
+            if (!resultadoActualizarValor)
             {
+                _dialogService.Error("No se pudo actualizar el costo por clase. Por favor, inténtalo de nuevo.");
                 return;
             }
-
-
-            _configuracionService.SetValor("costo_clase", valor.ToString());
 
             _dialogService.Info("Costo por clase actualizado correctamente.");
+            InicializarCostoPorClase();
         }
-        protected void InicializarVista()
+
+        private bool ConfirmarActualizacionCosto(string nombreCampo, int nuevoValor)
         {
-            InitializeView(Registros, Filtro);
+            return _dialogService.ConfirmarOkCancel($"¿Estás seguro de que deseas actualizar el {nombreCampo} a {nuevoValor}?", "Confirmar actualización");
         }
 
+        private void InicializarCostos()
+        {
+            InicializarCostoPorInscripcion();
+            InicializarCostoPorClase();
+        }
 
+        private void InicializarCostoPorInscripcion()
+        {
+            CostoInscripcionAlmacenado = _configuracionService.GetValor<int>(clave: "costo_inscripcion", valorPorDefecto: CostoDefaultInscripcion);
+            CostoInscripcion = CostoInscripcionAlmacenado.ToString();
+        }
+
+        private void InicializarCostoPorClase()
+        {
+            CostoPorClaseAlmacenado = _configuracionService.GetValor<int>(clave: "costo_clase", valorPorDefecto: CostoDefaultClase);
+            CostoPorClase = CostoPorClaseAlmacenado.ToString();
+        }
     }
 }

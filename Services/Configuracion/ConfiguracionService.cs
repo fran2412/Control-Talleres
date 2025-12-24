@@ -39,7 +39,6 @@ namespace ControlTalleresMVP.Services.Configuracion
 
             if (config is null)
             {
-                // Si no existe, lo insertamos
                 config = new Persistence.Models.Configuracion
                 {
                     Clave = clave,
@@ -52,15 +51,24 @@ namespace ControlTalleresMVP.Services.Configuracion
                 return valorPorDefecto;
             }
 
-            // Si existe, intentamos convertirlo al tipo T
             return (T)Convert.ChangeType(config.Valor, typeof(T));
         }
 
-        public void SetValor(string clave, string valor)
+        public bool SetValor(string clave, string valor)
         {
-            var config = _context.Configuraciones.First(c => c.Clave == clave);
-            config.Valor = valor;
-            _context.SaveChanges();
+            try
+            {
+                var config = _context.Configuraciones.First(c => c.Clave == clave);
+                if (config is null) return false;
+
+                config.Valor = valor;
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

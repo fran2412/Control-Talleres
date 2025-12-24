@@ -4,6 +4,6 @@
     {
         string GetValor(string clave, string valorPorDefecto = "");
         public T GetValor<T>(string clave, T valorPorDefecto = default!);
-        void SetValor(string clave, string valor);
+        bool SetValor(string clave, string valor);
     }
 }
