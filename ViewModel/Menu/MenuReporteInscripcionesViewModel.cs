@@ -1,16 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlTalleresMVP.Persistence.ModelDTO;
-using ControlTalleresMVP.Services.Inscripciones;
-using ControlTalleresMVP.Services.Sedes;
-using ControlTalleresMVP.Services.Promotores;
-using ControlTalleresMVP.Services.Talleres;
-using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Exportacion;
-using System;
+using ControlTalleresMVP.Services.Generaciones;
+using ControlTalleresMVP.Services.Inscripciones;
+using ControlTalleresMVP.Services.Promotores;
+using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Talleres;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -28,14 +25,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private ObservableCollection<PromotorDTO> promotores = new();
         [ObservableProperty] private ObservableCollection<GeneracionDTO> generaciones = new();
         [ObservableProperty] private ObservableCollection<SedeDTO> sedes = new();
-        
+
         [ObservableProperty] private TallerDTO? tallerSeleccionado;
         [ObservableProperty] private PromotorDTO? promotorSeleccionado;
         [ObservableProperty] private GeneracionDTO? generacionSeleccionada;
         [ObservableProperty] private SedeDTO? sedeSeleccionada;
         [ObservableProperty] private DateTime fechaDesde = DateTime.Today.AddMonths(-1);
         [ObservableProperty] private DateTime fechaHasta = DateTime.Today; // Incluye todo el día actual
-        
+
         [ObservableProperty] private bool cargando = false;
         [ObservableProperty] private string? mensajeEstado;
         [ObservableProperty] private InscripcionEstadisticasDTO estadisticas = new();
@@ -45,11 +42,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private decimal totalMontoTalleresActivos;
         [ObservableProperty] private decimal totalPagadoTalleresActivos;
         [ObservableProperty] private decimal totalSaldoTalleresActivos;
-        
+
         [ObservableProperty] private decimal totalMontoTalleresEliminados;
         [ObservableProperty] private decimal totalPagadoTalleresEliminados;
         [ObservableProperty] private decimal totalSaldoTalleresEliminados;
-        
+
         [ObservableProperty] private decimal totalMontoGeneral;
         [ObservableProperty] private decimal totalPagadoGeneral;
         [ObservableProperty] private decimal totalSaldoGeneral;
@@ -132,7 +129,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             SedeSeleccionada = null;
             FechaDesde = DateTime.Today.AddMonths(-1);
             FechaHasta = DateTime.Today; // Siempre hasta la fecha actual
-            
+
             await CargarInscripcionesAsync();
         }
 
@@ -258,7 +255,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             OnPropertyChanged(nameof(MontoTotalInscripciones));
             OnPropertyChanged(nameof(MontoTotalRecaudado));
             OnPropertyChanged(nameof(MontoTotalPendiente));
-            
+
             // Recalcular totales separados
             RecalcularTotalesSeparados();
         }
@@ -268,14 +265,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
             decimal montoActivos = 0, pagadoActivos = 0, saldoActivos = 0;
             decimal montoEliminados = 0, pagadoEliminados = 0, saldoEliminados = 0;
             decimal montoGeneral = 0, pagadoGeneral = 0, saldoGeneral = 0;
-            
+
             foreach (var inscripcion in Inscripciones)
             {
                 // Totales generales (todo lo que se muestra)
                 montoGeneral += inscripcion.Costo;
                 pagadoGeneral += inscripcion.Costo - inscripcion.SaldoActual;
                 saldoGeneral += inscripcion.SaldoActual;
-                
+
                 // Totales separados por tipo de taller
                 if (inscripcion.TallerEliminado)
                 {
@@ -290,16 +287,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     saldoActivos += inscripcion.SaldoActual;
                 }
             }
-            
+
             // Actualizar propiedades
             TotalMontoTalleresActivos = montoActivos;
             TotalPagadoTalleresActivos = pagadoActivos;
             TotalSaldoTalleresActivos = saldoActivos;
-            
+
             TotalMontoTalleresEliminados = montoEliminados;
             TotalPagadoTalleresEliminados = pagadoEliminados;
             TotalSaldoTalleresEliminados = saldoEliminados;
-            
+
             TotalMontoGeneral = montoGeneral;
             TotalPagadoGeneral = pagadoGeneral;
             TotalSaldoGeneral = saldoGeneral;
@@ -313,7 +310,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 FechaHasta = value;
             }
-            
+
             // Recargar datos automáticamente
             _ = Task.Run(async () => await CargarInscripcionesAsync());
         }
@@ -325,7 +322,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 FechaDesde = value;
             }
-            
+
             // Recargar datos automáticamente
             _ = Task.Run(async () => await CargarInscripcionesAsync());
         }

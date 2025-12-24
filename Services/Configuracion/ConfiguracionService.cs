@@ -1,11 +1,4 @@
 ﻿using ControlTalleresMVP.Persistence.DataContext;
-using ControlTalleresMVP.Persistence.Models;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Services.Configuracion
 {
@@ -20,7 +13,7 @@ namespace ControlTalleresMVP.Services.Configuracion
 
             if (string.IsNullOrWhiteSpace(clave))
                 throw new ArgumentException("La clave no puede estar vacía.", nameof(clave));
-            
+
             if (config is null)
             {
                 config = new Persistence.Models.Configuracion

@@ -2,20 +2,13 @@
 using CommunityToolkit.Mvvm.Input;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
-using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Picker;
 using ControlTalleresMVP.Services.Talleres;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace ControlTalleresMVP.ViewModel.Menu

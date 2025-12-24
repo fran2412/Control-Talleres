@@ -4,10 +4,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Talleres;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {

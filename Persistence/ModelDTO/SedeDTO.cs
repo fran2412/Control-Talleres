@@ -1,14 +1,9 @@
 ﻿using ControlTalleresMVP.Abstractions;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Persistence.ModelDTO
 {
-    public class SedeDTO: ICrudDTO
+    public class SedeDTO : ICrudDTO
     {
         [ScaffoldColumn(false)]
         public int Id { get; set; }

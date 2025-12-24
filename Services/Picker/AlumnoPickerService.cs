@@ -1,16 +1,10 @@
-﻿using ControlTalleresMVP.Persistence.ModelDTO;
+﻿using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.UI.Windows.Select;
 using ControlTalleresMVP.ViewModel.Menu;
-using ControlTalleresMVP.Helpers.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace ControlTalleresMVP.Services.Picker
 {
@@ -69,7 +63,7 @@ namespace ControlTalleresMVP.Services.Picker
 
             // Crear un ViewModel temporal solo con alumnos con deudas
             var registrosVM = _sp.GetRequiredService<MenuAlumnosViewModel>();
-            
+
             // Limpiar la colección actual y cargar solo alumnos con deudas
             registrosVM.Registros.Clear();
             foreach (var alumno in alumnosConDeudas)

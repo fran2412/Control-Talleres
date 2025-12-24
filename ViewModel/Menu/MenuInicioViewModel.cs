@@ -1,10 +1,5 @@
 ﻿using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ControlTalleresMVP.ViewModel.Menu
@@ -19,7 +14,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public MenuInicioViewModel(INavigatorService navigator)
         {
             Navigator = navigator;
-            
+
             GoAlumnos = new RelayCommand(() => Navigator.NavigateTo<MenuAlumnosViewModel>());
             GoTalleres = new RelayCommand(() => Navigator.NavigateTo<MenuTalleresViewModel>());
             GoPagos = new RelayCommand(() => Navigator.NavigateTo<MenuPagosViewModel>());

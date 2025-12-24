@@ -32,7 +32,7 @@
     {
         Inscripcion = 1,
         Clase = 2,
-    } 
+    }
 
     public enum MetodoPago
     {

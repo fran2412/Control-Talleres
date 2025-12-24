@@ -2,17 +2,12 @@
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace ControlTalleresMVP.Services.Promotores
 {
-    public class PromotorService: IPromotorService
+    public class PromotorService : IPromotorService
     {
         public ObservableCollection<PromotorDTO> RegistrosPromotores { get; set; } = new();
 
@@ -78,7 +73,7 @@ namespace ControlTalleresMVP.Services.Promotores
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         public async Task<List<PromotorDTO>> ObtenerPromotoresParaGridAsync(CancellationToken ct = default)
         {
 

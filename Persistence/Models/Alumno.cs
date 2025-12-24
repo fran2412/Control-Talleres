@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-
-namespace ControlTalleresMVP.Persistence.Models
+﻿namespace ControlTalleresMVP.Persistence.Models
 {
     public class Alumno
     {

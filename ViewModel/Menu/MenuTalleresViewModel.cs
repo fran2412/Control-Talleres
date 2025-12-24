@@ -6,11 +6,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -67,7 +63,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     SedesDisponibles.Add(sede);
                 }
-                
+
                 // Seleccionar la primera sede por defecto
                 if (SedesDisponibles.Any())
                 {
@@ -77,7 +73,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             catch (Exception ex)
             {
                 // Manejar error de carga de sedes
-                System.Windows.MessageBox.Show($"Error al cargar sedes: {ex.Message}", "Error", 
+                System.Windows.MessageBox.Show($"Error al cargar sedes: {ex.Message}", "Error",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }

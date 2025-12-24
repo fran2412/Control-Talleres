@@ -2,14 +2,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Clases;
-using ControlTalleresMVP.Services.Generaciones;
-using ControlTalleresMVP.Services.Talleres;
-using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Exportacion;
-using System;
+using ControlTalleresMVP.Services.Generaciones;
+using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Talleres;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -115,7 +112,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             SedeSeleccionada = null;
             FechaDesde = DateTime.Today.AddMonths(-1);
             FechaHasta = DateTime.Today; // Siempre hasta la fecha actual
-            
+
             await CargarEstadosPagoAsync();
         }
 
@@ -137,17 +134,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 Cargando = true;
                 MensajeEstado = "Cargando todos los registros...";
-                
+
                 // Limpiar filtros primero
                 TallerSeleccionado = null;
                 GeneracionSeleccionada = null;
                 SedeSeleccionada = null;
-                
+
                 // Cargar todos los datos sin filtros (null = sin filtro)
                 var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(null, null, null);
-                
+
                 EstadosPago = new ObservableCollection<EstadoPagoAlumnoDTO>(estados);
-                
+
                 MensajeEstado = $"Mostrando todos los registros: {EstadosPago.Count}";
             }
             catch (Exception ex)
@@ -183,7 +180,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     filtrosAplicados.Add($"Fechas: {FechaDesde:dd/MM/yyyy} - {FechaHasta:dd/MM/yyyy}");
                 }
 
-                var mensajeFiltros = filtrosAplicados.Count > 0 
+                var mensajeFiltros = filtrosAplicados.Count > 0
                     ? string.Join(", ", filtrosAplicados)
                     : "Todos los registros";
 
@@ -191,21 +188,21 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
                 // Llamar al servicio con los filtros
                 var estados = await _claseService.ObtenerEstadoPagoAlumnosAsync(tallerId, null, generacionId);
-                
+
                 // Aplicar filtros en memoria
                 var estadosFiltrados = estados.AsEnumerable();
-                
+
                 // Filtrar por sede si está seleccionada
                 if (sedeId.HasValue)
                 {
                     estadosFiltrados = estadosFiltrados.Where(e => e.SedeId == sedeId.Value);
                 }
-                
+
                 // Filtrar por rango de fechas si están configuradas
                 if (FechaDesde != DateTime.MinValue || FechaHasta != DateTime.MaxValue)
                 {
-                    estadosFiltrados = estadosFiltrados.Where(e => 
-                        e.FechaInicio.Date >= FechaDesde.Date && 
+                    estadosFiltrados = estadosFiltrados.Where(e =>
+                        e.FechaInicio.Date >= FechaDesde.Date &&
                         e.FechaInicio.Date <= FechaHasta.Date);
                 }
 
@@ -244,10 +241,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private static decimal CalcularProgresoPago(decimal montoTotal, decimal montoPendiente)
         {
             if (montoTotal <= 0) return 0;
-            
+
             var montoPagado = montoTotal - montoPendiente;
             var progreso = (montoPagado / montoTotal) * 100;
-            
+
             return Math.Max(0, Math.Min(100, progreso));
         }
 
@@ -256,23 +253,23 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public int AlumnosCompletos => EstadosPago.Count(e => e.TodasLasClasesPagadas);
         public int AlumnosParciales => EstadosPago.Count(e => e.ClasesPagadas > 0 && !e.TodasLasClasesPagadas);
         public int AlumnosSinPagos => EstadosPago.Count(e => e.ClasesPagadas == 0);
-        
+
         // Métricas financieras
         public decimal MontoTotalEsperado => EstadosPago.Sum(e => e.MontoTotal);
         public decimal MontoTotalRecaudado => EstadosPago.Sum(e => e.MontoPagado);
         public decimal MontoPendiente => EstadosPago.Sum(e => e.MontoPendiente);
         public decimal PorcentajeRecaudacion => MontoTotalEsperado > 0 ? (MontoTotalRecaudado / MontoTotalEsperado) * 100 : 0;
-        
+
         // Métricas de clases
         public int TotalClasesEsperadas => EstadosPago.Sum(e => e.ClasesTotales);
         public int TotalClasesPagadas => EstadosPago.Sum(e => e.ClasesPagadas);
         public int TotalClasesPendientes => EstadosPago.Sum(e => e.ClasesPendientes);
         public decimal PorcentajeClasesPagadas => TotalClasesEsperadas > 0 ? (decimal)TotalClasesPagadas / TotalClasesEsperadas * 100 : 0;
-        
+
         // Métricas por taller (si hay filtro)
         public int TalleresActivos => EstadosPago.Select(e => e.TallerId).Distinct().Count();
         public decimal PromedioPagoPorAlumno => TotalAlumnos > 0 ? MontoTotalRecaudado / TotalAlumnos : 0;
-        
+
         // Formateo de montos para mostrar
         public string MontoTotalEsperadoFormateado => $"${MontoTotalEsperado:N2}";
         public string MontoTotalRecaudadoFormateado => $"${MontoTotalRecaudado:N2}";
@@ -288,23 +285,23 @@ namespace ControlTalleresMVP.ViewModel.Menu
             OnPropertyChanged(nameof(AlumnosCompletos));
             OnPropertyChanged(nameof(AlumnosParciales));
             OnPropertyChanged(nameof(AlumnosSinPagos));
-            
+
             // Métricas financieras
             OnPropertyChanged(nameof(MontoTotalEsperado));
             OnPropertyChanged(nameof(MontoTotalRecaudado));
             OnPropertyChanged(nameof(MontoPendiente));
             OnPropertyChanged(nameof(PorcentajeRecaudacion));
-            
+
             // Métricas de clases
             OnPropertyChanged(nameof(TotalClasesEsperadas));
             OnPropertyChanged(nameof(TotalClasesPagadas));
             OnPropertyChanged(nameof(TotalClasesPendientes));
             OnPropertyChanged(nameof(PorcentajeClasesPagadas));
-            
+
             // Métricas adicionales
             OnPropertyChanged(nameof(TalleresActivos));
             OnPropertyChanged(nameof(PromedioPagoPorAlumno));
-            
+
             // Formateo
             OnPropertyChanged(nameof(MontoTotalEsperadoFormateado));
             OnPropertyChanged(nameof(MontoTotalRecaudadoFormateado));
@@ -381,14 +378,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     filtros.Add($"Fechas: {FechaDesde:dd/MM/yyyy} - {FechaHasta:dd/MM/yyyy}");
                 }
-                
-                return filtros.Count > 0 
+
+                return filtros.Count > 0
                     ? $"Filtrado por: {string.Join(", ", filtros)}"
                     : "Mostrando todos los registros";
             }
         }
 
-        public bool TieneFiltroActivo => TallerSeleccionado != null || GeneracionSeleccionada != null || 
+        public bool TieneFiltroActivo => TallerSeleccionado != null || GeneracionSeleccionada != null ||
             SedeSeleccionada != null || FechaDesde != DateTime.Today.AddMonths(-1) || FechaHasta != DateTime.Today;
 
         // Métodos para actualizar información de filtro cuando cambian las selecciones
@@ -417,11 +414,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 FechaHasta = value;
             }
-            
+
             // Actualizar propiedades de filtro
             OnPropertyChanged(nameof(FiltroActual));
             OnPropertyChanged(nameof(TieneFiltroActivo));
-            
+
             // Recargar datos automáticamente
             _ = Task.Run(async () => await CargarEstadosPagoAsync());
         }
@@ -433,11 +430,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 FechaDesde = value;
             }
-            
+
             // Actualizar propiedades de filtro
             OnPropertyChanged(nameof(FiltroActual));
             OnPropertyChanged(nameof(TieneFiltroActivo));
-            
+
             // Recargar datos automáticamente
             _ = Task.Run(async () => await CargarEstadosPagoAsync());
         }

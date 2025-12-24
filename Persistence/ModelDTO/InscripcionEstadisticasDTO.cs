@@ -7,20 +7,20 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         public int InscripcionesActivas { get; set; }
         public int InscripcionesCanceladas { get; set; }
         public int InscripcionesPagadas { get; set; }
-        
+
         // Estadísticas financieras
         public decimal MontoTotalInscripciones { get; set; }
         public decimal MontoTotalRecaudado { get; set; }
         public decimal MontoTotalPendiente { get; set; }
         public decimal PromedioCostoInscripcion { get; set; }
-        
+
         // Estadísticas por período (removidas las de crecimiento)
-        
+
         // Estadísticas por taller
         public int TalleresConInscripciones { get; set; }
         public string TallerMasPopular { get; set; } = "";
         public int InscripcionesTallerMasPopular { get; set; }
-        
+
         // Estadísticas por día de la semana
         public int LunesInscripciones { get; set; }
         public int MartesInscripciones { get; set; }
@@ -29,12 +29,12 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         public int ViernesInscripciones { get; set; }
         public int SabadoInscripciones { get; set; }
         public int DomingoInscripciones { get; set; }
-        
+
         // Estadísticas de retención
         public decimal TasaRetencion { get; set; }
         public int AlumnosNuevos { get; set; }
         public int AlumnosRecurrentes { get; set; }
-        
+
         // Formateo para mostrar
         public string MontoTotalInscripcionesFormateado => $"${MontoTotalInscripciones:N2}";
         public string MontoTotalRecaudadoFormateado => $"${MontoTotalRecaudado:N2}";

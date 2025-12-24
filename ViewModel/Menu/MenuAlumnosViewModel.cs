@@ -6,7 +6,6 @@ using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
-using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Promotores;
@@ -15,7 +14,6 @@ using ControlTalleresMVP.Services.Talleres;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -128,12 +126,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     var inscripcionesExitosas = await ProcesarInscripcionesTalleres(alumnoGuardado.AlumnoId);
                     if (!inscripcionesExitosas) return;
-                    
+
                     // Preguntar si desea registrar el pago de las clases del alumno
                     if (_dialogService.Confirmar(
                         "¿Desea registrar el pago de las clases del alumno?\n\n" +
                         "Si selecciona 'Sí', se abrirá el formulario de pagos de clases con este alumno preseleccionado.\n" +
-                        "Si selecciona 'No', solo se registrará la inscripción.", 
+                        "Si selecciona 'No', solo se registrará la inscripción.",
                         "¿Registrar pago de clases?"))
                     {
                         await AbrirFormularioPagoClasesConAlumno(alumnoGuardado.AlumnoId, alumnoGuardado.Nombre);
@@ -151,7 +149,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        private async Task <bool> ProcesarInscripcionesTalleres(int alumnoId)
+        private async Task<bool> ProcesarInscripcionesTalleres(int alumnoId)
         {
             var seleccionados = TalleresDisponibles?.Where(t => t.EstaSeleccionado).ToList();
             if (seleccionados == null || seleccionados.Count == 0)
@@ -298,7 +296,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 ActualizarTotales();
             }
         }
-        
+
         private async Task AbrirFormularioPagoClasesConAlumno(int alumnoId, string nombreAlumno)
         {
             try
@@ -307,9 +305,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 if (navigatorService == null) return;
 
                 navigatorService.NavigateTo<MenuClaseUserControl>();
-                
+
                 await Task.Delay(100);
-                
+
                 var claseUserControl = navigatorService.CurrentViewModel as MenuClaseUserControl;
                 if (claseUserControl?.MenuClaseCobroVM != null)
                 {
@@ -322,7 +320,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 _dialogService.Error($"Error al abrir el formulario de pagos de clases: {ex.Message}");
             }
         }
-        
+
         private bool ValidarYConfirmarRegistro()
         {
             if (string.IsNullOrWhiteSpace(CampoTextoNombre))
@@ -349,7 +347,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             return _dialogService.Confirmar(
                 $"¿Confirma que desea registrar al alumno: {CampoTextoNombre}?");
         }
-        
+
 
         private static decimal ObtenerAbonoValido(decimal abono)
         {

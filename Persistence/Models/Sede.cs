@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ControlTalleresMVP.Persistence.Models
+﻿namespace ControlTalleresMVP.Persistence.Models
 {
     public class Sede
     {
@@ -19,7 +13,7 @@ namespace ControlTalleresMVP.Persistence.Models
 
         // Relación inversa: una sede puede tener muchos alumnos
         public ICollection<Alumno> Alumnos { get; set; } = new List<Alumno>();
-        
+
         // Relación inversa: una sede puede tener muchos talleres
         public ICollection<Taller> Talleres { get; set; } = new List<Taller>();
     }

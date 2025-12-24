@@ -1,11 +1,6 @@
 ﻿using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Commands;
 using ControlTalleresMVP.ViewModel.Menu;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ControlTalleresMVP.ViewModel.Navigation
@@ -26,7 +21,7 @@ namespace ControlTalleresMVP.ViewModel.Navigation
         public ICommand GoReporteInscripciones { get; set; }
         public ICommand NavigateCommand { get; }
 
-        public ShellViewModel (INavigatorService navigator)
+        public ShellViewModel(INavigatorService navigator)
         {
             Navigator = navigator;
 

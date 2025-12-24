@@ -1,11 +1,6 @@
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
-using ControlTalleresMVP.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Services.Inscripciones
 {
@@ -29,14 +24,14 @@ namespace ControlTalleresMVP.Services.Inscripciones
         {
             var hoy = DateTime.Today;
             var hastaFiltro = hasta ?? hoy; // Si no se especifica hasta, usar fecha actual
-            
+
             // Ajustar las fechas para incluir todo el día
             var desdeFiltro = desde?.Date ?? DateTime.MinValue;
             var hastaFiltroCompleto = hastaFiltro.Date.AddDays(1).AddTicks(-1); // Hasta el final del día
-            
+
             // Log de depuración para entender los filtros aplicados
             System.Diagnostics.Debug.WriteLine($"Filtros aplicados - TallerId: {tallerId}, PromotorId: {promotorId}, GeneracionId: {generacionId}, Desde: {desdeFiltro}, Hasta: {hastaFiltroCompleto}");
-            
+
             var query = from i in _escuelaContext.Inscripciones.AsNoTracking()
                         where (incluirTalleresEliminados || !i.Eliminado)
                               && (tallerId == null || i.TallerId == tallerId)
@@ -107,13 +102,13 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 InscripcionesActivas = inscripciones.Count(i => i.Estado == "Pendiente"),
                 InscripcionesCanceladas = inscripciones.Count(i => i.Estado == "Cancelada"),
                 InscripcionesPagadas = inscripciones.Count(i => i.Estado == "Pagada"),
-                
+
                 MontoTotalInscripciones = inscripciones.Sum(i => i.Costo),
                 MontoTotalRecaudado = inscripciones.Sum(i => i.Costo - i.SaldoActual),
                 MontoTotalPendiente = inscripciones.Where(i => !i.TallerEliminado).Sum(i => i.SaldoActual),
-                
+
                 TalleresConInscripciones = inscripciones.Select(i => i.NombreTaller).Distinct().Count(),
-                
+
                 LunesInscripciones = inscripciones.Count(i => i.DiaSemana == "Monday"),
                 MartesInscripciones = inscripciones.Count(i => i.DiaSemana == "Tuesday"),
                 MiercolesInscripciones = inscripciones.Count(i => i.DiaSemana == "Wednesday"),
@@ -124,8 +119,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
             };
 
             // Calcular promedios y porcentajes
-            estadisticas.PromedioCostoInscripcion = estadisticas.TotalInscripciones > 0 
-                ? estadisticas.MontoTotalInscripciones / estadisticas.TotalInscripciones 
+            estadisticas.PromedioCostoInscripcion = estadisticas.TotalInscripciones > 0
+                ? estadisticas.MontoTotalInscripciones / estadisticas.TotalInscripciones
                 : 0;
 
             // Taller más popular
@@ -133,7 +128,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 .GroupBy(i => i.NombreTaller)
                 .OrderByDescending(g => g.Count())
                 .FirstOrDefault();
-            
+
             if (tallerMasPopular != null)
             {
                 estadisticas.TallerMasPopular = tallerMasPopular.Key;
@@ -153,12 +148,12 @@ namespace ControlTalleresMVP.Services.Inscripciones
             var hoy = DateTime.Today;
             var fechaFin = fechaFinTaller ?? hoy;
             var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
-            
+
             var diasTotales = (fechaFin - fechaInicioTaller).Days;
             var diasTranscurridos = (fechaLimite - fechaInicioTaller).Days;
-            
+
             if (diasTotales <= 0) return 0;
-            
+
             var progreso = (decimal)diasTranscurridos / diasTotales * 100;
             return Math.Max(0, Math.Min(100, progreso));
         }
@@ -166,10 +161,10 @@ namespace ControlTalleresMVP.Services.Inscripciones
         private static decimal CalcularProgresoPago(decimal costo, decimal saldoActual)
         {
             if (costo <= 0) return 0;
-            
+
             var montoPagado = costo - saldoActual;
             var progreso = (montoPagado / costo) * 100;
-            
+
             return Math.Max(0, Math.Min(100, progreso));
         }
 

@@ -4,19 +4,12 @@ using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
-using ControlTalleresMVP.Services.Navigation;
 using ControlTalleresMVP.Services.Promotores;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    public partial class MenuPromotorViewModel: BaseMenuViewModel<PromotorDTO, Promotor, IPromotorService>
+    public partial class MenuPromotorViewModel : BaseMenuViewModel<PromotorDTO, Promotor, IPromotorService>
     {
         public string TituloEncabezado { get; set; } = "Gestión de promotores";
         public override ObservableCollection<PromotorDTO> Registros

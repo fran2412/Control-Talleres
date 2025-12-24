@@ -1,7 +1,4 @@
 using ControlTalleresMVP.Persistence.ModelDTO;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Services.Inscripciones
 {

@@ -1,20 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
-using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
-using ControlTalleresMVP.Services.Talleres;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace ControlTalleresMVP.ViewModel.Menu
@@ -28,7 +21,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         protected readonly IGeneracionService _generacionService;
         protected readonly IDialogService _dialogService;
         private readonly IConfiguracionService _configuracionService;
-        
+
         // ViewModel para el sistema de backup
         public MenuBackupViewModel MenuBackupVM { get; }
 

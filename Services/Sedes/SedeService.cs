@@ -2,17 +2,12 @@
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace ControlTalleresMVP.Services.Sedes
 {
-    public class SedeService: ISedeService
+    public class SedeService : ISedeService
     {
         public ObservableCollection<SedeDTO> RegistrosSedes { get; set; } = new();
 
@@ -44,7 +39,7 @@ namespace ControlTalleresMVP.Services.Sedes
             // Validar que no tenga alumnos asociados
             var tieneAlumnos = await _context.Alumnos
                 .AnyAsync(a => a.SedeId == id && !a.Eliminado, ct);
-            
+
             if (tieneAlumnos)
                 throw new InvalidOperationException("No se puede eliminar una sede que tiene alumnos registrados.");
 

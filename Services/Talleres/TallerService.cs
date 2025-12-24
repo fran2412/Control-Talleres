@@ -2,12 +2,7 @@
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace ControlTalleresMVP.Services.Talleres
@@ -29,7 +24,7 @@ namespace ControlTalleresMVP.Services.Talleres
             {
                 throw new InvalidOperationException("El horario de fin debe ser posterior al horario de inicio");
             }
-            
+
             _context.Talleres.Add(taller);
             await _context.SaveChangesAsync(ct);
 
@@ -122,7 +117,7 @@ namespace ControlTalleresMVP.Services.Talleres
             {
                 throw new InvalidOperationException("El horario de fin debe ser posterior al horario de inicio");
             }
-            
+
             // Solo actualizas campos que quieres
             tallerExistente.Nombre = taller.Nombre;
             tallerExistente.HorarioInicio = taller.HorarioInicio;
@@ -161,7 +156,7 @@ namespace ControlTalleresMVP.Services.Talleres
         public async Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(bool incluirEliminados, CancellationToken ct = default)
         {
             var query = _context.Talleres.AsNoTracking();
-            
+
             if (!incluirEliminados)
             {
                 query = query.Where(a => !a.Eliminado);

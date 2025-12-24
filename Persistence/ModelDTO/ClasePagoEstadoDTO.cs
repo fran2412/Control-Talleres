@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ControlTalleresMVP.Persistence.ModelDTO
+﻿namespace ControlTalleresMVP.Persistence.ModelDTO
 {
     public record ClasePagoEstadoDTO(
         int TallerId,
@@ -14,11 +8,11 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
     );
 
     public record RegistrarClaseResult(
-        DateTime Fecha, 
-        bool ClaseCreada, 
-        bool CargoCreado, 
-        bool PagoCreado, 
-        decimal MontoAplicado, 
+        DateTime Fecha,
+        bool ClaseCreada,
+        bool CargoCreado,
+        bool PagoCreado,
+        decimal MontoAplicado,
         bool CargoYaPagado,
         decimal ExcedenteAplicado = 0m
         );

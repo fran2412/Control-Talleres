@@ -3,14 +3,8 @@ using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
-using ControlTalleresMVP.Services.Promotores;
 using ControlTalleresMVP.Services.Sedes;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {

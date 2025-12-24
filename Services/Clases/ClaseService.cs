@@ -1,11 +1,11 @@
-﻿using ControlTalleresMVP.Helpers.Dialogs;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Messages;
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
-using ControlTalleresMVP.Messages;
-using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControlTalleresMVP.Services.Clases
@@ -141,7 +141,7 @@ namespace ControlTalleresMVP.Services.Clases
 
                         var diaSemana = ConvertirDiaSemanaASpanol(taller?.DiaSemana ?? DayOfWeek.Monday);
                         var descripcion = $"Pago de clase - {taller?.Nombre ?? "Taller"} ({diaSemana} {fechaClase:dd/MM/yyyy}) - Monto: ${aAplicar:F2}";
-                        
+
                         var pago = new Pago
                         {
                             AlumnoId = alumnoId,
@@ -280,8 +280,8 @@ namespace ControlTalleresMVP.Services.Clases
             // Agrupamos por cargo (una fila por clase/alumno)
             // Nota: EF Core 3.x/5.x+ a veces requiere traer los datos a memoria antes de agrupar si la consulta es compleja
             // Pero intentaremos mantenerlo eficiente. Si falla, traeremos q.ToListAsync() primero.
-            var listaRaw = await q.ToListAsync(ct); 
-            
+            var listaRaw = await q.ToListAsync(ct);
+
             var lista = listaRaw
                 .GroupBy(x => new
                 {
@@ -307,21 +307,21 @@ namespace ControlTalleresMVP.Services.Clases
                     AlumnoNombre   = g.Key.AlumnoNombre,
                     MontoTotal     = g.Key.Monto, // Renombrado de Monto
                     SaldoActual    = g.Key.SaldoActual,
-                    
+
                     // Total histórico pagado
                     MontoPagado    = (decimal)((g.Where(z => z.pa != null)
                                                 .Select(z => (double?)z.pa.MontoAplicado)
                                                 .Sum()) ?? 0.0),
-                    
+
                     // Nuevo: Cash Basis - Ingreso estrictamente en el rango de fechas consultado
-                    IngresoPorFecha = (decimal)((g.Where(z => 
+                    IngresoPorFecha = (decimal)((g.Where(z =>
                     {
                         if (z.pa == null || z.pa.Pago == null) return false;
                         var fechaPago = z.pa.Pago.Fecha.Date;
-                        
+
                         if (fechaDesde.HasValue && fechaPago < fechaDesde.Value) return false;
                         if (fechaHasta.HasValue && fechaPago > fechaHasta.Value) return false;
-                        
+
                         return true;
                     })
                     .Select(z => (double?)z.pa!.MontoAplicado)
@@ -368,7 +368,7 @@ namespace ControlTalleresMVP.Services.Clases
         // ====================
         // Verificación de duplicados
         // ====================min
-        
+
         private async Task<bool> ExisteCargoClaseAsync(int alumnoId, int claseId, DateTime fecha, CancellationToken ct = default)
             => await _escuelaContext.Cargos.AnyAsync(i =>
                    i.AlumnoId == alumnoId
@@ -458,16 +458,16 @@ namespace ControlTalleresMVP.Services.Clases
             CancellationToken ct = default)
         {
             var hoy = DateTime.Today;
-            
+
             // Si no se especifica generación, traer datos de todas las generaciones
             if (!generacionId.HasValue)
             {
                 return await ObtenerEstadosPagoTodasGeneracionesAsync(null, null, ct);
             }
-            
+
             // Usar la generación especificada
             var generacion = _escuelaContext.Generaciones.FirstOrDefault(g => g.GeneracionId == generacionId.Value);
-            if (generacion == null) 
+            if (generacion == null)
             {
                 return Array.Empty<EstadoPagoAlumnoDTO>();
             }
@@ -491,21 +491,21 @@ namespace ControlTalleresMVP.Services.Clases
 
             var talleres = await talleresQuery.ToListAsync(ct);
             System.Diagnostics.Debug.WriteLine($"✅ Talleres encontrados: {talleres.Count}");
-            
+
             var resultados = new List<EstadoPagoAlumnoDTO>();
 
             foreach (var taller in talleres)
             {
                 System.Diagnostics.Debug.WriteLine($"🔍 Procesando taller: {taller.Nombre} (ID: {taller.TallerId})");
-                
+
                 // Calcular fechas de clases - usar fecha fin del taller o una fecha futura razonable
                 var fechaFin = taller.FechaFin?.Date ?? hoy.AddMonths(6); // Si no tiene fecha fin, asumir 6 meses
                 var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
-                
+
                 // Generar fechas de clases desde FechaInicio hasta fechaLimite
                 var fechasClases = GenerarFechasClases(taller.FechaInicio, fechaLimite, taller.DiaSemana);
                 System.Diagnostics.Debug.WriteLine($"📅 Fechas de clases generadas: {fechasClases.Count} (desde {taller.FechaInicio:yyyy-MM-dd} hasta {fechaLimite:yyyy-MM-dd})");
-                
+
                 // Si no hay fechas de clases generadas, crear al menos una fecha para mostrar el taller
                 if (fechasClases.Count == 0)
                 {
@@ -529,10 +529,11 @@ namespace ControlTalleresMVP.Services.Clases
                                 && !i.Eliminado
                                 && (taller.Eliminado || i.Estado != EstadoInscripcion.Cancelada)
                                 && (alumnoId == null || i.AlumnoId == alumnoId))
-                    .Select(i => new { 
-                        i.AlumnoId, 
-                        i.Alumno!.Nombre, 
-                        i.Estado, 
+                    .Select(i => new
+                    {
+                        i.AlumnoId,
+                        i.Alumno!.Nombre,
+                        i.Estado,
                         i.SaldoActual,
                         SedeId = i.Alumno.SedeId,
                         NombreSede = i.Alumno.Sede!.Nombre
@@ -540,7 +541,7 @@ namespace ControlTalleresMVP.Services.Clases
 
                 var alumnos = await alumnosQuery.ToListAsync(ct);
                 System.Diagnostics.Debug.WriteLine($"👥 Alumnos inscritos en {taller.Nombre}: {alumnos.Count}");
-                
+
                 // Si no hay alumnos inscritos, mostrar un mensaje informativo
                 if (alumnos.Count == 0)
                 {
@@ -574,7 +575,7 @@ namespace ControlTalleresMVP.Services.Clases
                 {
                     // Verificar si la inscripción está cancelada
                     var inscripcionCancelada = alumno.Estado == EstadoInscripcion.Cancelada;
-                    
+
                     // Obtener todos los cargos de clases de este alumno en este taller
                     var cargosClases = await _escuelaContext.Cargos
                         .AsNoTracking()
@@ -582,9 +583,10 @@ namespace ControlTalleresMVP.Services.Clases
                                     && c.ClaseId != null
                                     && c.Clase!.TallerId == taller.TallerId
                                     && (taller.Eliminado || c.Estado != EstadoCargo.Anulado))
-                        .Select(c => new { 
-                            c.Clase!.Fecha, 
-                            c.Monto, 
+                        .Select(c => new
+                        {
+                            c.Clase!.Fecha,
+                            c.Monto,
                             c.SaldoActual,
                             c.Estado,
                             MontoPagado = c.Monto - c.SaldoActual
@@ -597,7 +599,7 @@ namespace ControlTalleresMVP.Services.Clases
                     // Calcular clases pagadas y pendientes basándose en las fechas esperadas
                     var clasesPagadas = new List<ClaseInfo>();
                     var clasesPendientes = new List<ClaseInfo>();
-                    
+
                     if (!inscripcionCancelada)
                     {
                         // Primero, procesar las clases esperadas del taller
@@ -679,23 +681,23 @@ namespace ControlTalleresMVP.Services.Clases
                     var clasesPagadasCount = clasesCompletamentePagadas;
                     var clasesPendientesCount = clasesPendientes.Count;
                     var clasesTotales = fechasClases.Count;
-                    
+
                     // Calcular monto pagado
-                    var montoPagado = inscripcionCancelada 
+                    var montoPagado = inscripcionCancelada
                         ? 0 // No hay pagos si la inscripción está cancelada
                         : clasesPagadas.Sum(c => c.MontoPagado);
-                    
+
                     // Calcular monto pendiente
-                    var montoPendiente = inscripcionCancelada 
+                    var montoPendiente = inscripcionCancelada
                         ? 0 // No hay deuda pendiente si la inscripción está cancelada
                         : taller.Eliminado ? 0 : clasesPendientes.Sum(c => c.SaldoActual);
-                    
+
                     var montoTotal = clasesTotales * costoClase;
-                    
+
                     // Calcular clases parcialmente pagadas (tienen pago pero no están completas)
                     var clasesParcialmentePagadas = clasesPagadas.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
                     var clasesSinPagos = clasesTotales - clasesPagadasCount;
-                    
+
                     // Verificar si se pagaron al menos todas las clases que se deben
                     var todasLasClasesPagadas = clasesCompletamentePagadas >= clasesTotales && clasesPendientesCount == 0;
                     // Verificar si se pagó más de lo debido
@@ -798,7 +800,7 @@ namespace ControlTalleresMVP.Services.Clases
         {
             var fechas = new List<DateTime>();
             var fechaActual = fechaInicio.Date;
-            
+
             // Encontrar el primer día de la semana del taller
             while (fechaActual.DayOfWeek != diaSemana)
             {
@@ -892,17 +894,17 @@ namespace ControlTalleresMVP.Services.Clases
                     // Calcular fechas de clases solo hasta hoy (no futuras)
                     var fechaInicio = inscripcion.Taller.FechaInicio;
                     var fechaFin = inscripcion.Taller.FechaFin ?? hoy.AddMonths(6);
-                    
+
                     // Usar la fecha más temprana entre la fecha fin del taller y hoy
                     var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
-                    
+
                     // Solo generar fechas si el taller ya comenzó
                     var fechasClases = new List<DateTime>();
                     if (fechaInicio <= hoy)
                     {
                         fechasClases = GenerarFechasClases(fechaInicio, fechaLimite, inscripcion.Taller.DiaSemana);
                     }
-                    
+
                     if (fechasClases.Count == 0)
                     {
                         fechasClases.Add(fechaInicio);
@@ -915,9 +917,10 @@ namespace ControlTalleresMVP.Services.Clases
                                     && c.ClaseId != null
                                     && c.Clase!.TallerId == inscripcion.TallerId
                                     && (inscripcion.Taller.Eliminado || c.Estado != EstadoCargo.Anulado))
-                        .Select(c => new { 
-                            c.Clase!.Fecha, 
-                            c.Monto, 
+                        .Select(c => new
+                        {
+                            c.Clase!.Fecha,
+                            c.Monto,
                             c.SaldoActual,
                             c.Estado,
                             MontoPagado = c.Monto - c.SaldoActual
@@ -926,14 +929,14 @@ namespace ControlTalleresMVP.Services.Clases
 
                     // Verificar si la inscripción está cancelada
                     var inscripcionCancelada = inscripcion.Estado == EstadoInscripcion.Cancelada;
-                    
+
                     // Crear un diccionario de cargos por fecha para facilitar la búsqueda
                     var cargosPorFecha = cargosClases.ToDictionary(c => c.Fecha.Date, c => c);
 
                     // Calcular clases pagadas y pendientes basándose en las fechas esperadas
                     var clasesPagadas = new List<ClaseInfo>();
                     var clasesPendientes = new List<ClaseInfo>();
-                    
+
                     if (!inscripcionCancelada)
                     {
                         // Primero, procesar las clases esperadas del taller
@@ -1015,22 +1018,22 @@ namespace ControlTalleresMVP.Services.Clases
                     var clasesPagadasCount = clasesCompletamentePagadas;
                     var clasesPendientesCount = clasesPendientes.Count;
                     var clasesTotales = fechasClases.Count;
-                    
+
                     // Calcular monto pagado
-                    var montoPagado = inscripcionCancelada 
+                    var montoPagado = inscripcionCancelada
                         ? 0 // No hay pagos si la inscripción está cancelada
                         : clasesPagadas.Sum(c => c.MontoPagado);
-                    
+
                     // Calcular monto pendiente
-                    var montoPendiente = inscripcionCancelada 
+                    var montoPendiente = inscripcionCancelada
                         ? 0 // No hay deuda pendiente si la inscripción está cancelada
                         : inscripcion.Taller.Eliminado ? 0 : clasesPendientes.Sum(c => c.SaldoActual);
-                    
+
                     var montoTotal = clasesTotales * costoClase;
-                    
+
                     // Calcular clases parcialmente pagadas (tienen pago pero no están completas)
                     var clasesParcialmentePagadas = clasesPagadas.Count(c => c.MontoPagado > 0 && c.SaldoActual > 0);
-                    
+
                     // Verificar si se pagaron al menos todas las clases que se deben
                     var todasLasClasesPagadas = clasesCompletamentePagadas >= clasesTotales && clasesPendientesCount == 0;
                     // Verificar si se pagó más de lo debido

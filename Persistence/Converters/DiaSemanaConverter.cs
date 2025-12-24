@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
 
 namespace ControlTalleresMVP.Persistence.Converters
 {
@@ -49,10 +48,10 @@ namespace ControlTalleresMVP.Persistence.Converters
         {
             if (SpanishToDiaSemana.ContainsKey(value))
                 return SpanishToDiaSemana[value];
-            
+
             if (EnglishToDiaSemana.ContainsKey(value))
                 return EnglishToDiaSemana[value];
-            
+
             return DayOfWeek.Monday; // Valor por defecto
         }
     }

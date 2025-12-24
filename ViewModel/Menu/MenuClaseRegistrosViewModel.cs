@@ -6,12 +6,8 @@ using ControlTalleresMVP.Messages;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Picker;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace ControlTalleresMVP.ViewModel.Menu
@@ -44,7 +40,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private decimal totalPagadoClases;
         [ObservableProperty] private decimal totalSaldoClases;
         [ObservableProperty] private decimal totalIngresoReal;
-        
+
         // Título dinámico para la columna y el total
         public string TituloIngreso => FiltrarPorDiaEspecifico ? "Ingreso del día" : "Ingreso del periodo";
 
@@ -91,24 +87,24 @@ namespace ControlTalleresMVP.ViewModel.Menu
             var token = _ctsCarga.Token;
 
             // Ejecutar carga segura
-            _ = Task.Run(async () => 
+            _ = Task.Run(async () =>
             {
-                try 
+                try
                 {
                     // Pequeño delay para "debounce" si hay cambios rápidos
-                    await Task.Delay(100, token); 
+                    await Task.Delay(100, token);
                     if (token.IsCancellationRequested) return;
-                    
-                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () => 
+
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
                     {
-                         await CargarRegistrosClasesAsync(token);
+                        await CargarRegistrosClasesAsync(token);
                     });
                 }
                 catch (OperationCanceledException) { }
                 catch (Exception ex)
                 {
-                     // Log error
-                     System.Diagnostics.Debug.WriteLine($"Error en carga: {ex.Message}");
+                    // Log error
+                    System.Diagnostics.Debug.WriteLine($"Error en carga: {ex.Message}");
                 }
             }, token);
         }
@@ -187,8 +183,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private async Task CancelarClaseAsync(int claseId)
         {
             System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Comando ejecutado para claseId: {claseId}");
-            
-            if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta clase?")) 
+
+            if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta clase?"))
             {
                 System.Diagnostics.Debug.WriteLine("CancelarClaseAsync - Usuario canceló la operación");
                 return;
@@ -222,16 +218,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 // Actualizamos el campo backing field directamente para evitar disparadores en cadena si es posible,
                 // o simplemente controlamos la lógica en el setter. 
                 // Aquí usaremos SetProperty normal pero el debounce/cancelación manejará la carga.
-                FechaDesdeRegistros = fecha; 
+                FechaDesdeRegistros = fecha;
                 cambiado = true;
             }
-            
+
             if (FechaHastaRegistros != fecha)
             {
                 FechaHastaRegistros = fecha;
                 cambiado = true;
             }
-            
+
             // Si no hubo cambios (ya estaba en la fecha), forzamos recarga por si acaso el usuario re-seleccionó
             if (!cambiado) SolicitarCarga();
         }

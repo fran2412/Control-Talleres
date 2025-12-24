@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace ControlTalleresMVP.Abstractions
 {
-    public interface INavigatorService: INotifyPropertyChanged
+    public interface INavigatorService : INotifyPropertyChanged
     {
         object? CurrentViewModel { get; }
         void NavigateTo<TViewModel>() where TViewModel : class;

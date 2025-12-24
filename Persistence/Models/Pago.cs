@@ -3,8 +3,8 @@
     public class Pago
     {
         public int PagoId { get; set; }
-        public DateTime Fecha { get; set; } = DateTime.Now; 
-        
+        public DateTime Fecha { get; set; } = DateTime.Now;
+
         public decimal MontoTotal { get; set; }
         public MetodoPago Metodo { get; set; } = MetodoPago.Efectivo;
         public string? Referencia { get; set; }

@@ -2,12 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Services.Backup;
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace ControlTalleresMVP.ViewModel.Menu
@@ -30,7 +26,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             _backupService = backupService;
             _dialogService = dialogService;
-            
+
             _ = LoadBackupsAsync();
             _ = UpdateDatabaseInfoAsync();
         }
@@ -42,7 +38,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 var backupList = await _backupService.GetAvailableBackupsAsync();
                 Backups.Clear();
-                
+
                 foreach (var backup in backupList)
                 {
                     Backups.Add(backup);
@@ -62,14 +58,14 @@ namespace ControlTalleresMVP.ViewModel.Menu
             try
             {
                 IsCreatingBackup = true;
-                
-                var backupPath = string.IsNullOrWhiteSpace(BackupName) 
+
+                var backupPath = string.IsNullOrWhiteSpace(BackupName)
                     ? await _backupService.CreateBackupAsync("Respaldo_Manual")
                     : await _backupService.CreateBackupAsync(BackupName);
 
                 _dialogService.Info($"Backup creado exitosamente:\n{Path.GetFileName(backupPath)}");
                 BackupName = string.Empty;
-                
+
                 await LoadBackupsAsync();
                 await UpdateDatabaseInfoAsync();
             }
@@ -87,15 +83,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private async Task RestoreBackupAsync()
         {
             System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Comando ejecutado");
-            
-            if (BackupSeleccionado == null) 
+
+            if (BackupSeleccionado == null)
             {
                 System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - No hay backup seleccionado");
                 _dialogService.Alerta("Por favor selecciona un backup para restaurar.");
                 return;
             }
 
-            if (IsRestoringBackup) 
+            if (IsRestoringBackup)
             {
                 System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Ya se está restaurando un backup");
                 return;
@@ -108,8 +104,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 $"Archivo: {BackupSeleccionado.FileName}\n" +
                 $"Fecha: {BackupSeleccionado.CreatedDate:dd/MM/yyyy HH:mm}\n\n" +
                 $"⚠️ Esta acción reemplazará la base de datos actual.");
-            
-            if (!confirmacion) 
+
+            if (!confirmacion)
             {
                 System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Usuario canceló la restauración");
                 return;
@@ -119,9 +115,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 System.Diagnostics.Debug.WriteLine($"RestoreBackupAsync - Restaurando backup: {BackupSeleccionado.FilePath}");
                 IsRestoringBackup = true;
-                
+
                 var success = await _backupService.RestoreFromBackupAsync(BackupSeleccionado.FilePath);
-                
+
                 if (success)
                 {
                     System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Backup restaurado exitosamente");
@@ -149,8 +145,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private async Task DeleteBackupAsync()
         {
             System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - Comando ejecutado");
-            
-            if (BackupSeleccionado == null) 
+
+            if (BackupSeleccionado == null)
             {
                 System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - No hay backup seleccionado");
                 _dialogService.Alerta("Por favor selecciona un backup para eliminar.");
@@ -163,8 +159,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 $"¿Estás seguro de que quieres eliminar este backup?\n\n" +
                 $"Archivo: {BackupSeleccionado.FileName}\n" +
                 $"Fecha: {BackupSeleccionado.CreatedDate:dd/MM/yyyy HH:mm}");
-            
-            if (!confirmacion) 
+
+            if (!confirmacion)
             {
                 System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - Usuario canceló la eliminación");
                 return;
@@ -174,7 +170,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 System.Diagnostics.Debug.WriteLine($"DeleteBackupAsync - Eliminando backup: {BackupSeleccionado.FilePath}");
                 var success = await _backupService.DeleteBackupAsync(BackupSeleccionado.FilePath);
-                
+
                 if (success)
                 {
                     System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - Backup eliminado exitosamente");
@@ -200,7 +196,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             var confirmacion = _dialogService.Confirmar(
                 "¿Eliminar backups antiguos (más de 30 días)?\n\n" +
                 "Esta acción no se puede deshacer.");
-            
+
             if (!confirmacion) return;
 
             try
@@ -222,7 +218,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 var isIntegrityOk = await _backupService.VerifyDatabaseIntegrityAsync();
                 DatabaseIntegrityOk = isIntegrityOk;
-                
+
                 if (isIntegrityOk)
                 {
                     _dialogService.Info("✅ La base de datos está íntegra y funcionando correctamente.");

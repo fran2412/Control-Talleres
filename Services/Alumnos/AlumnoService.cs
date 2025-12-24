@@ -6,10 +6,8 @@ using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Validators;
-using F23.StringSimilarity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
-using System.IO;
 
 namespace ControlTalleresMVP.Services.Alumnos
 {

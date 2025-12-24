@@ -9,14 +9,9 @@ using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Picker;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
@@ -111,78 +106,78 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private async Task BuscarAlumno()
         {
             var alumno = _alumnoPicker.Pick(excluirBecados: true);
-    if (alumno is null) return;
+            if (alumno is null) return;
 
-    await ProcesarSeleccionAlumno(alumno);
-}
+            await ProcesarSeleccionAlumno(alumno);
+        }
 
-public async Task BuscarAlumnoConAlumno(Alumno alumno)
-{
-    if (alumno is null) return;
-    
-    await ProcesarSeleccionAlumno(alumno);
-}
-
-private async Task ProcesarSeleccionAlumno(Alumno alumno)
-{
-    var inscripciones = await _inscripcionService.ObtenerInscripcionesAlumnoAsync(alumno.AlumnoId);
-    var activas = inscripciones.Where(i => !i.Eliminado).ToArray();
-
-    if (activas.Length == 0)
-    {
-        _dialogService.Alerta("Este alumno no está inscrito en ningún taller.\nInscríbalo en alguno para poder registrar sus pagos a clases.");
-        return;
-    }
-
-    var inscripcionesPendientes = activas.Where(i => i.Estado == EstadoInscripcion.Pendiente).ToArray();
-
-    var pendientesAgrupadas = inscripcionesPendientes
-        .Where(i => i.Taller != null)
-        .GroupBy(i => i.Taller!.Nombre)
-        .Select(g => new
+        public async Task BuscarAlumnoConAlumno(Alumno alumno)
         {
-            Taller = g.Key,
+            if (alumno is null) return;
+
+            await ProcesarSeleccionAlumno(alumno);
+        }
+
+        private async Task ProcesarSeleccionAlumno(Alumno alumno)
+        {
+            var inscripciones = await _inscripcionService.ObtenerInscripcionesAlumnoAsync(alumno.AlumnoId);
+            var activas = inscripciones.Where(i => !i.Eliminado).ToArray();
+
+            if (activas.Length == 0)
+            {
+                _dialogService.Alerta("Este alumno no está inscrito en ningún taller.\nInscríbalo en alguno para poder registrar sus pagos a clases.");
+                return;
+            }
+
+            var inscripcionesPendientes = activas.Where(i => i.Estado == EstadoInscripcion.Pendiente).ToArray();
+
+            var pendientesAgrupadas = inscripcionesPendientes
+                .Where(i => i.Taller != null)
+                .GroupBy(i => i.Taller!.Nombre)
+                .Select(g => new
+                {
+                    Taller = g.Key,
                     MontoPendiente = g.Sum(x => Math.Max(0m, x.SaldoActual))
-        })
-        .Where(x => x.MontoPendiente > 0m)
-        .OrderBy(x => x.Taller)
-        .ToList();
+                })
+                .Where(x => x.MontoPendiente > 0m)
+                .OrderBy(x => x.Taller)
+                .ToList();
 
-    if (pendientesAgrupadas.Count > 0)
-    {
-        var lista = string.Join(", ", pendientesAgrupadas.Select(p => $"{p.Taller} (${p.MontoPendiente:0.00})"));
-        NotificacionTalleresSinPagar = $"⚠️ Inscripciones pendientes: {lista}";
-        TieneTalleresSinPagar = true;
-    }
-    else
-    {
-        NotificacionTalleresSinPagar = null;
-        TieneTalleresSinPagar = false;
-    }
+            if (pendientesAgrupadas.Count > 0)
+            {
+                var lista = string.Join(", ", pendientesAgrupadas.Select(p => $"{p.Taller} (${p.MontoPendiente:0.00})"));
+                NotificacionTalleresSinPagar = $"⚠️ Inscripciones pendientes: {lista}";
+                TieneTalleresSinPagar = true;
+            }
+            else
+            {
+                NotificacionTalleresSinPagar = null;
+                TieneTalleresSinPagar = false;
+            }
 
-    var talleresDisponibles = new ObservableCollection<Taller>(
-        activas
-            .Where(i => i.Taller != null)
-            .Select(i => i.Taller!)
-            .GroupBy(t => t.TallerId)
-            .Select(g => g.First())
-            .OrderBy(t => t.Nombre)
-                    .ToList());
+            var talleresDisponibles = new ObservableCollection<Taller>(
+                activas
+                    .Where(i => i.Taller != null)
+                    .Select(i => i.Taller!)
+                    .GroupBy(t => t.TallerId)
+                    .Select(g => g.First())
+                    .OrderBy(t => t.Nombre)
+                            .ToList());
 
-    TalleresDelAlumno = talleresDisponibles;
-    AlumnoSeleccionado = alumno;
-    AlumnoNombre = alumno.Nombre;
+            TalleresDelAlumno = talleresDisponibles;
+            AlumnoSeleccionado = alumno;
+            AlumnoNombre = alumno.Nombre;
 
-    var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
-    var estados = await _claseService.ObtenerEstadoPagoHoyAsync(alumno.AlumnoId, ids, DateTime.Today);
-    var disponibles = estados.Where(e => e.PuedePagar).Select(e => e.TallerId).ToHashSet();
+            var ids = talleresDisponibles.Select(t => t.TallerId).ToArray();
+            var estados = await _claseService.ObtenerEstadoPagoHoyAsync(alumno.AlumnoId, ids, DateTime.Today);
+            var disponibles = estados.Where(e => e.PuedePagar).Select(e => e.TallerId).ToHashSet();
 
-    TallerSeleccionado = TalleresDelAlumno.FirstOrDefault(t => disponibles.Contains(t.TallerId))
-                       ?? TalleresDelAlumno.FirstOrDefault();
+            TallerSeleccionado = TalleresDelAlumno.FirstOrDefault(t => disponibles.Contains(t.TallerId))
+                               ?? TalleresDelAlumno.FirstOrDefault();
 
             // Forzar recarga del grid aunque TallerSeleccionado no cambie de referencia
             await CargarClasesDisponiblesAsync();
-}
+        }
 
         [RelayCommand]
         private void LimpiarSeleccion()
@@ -190,7 +185,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
             NotificacionTalleresSinPagar = null;
             TieneTalleresSinPagar = false;
             MensajeValidacion = null;
-            
+
             LimpiarClases();
 
             AlumnoSeleccionado = null;
@@ -209,15 +204,15 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                 if (AlumnoSeleccionado is null)
                 {
                     MensajeValidacion = "Debes seleccionar un alumno.";
-                        return;
-                    }
-                    
+                    return;
+                }
+
                 if (TallerSeleccionado is null)
                 {
                     MensajeValidacion = "Debes seleccionar un taller.";
-                            return;
-                        }
-                        
+                    return;
+                }
+
                 var seleccion = ClasesParaPago
                     .Where(c => c.IsSeleccionada && c.EstaHabilitada && c.MontoAplicar > 0m)
                     .OrderBy(c => c.Fecha)
@@ -226,9 +221,9 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                 if (seleccion.Count == 0)
                 {
                     MensajeValidacion = "Selecciona al menos una clase y un monto mayor a 0.";
-                            return;
-                        }
-                        
+                    return;
+                }
+
                 var resultados = new List<RegistrarClaseResult>();
                 var operacionGrupoId = Guid.NewGuid();
 
@@ -241,7 +236,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                     {
                         continue;
                     }
-                            
+
                     var r = await _claseService.RegistrarClaseAsync(
                         AlumnoSeleccionado.AlumnoId,
                         TallerSeleccionado.TallerId,
@@ -252,7 +247,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
 
                     resultados.Add(r);
                 }
-                        
+
                 if (resultados.Count == 0)
                 {
                     _dialogService.Alerta("No se registró ningún movimiento.", "Clases");
@@ -471,7 +466,7 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
 
                 var objetivo = TallerSeleccionado.DiaSemana;
                 var fecha = AjustarAlDia(inicioBase, objetivo);
-                        var hoy = DateTime.Today;
+                var hoy = DateTime.Today;
                 var fin = TallerSeleccionado.FechaFin?.Date;
 
                 var fechas = new List<DateTime>();
@@ -498,9 +493,9 @@ private async Task ProcesarSeleccionAlumno(Alumno alumno)
                 }
 
                 return fechas.ToArray();
-                }
-                catch
-                {
+            }
+            catch
+            {
                 return Array.Empty<DateTime>();
             }
         }

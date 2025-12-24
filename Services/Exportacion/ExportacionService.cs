@@ -1,13 +1,9 @@
+using ClosedXML.Excel;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using CsvHelper;
 using CsvHelper.Configuration;
-using ClosedXML.Excel;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Services.Exportacion
 {
@@ -151,9 +147,9 @@ namespace ControlTalleresMVP.Services.Exportacion
             var worksheet = workbook.Worksheets.Add("Estado de Pagos");
 
             // Escribir encabezados
-            var headers = new[] { "Alumno", "Taller", "Fecha Inicio", "Fecha Fin", "Clases Pagadas", 
+            var headers = new[] { "Alumno", "Taller", "Fecha Inicio", "Fecha Fin", "Clases Pagadas",
                                 "Clases Totales", "Monto Pagado", "Monto Total", "Estado Pago", "Progreso %" };
-            
+
             for (int i = 0; i < headers.Length; i++)
             {
                 worksheet.Cell(1, i + 1).Value = headers[i];
@@ -190,9 +186,9 @@ namespace ControlTalleresMVP.Services.Exportacion
 
             // Escribir encabezados
             var headers = new[] { "Alumno", "Taller", "Sede", "Promotor", "Generación", "Fecha Inscripción",
-                                "Costo", "Saldo Actual", "Estado", "Día Semana", "Fecha Inicio Taller", 
+                                "Costo", "Saldo Actual", "Estado", "Día Semana", "Fecha Inicio Taller",
                                 "Fecha Fin Taller", "Días Transcurridos", "Días Restantes", "Progreso %" };
-            
+
             for (int i = 0; i < headers.Length; i++)
             {
                 worksheet.Cell(1, i + 1).Value = headers[i];

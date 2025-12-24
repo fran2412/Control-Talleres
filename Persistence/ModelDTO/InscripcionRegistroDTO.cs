@@ -1,5 +1,4 @@
 using ControlTalleresMVP.Persistence.Models;
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ControlTalleresMVP.Persistence.ModelDTO

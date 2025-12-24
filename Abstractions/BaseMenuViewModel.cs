@@ -1,22 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlTalleresMVP.Helpers.Dialogs;
-using ControlTalleresMVP.Persistence.ModelDTO;
-using ControlTalleresMVP.Services.Alumnos;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 
 namespace ControlTalleresMVP.Abstractions
 {
-    public abstract partial class BaseMenuViewModel<TDto, Item, TService> :ObservableObject where TDto : ICrudDTO where TService : ICrudService<Item>
+    public abstract partial class BaseMenuViewModel<TDto, Item, TService> : ObservableObject where TDto : ICrudDTO where TService : ICrudService<Item>
     {
         public abstract ObservableCollection<TDto> Registros { get; }
         public ICollectionView? RegistrosView { get; set; }
@@ -113,7 +107,7 @@ namespace ControlTalleresMVP.Abstractions
                 {
                     _dialogService.Error("Error al limpiar los campos.\n" + ex.Message);
 
-                }            
+                }
             }
         }
     }

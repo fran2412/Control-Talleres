@@ -1,14 +1,13 @@
-﻿using ControlTalleresMVP.Helpers.Dialogs;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using ControlTalleresMVP.Helpers.Dialogs;
+using ControlTalleresMVP.Messages;
 using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Messaging;
-using ControlTalleresMVP.Messages;
 
 namespace ControlTalleresMVP.Services.Inscripciones
 {
@@ -63,7 +62,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             var fechaInscripcion = fecha ?? DateTime.Now;
             if (fechaInscripcion < generacion.FechaInicio)
                 throw new InvalidOperationException($"La fecha de inscripción no puede ser anterior al inicio de la generación ({generacion.FechaInicio:dd/MM/yyyy}).");
-            
+
             if (generacion.FechaFin.HasValue && fechaInscripcion > generacion.FechaFin.Value)
                 throw new InvalidOperationException($"La fecha de inscripción no puede ser posterior al fin de la generación ({generacion.FechaFin.Value:dd/MM/yyyy}).");
 
@@ -121,7 +120,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 {
                     // Obtener información del alumno y taller para la descripción
                     var descripcion = $"Pago de inscripción - {alumno.Nombre} en {taller.Nombre} - Abono: ${abonoInicial:F2} de ${costo:F2} (Deuda pendiente: ${saldo:F2})";
-                    
+
                     var pago = new Pago
                     {
                         AlumnoId = alumnoId,
@@ -221,7 +220,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
                 // Enviar mensaje de actualización para notificar a otros componentes
                 WeakReferenceMessenger.Default.Send(new InscripcionesActualizadasMessage(alumnoId));
-                
+
                 return inscripcion;
             }
             catch
@@ -242,7 +241,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             {
                 var motivoCancelacion = _dialogService.PedirTexto("Ingrese el motivo de la cancelación de la inscripción\nOpcional");
                 if (String.IsNullOrWhiteSpace(motivoCancelacion)) motivoCancelacion = "No especificado";
-                 motivo = motivoCancelacion;
+                motivo = motivoCancelacion;
             }
 
             // Cancelar la inscripción (mantener SaldoActual original)
@@ -353,12 +352,12 @@ namespace ControlTalleresMVP.Services.Inscripciones
             CancellationToken ct = default)
         {
             var genActualId = generacionId ?? _generacionService.ObtenerGeneracionActual()?.GeneracionId;
-            if (genActualId == null) 
+            if (genActualId == null)
             {
                 System.Diagnostics.Debug.WriteLine("No hay generación actual");
                 return new List<InscripcionRegistroDTO>();
             }
-            
+
             System.Diagnostics.Debug.WriteLine($"Buscando inscripciones para generación {genActualId}");
 
             // Query base con joins necesarios
@@ -479,8 +478,8 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
             var inscripcion = await _escuelaContext.Inscripciones
                 .AsNoTracking()
-                .Where(i => i.AlumnoId == alumnoId 
-                         && i.TallerId == tallerId 
+                .Where(i => i.AlumnoId == alumnoId
+                         && i.TallerId == tallerId
                          && i.GeneracionId == generacion.GeneracionId
                          && !i.Eliminado)
                 .Select(i => i.SaldoActual)

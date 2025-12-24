@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -104,7 +103,7 @@ namespace ControlTalleresMVP.Helpers.Converters
             {
                 var aviso = pair.Key; // AvisoClasesPendientes
                 var alumno = pair.Value; // AlumnoSeleccionado
-                
+
                 return !string.IsNullOrEmpty(aviso) && alumno != null ? Visibility.Visible : Visibility.Collapsed;
             }
             return Visibility.Collapsed;

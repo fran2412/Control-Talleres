@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ControlTalleresMVP.Persistence.Models
+﻿namespace ControlTalleresMVP.Persistence.Models
 {
     public class Configuracion
     {

@@ -1,13 +1,7 @@
 using ControlTalleresMVP.Configuraciones;
 using ControlTalleresMVP.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Services.Backup
 {
@@ -20,7 +14,7 @@ namespace ControlTalleresMVP.Services.Backup
         {
             _context = context;
             _backupDirectory = Path.Combine(Path.GetDirectoryName(AppPaths.DbPath)!, "backups");
-            
+
             // Crear directorio de backups si no existe
             if (!Directory.Exists(_backupDirectory))
             {
@@ -40,10 +34,10 @@ namespace ControlTalleresMVP.Services.Backup
                 // Generar nombre del backup
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 var fechaFormateada = DateTime.Now.ToString("dd-MM-yyyy_HH");
-                var fileName = backupName != null 
+                var fileName = backupName != null
                     ? $"{backupName}.db"
                     : $"Copia_Seguridad_Manual_{fechaFormateada}.db";
-                
+
                 var backupPath = Path.Combine(_backupDirectory, fileName);
 
                 // Ejecutar PRAGMA solo si se solicita optimización (backups manuales)
@@ -60,18 +54,18 @@ namespace ControlTalleresMVP.Services.Backup
                 {
                     var backupSize = new FileInfo(backupPath).Length;
                     const long MINIMUM_BACKUP_SIZE = 50 * 1024; // 50 KB
-                    
+
                     if (backupSize < MINIMUM_BACKUP_SIZE)
                     {
                         System.Diagnostics.Debug.WriteLine($"⚠️ Backup demasiado pequeño ({backupSize} bytes). Reiniciando aplicación para aplicar WAL.");
-                        
+
                         // Eliminar backup inválido
                         File.Delete(backupPath);
-                        
+
                         // Reiniciar la aplicación para forzar aplicación del WAL
                         RestartApplication();
                     }
-                    
+
                     System.Diagnostics.Debug.WriteLine($"Backup creado exitosamente: {backupPath} ({backupSize} bytes)");
                     return backupPath;
                 }
@@ -94,19 +88,19 @@ namespace ControlTalleresMVP.Services.Backup
                 var today = DateTime.Now.ToString("yyyyMMdd");
                 var fechaFormateada = DateTime.Now.ToString("dd-MM-yyyy_HH");
                 var backupName = $"Copia_Seguridad_Automatica_{fechaFormateada}";
-                
+
                 // Verificar si ya existe un backup automático del día actual
                 var existingBackups = await GetAvailableBackupsAsync();
-                var todayBackup = existingBackups.FirstOrDefault(b => 
-                    b.FileName.StartsWith($"Copia_Seguridad_Automatica_{DateTime.Now.ToString("dd-MM-yyyy")}") && 
+                var todayBackup = existingBackups.FirstOrDefault(b =>
+                    b.FileName.StartsWith($"Copia_Seguridad_Automatica_{DateTime.Now.ToString("dd-MM-yyyy")}") &&
                     b.CreatedDate.Date == DateTime.Now.Date);
-                
+
                 if (todayBackup != null)
                 {
                     System.Diagnostics.Debug.WriteLine($"Ya existe un backup automático del día {today}. No se creará uno nuevo.");
                     return todayBackup.FilePath;
                 }
-                
+
                 // Crear backup automático solo si no existe uno del día actual
                 System.Diagnostics.Debug.WriteLine($"Creando backup automático del día {today}");
                 return await CreateBackupAsync(backupName, ct);
@@ -141,7 +135,7 @@ namespace ControlTalleresMVP.Services.Backup
                     // 1) Cerrar conexiones y pools para soltar el archivo
                     await _context.Database.CloseConnectionAsync();
                     _context.ChangeTracker.Clear();
-                    
+
                     // Limpiar pools de SQLite
                     try
                     {
@@ -185,7 +179,7 @@ namespace ControlTalleresMVP.Services.Backup
                     if (!isIntegrityOk)
                     {
                         System.Diagnostics.Debug.WriteLine("Integridad falló, ejecutando rollback...");
-                        
+
                         // Rollback: volver al respaldo pre_restore (también de forma atómica)
                         var rollbackTmp = Path.Combine(dbDir, $"{Path.GetFileNameWithoutExtension(dbPath)}.__rollback_tmp{Path.GetExtension(dbPath)}");
                         await Task.Run(() => File.Copy(preRestore!, rollbackTmp, true), ct);
@@ -204,21 +198,21 @@ namespace ControlTalleresMVP.Services.Backup
                     }
 
                     System.Diagnostics.Debug.WriteLine($"Base de datos restaurada exitosamente desde: {backupPath}");
-                    
+
                     // Reiniciar la aplicación después de la restauración exitosa
                     System.Diagnostics.Debug.WriteLine("🔄 Reiniciando aplicación después de restauración exitosa...");
                     RestartApplication();
-                    
+
                     return true;
                 }
-                catch (OperationCanceledException) 
-                { 
-                    throw; 
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Error durante la restauración: {ex.Message}");
-                    
+
                     // Limpieza del temporal si quedó colgado
                     TryDeleteIfExists(tempPath);
                     return false;
@@ -236,16 +230,16 @@ namespace ControlTalleresMVP.Services.Backup
         /// </summary>
         private static void TryDeleteIfExists(string path)
         {
-            try 
-            { 
-                if (File.Exists(path)) 
+            try
+            {
+                if (File.Exists(path))
                 {
                     File.Delete(path);
                     System.Diagnostics.Debug.WriteLine($"Archivo auxiliar eliminado: {path}");
                 }
-            } 
+            }
             catch (Exception ex)
-            { 
+            {
                 System.Diagnostics.Debug.WriteLine($"No se pudo eliminar archivo {path}: {ex.Message}");
             }
         }
@@ -433,7 +427,7 @@ namespace ControlTalleresMVP.Services.Backup
                 using var fileStream = new FileStream(backupPath, FileMode.Open, FileAccess.Read);
                 var header = new byte[16];
                 await fileStream.ReadAsync(header, 0, 16);
-                
+
                 // SQLite files start with "SQLite format 3"
                 var sqliteHeader = System.Text.Encoding.ASCII.GetString(header);
                 return sqliteHeader.StartsWith("SQLite format 3");
@@ -452,10 +446,10 @@ namespace ControlTalleresMVP.Services.Backup
             try
             {
                 System.Diagnostics.Debug.WriteLine("🔄 Aplicando cambios del WAL al archivo principal...");
-                
+
                 // Forzar checkpoint del WAL para incluir todos los cambios pendientes
                 await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(FULL)", ct);
-                
+
                 System.Diagnostics.Debug.WriteLine("✅ Cambios del WAL aplicados al archivo principal");
             }
             catch (Exception ex)
@@ -473,19 +467,19 @@ namespace ControlTalleresMVP.Services.Backup
             try
             {
                 System.Diagnostics.Debug.WriteLine("🔄 Iniciando reinicio de la aplicación...");
-                
+
                 // Obtener la ruta del ejecutable actual
                 var currentExecutable = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 var executablePath = currentExecutable.Replace(".dll", ".exe");
-                
+
                 // Si no existe el .exe, usar el .dll
                 if (!File.Exists(executablePath))
                 {
                     executablePath = currentExecutable;
                 }
-                
+
                 System.Diagnostics.Debug.WriteLine($"Ejecutando: {executablePath}");
-                
+
                 // Iniciar una nueva instancia de la aplicación
                 var startInfo = new System.Diagnostics.ProcessStartInfo
                 {
@@ -493,9 +487,9 @@ namespace ControlTalleresMVP.Services.Backup
                     UseShellExecute = true,
                     WorkingDirectory = Path.GetDirectoryName(executablePath)
                 };
-                
+
                 System.Diagnostics.Process.Start(startInfo);
-                
+
                 // Cerrar la aplicación actual
                 System.Diagnostics.Debug.WriteLine("✅ Nueva instancia iniciada, cerrando aplicación actual...");
                 Environment.Exit(0);

@@ -1,11 +1,4 @@
-﻿using ControlTalleresMVP.Persistence.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ControlTalleresMVP.Abstractions
+﻿namespace ControlTalleresMVP.Abstractions
 {
     public interface ICrudService<TItem>
     {

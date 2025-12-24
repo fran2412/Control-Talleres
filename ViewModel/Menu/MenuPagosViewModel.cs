@@ -6,19 +6,12 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Pagos;
 using ControlTalleresMVP.Services.Picker;
-using Microsoft.Extensions.Logging.Abstractions;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace ControlTalleresMVP.ViewModel.Menu
 {
-    public partial class MenuPagosViewModel: ObservableObject
+    public partial class MenuPagosViewModel : ObservableObject
     {
         public string TituloEncabezado { get; set; } = "Gestión de pagos";
         private readonly IAlumnoPickerService _alumnoPicker;

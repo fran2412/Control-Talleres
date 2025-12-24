@@ -6,12 +6,8 @@ using ControlTalleresMVP.Messages;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Picker;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace ControlTalleresMVP.ViewModel.Menu
@@ -35,9 +31,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public string FiltroRegistrosInscripciones
         {
             get => _filtroRegistrosInscripciones;
-            set 
-            { 
-                if (SetProperty(ref _filtroRegistrosInscripciones, value)) 
+            set
+            {
+                if (SetProperty(ref _filtroRegistrosInscripciones, value))
                 {
                     RegistrosInscripcionesView?.Refresh();
                     RecalcularTotales(); // Recalcular totales cuando cambie el filtro
@@ -54,11 +50,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private decimal totalMontoTalleresActivos;
         [ObservableProperty] private decimal totalPagadoTalleresActivos;
         [ObservableProperty] private decimal totalSaldoTalleresActivos;
-        
+
         [ObservableProperty] private decimal totalMontoTalleresEliminados;
         [ObservableProperty] private decimal totalPagadoTalleresEliminados;
         [ObservableProperty] private decimal totalSaldoTalleresEliminados;
-        
+
         [ObservableProperty] private decimal totalMontoGeneral;
         [ObservableProperty] private decimal totalPagadoGeneral;
         [ObservableProperty] private decimal totalSaldoGeneral;
@@ -108,7 +104,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             RegistrosInscripcionesView = CollectionViewSource.GetDefaultView(RegistrosInscripciones);
             RegistrosInscripcionesView.Filter = FiltroRegistrosPredicate;
             RegistrosInscripcionesView.CurrentChanged += (_, __) => RecalcularTotales();
-            
+
             System.Diagnostics.Debug.WriteLine("CollectionView inicializado");
 
             // Suscríbete a los cambios de inscripciones
@@ -138,7 +134,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 foreach (var r in datos) RegistrosInscripciones.Add(r);
 
                 RecalcularTotales();
-                
+
                 // Debug: verificar cuántos registros se cargaron
                 System.Diagnostics.Debug.WriteLine($"Cargados {datos.Count} registros de inscripciones");
             }
@@ -197,7 +193,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             decimal montoActivos = 0, pagadoActivos = 0, saldoActivos = 0;
             decimal montoEliminados = 0, pagadoEliminados = 0, saldoEliminados = 0;
             decimal montoGeneral = 0, pagadoGeneral = 0, saldoGeneral = 0;
-            
+
             foreach (var item in RegistrosInscripcionesView)
             {
                 if (item is InscripcionRegistroDTO r)
@@ -206,7 +202,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     montoGeneral += r.Monto;
                     pagadoGeneral += r.MontoPagado;
                     saldoGeneral += r.SaldoActual;
-                    
+
                     // Totales separados por tipo de taller
                     if (r.TallerEliminado)
                     {
@@ -222,21 +218,21 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     }
                 }
             }
-            
+
             // Totales filtrados (solo talleres activos) - para compatibilidad
             TotalMontoInscripciones = montoActivos;
             TotalPagadoInscripciones = pagadoActivos;
             TotalSaldoInscripciones = saldoActivos;
-            
+
             // Totales separados por tipo de taller
             TotalMontoTalleresActivos = montoActivos;
             TotalPagadoTalleresActivos = pagadoActivos;
             TotalSaldoTalleresActivos = saldoActivos;
-            
+
             TotalMontoTalleresEliminados = montoEliminados;
             TotalPagadoTalleresEliminados = pagadoEliminados;
             TotalSaldoTalleresEliminados = saldoEliminados;
-            
+
             // Totales generales
             TotalMontoGeneral = montoGeneral;
             TotalPagadoGeneral = pagadoGeneral;

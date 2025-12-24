@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace ControlTalleresMVP.Helpers.Commands
 {
-    public sealed class RelayCommandGeneric <T>: ICommand
+    public sealed class RelayCommandGeneric<T> : ICommand
     {
         private readonly Action<T?> _execute;
         private readonly Predicate<T?>? _canExecute;

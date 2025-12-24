@@ -1,5 +1,3 @@
-using System;
-
 namespace ControlTalleresMVP.Messages
 {
     public sealed record ClasesActualizadasMessage(int AlumnoId);

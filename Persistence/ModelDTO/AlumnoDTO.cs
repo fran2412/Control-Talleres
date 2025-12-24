@@ -1,15 +1,10 @@
 ﻿using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Persistence.Models;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ControlTalleresMVP.Persistence.ModelDTO
 {
-    public class AlumnoDTO: ICrudDTO
+    public class AlumnoDTO : ICrudDTO
     {
         [ScaffoldColumn(false)]
         public int Id { get; set; }
