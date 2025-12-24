@@ -28,7 +28,7 @@ Desktop.ini
 *.dump
 
 # =========================
-# Archivos de compilación / salida genérica
+# Archivos de compilación / salida genéricos
 # =========================
 bin/
 obj/
@@ -43,7 +43,7 @@ build/
 .idea/
 *.iml
 *.suo
-*.vs/
+**.vs/
 *.user
 *.userosscache
 *.sln.docstates
