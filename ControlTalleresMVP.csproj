@@ -71,18 +71,19 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="EFCore.NamingConventions" Version="8.0" />
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.0" />
     <PackageReference Include="extended.wpf.toolkit" Version="5.0.0" />
-    <PackageReference Include="F23.StringSimilarity" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0">
+    <PackageReference Include="F23.StringSimilarity" Version="7.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="SharpVectors.Wpf" Version="1.8.5" />
-    <PackageReference Include="CsvHelper" Version="33.0.1" />
-    <PackageReference Include="ClosedXML" Version="0.102.2" />
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
   </ItemGroup>
 
   <ItemGroup>
