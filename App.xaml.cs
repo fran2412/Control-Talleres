@@ -46,17 +46,6 @@ namespace ControlTalleresMVP
 
             base.OnStartup(e);
 
-            var _escuelaContext = ServiceProvider.GetRequiredService<EscuelaContext>();
-
-            using (var scope = ServiceProvider.CreateScope())
-            {
-                var serviceProviderScope = scope.ServiceProvider;
-                var escuelaContext = serviceProviderScope.GetRequiredService<EscuelaContext>();
-
-                escuelaContext.Database.Migrate();
-                
-            }
-
             // Verificación de licencia antes de abrir la ventana principal
             using (var scope = ServiceProvider.CreateScope())
             {
