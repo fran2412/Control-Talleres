@@ -37,7 +37,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             IDialogService dialogService,
             MenuInscripcionRegistrosViewModel menuInscripcionRegistrosVM)
         {
-            System.Diagnostics.Debug.WriteLine("Inicializando MenuInscripcionesViewModel");
             _inscripcionService = inscripcionService;
             _tallerService = tallerService;
             _configuracionService = configuracionService;

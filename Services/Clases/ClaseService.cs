@@ -298,18 +298,18 @@ namespace ControlTalleresMVP.Services.Clases
                 })
                 .Select(g => new ClaseFinancieraDTO
                 {
-                    CargoId        = g.Key.CargoId,
-                    ClaseId        = g.Key.ClaseId,
-                    TallerId       = g.Key.TallerId,
-                    AlumnoId       = g.Key.AlumnoId,
-                    FechaClase     = g.Key.Fecha,
-                    TallerNombre   = g.Key.TallerNombre,
-                    AlumnoNombre   = g.Key.AlumnoNombre,
-                    MontoTotal     = g.Key.Monto, // Renombrado de Monto
-                    SaldoActual    = g.Key.SaldoActual,
+                    CargoId = g.Key.CargoId,
+                    ClaseId = g.Key.ClaseId,
+                    TallerId = g.Key.TallerId,
+                    AlumnoId = g.Key.AlumnoId,
+                    FechaClase = g.Key.Fecha,
+                    TallerNombre = g.Key.TallerNombre,
+                    AlumnoNombre = g.Key.AlumnoNombre,
+                    MontoTotal = g.Key.Monto, // Renombrado de Monto
+                    SaldoActual = g.Key.SaldoActual,
 
                     // Total histórico pagado
-                    MontoPagado    = (decimal)((g.Where(z => z.pa != null)
+                    MontoPagado = (decimal)((g.Where(z => z.pa != null)
                                                 .Select(z => (double?)z.pa.MontoAplicado)
                                                 .Sum()) ?? 0.0),
 
@@ -330,10 +330,10 @@ namespace ControlTalleresMVP.Services.Clases
                     PorcentajePagado = g.Key.Monto > 0
                         ? (int)Math.Round((double)((g.Key.Monto - g.Key.SaldoActual) / g.Key.Monto * 100m))
                         : 0,
-                    EstadoCargo    = g.Key.Estado,
-                    EstadoTexto    = g.Key.Estado == EstadoCargo.Pagado ? "Pagada" :
+                    EstadoCargo = g.Key.Estado,
+                    EstadoTexto = g.Key.Estado == EstadoCargo.Pagado ? "Pagada" :
                                      g.Key.Estado == EstadoCargo.Pendiente ? "Pendiente" : "Anulada",
-                    UltimoPagoFecha  = g.Where(z => z.pa != null)
+                    UltimoPagoFecha = g.Where(z => z.pa != null)
                                         .Max(z => (DateTime?)z.pa.Pago.Fecha)
                 })
                 .ToList();
@@ -356,9 +356,9 @@ namespace ControlTalleresMVP.Services.Clases
             // Redondeamos importes por consistencia visual
             foreach (var r in lista)
             {
-                r.MontoTotal     = Math.Round(r.MontoTotal, 2, MidpointRounding.AwayFromZero);
-                r.MontoPagado    = Math.Round(r.MontoPagado, 2, MidpointRounding.AwayFromZero);
-                r.SaldoActual    = Math.Round(r.SaldoActual, 2, MidpointRounding.AwayFromZero);
+                r.MontoTotal = Math.Round(r.MontoTotal, 2, MidpointRounding.AwayFromZero);
+                r.MontoPagado = Math.Round(r.MontoPagado, 2, MidpointRounding.AwayFromZero);
+                r.SaldoActual = Math.Round(r.SaldoActual, 2, MidpointRounding.AwayFromZero);
                 r.IngresoPorFecha = Math.Round(r.IngresoPorFecha, 2, MidpointRounding.AwayFromZero);
             }
 
@@ -490,21 +490,17 @@ namespace ControlTalleresMVP.Services.Clases
                 });
 
             var talleres = await talleresQuery.ToListAsync(ct);
-            System.Diagnostics.Debug.WriteLine($"✅ Talleres encontrados: {talleres.Count}");
 
             var resultados = new List<EstadoPagoAlumnoDTO>();
 
             foreach (var taller in talleres)
             {
-                System.Diagnostics.Debug.WriteLine($"🔍 Procesando taller: {taller.Nombre} (ID: {taller.TallerId})");
-
                 // Calcular fechas de clases - usar fecha fin del taller o una fecha futura razonable
                 var fechaFin = taller.FechaFin?.Date ?? hoy.AddMonths(6); // Si no tiene fecha fin, asumir 6 meses
                 var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
 
                 // Generar fechas de clases desde FechaInicio hasta fechaLimite
                 var fechasClases = GenerarFechasClases(taller.FechaInicio, fechaLimite, taller.DiaSemana);
-                System.Diagnostics.Debug.WriteLine($"📅 Fechas de clases generadas: {fechasClases.Count} (desde {taller.FechaInicio:yyyy-MM-dd} hasta {fechaLimite:yyyy-MM-dd})");
 
                 // Si no hay fechas de clases generadas, crear al menos una fecha para mostrar el taller
                 if (fechasClases.Count == 0)
@@ -540,7 +536,6 @@ namespace ControlTalleresMVP.Services.Clases
                     });
 
                 var alumnos = await alumnosQuery.ToListAsync(ct);
-                System.Diagnostics.Debug.WriteLine($"👥 Alumnos inscritos en {taller.Nombre}: {alumnos.Count}");
 
                 // Si no hay alumnos inscritos, mostrar un mensaje informativo
                 if (alumnos.Count == 0)

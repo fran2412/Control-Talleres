@@ -82,22 +82,18 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [RelayCommand]
         private async Task RestoreBackupAsync()
         {
-            System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Comando ejecutado");
 
             if (BackupSeleccionado == null)
             {
-                System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - No hay backup seleccionado");
                 _dialogService.Alerta("Por favor selecciona un backup para restaurar.");
                 return;
             }
 
             if (IsRestoringBackup)
             {
-                System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Ya se está restaurando un backup");
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"RestoreBackupAsync - Backup seleccionado: {BackupSeleccionado.FileName}");
 
             var confirmacion = _dialogService.Confirmar(
                 $"¿Estás seguro de que quieres restaurar el backup?\n\n" +
@@ -107,32 +103,27 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             if (!confirmacion)
             {
-                System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Usuario canceló la restauración");
                 return;
             }
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"RestoreBackupAsync - Restaurando backup: {BackupSeleccionado.FilePath}");
                 IsRestoringBackup = true;
 
                 var success = await _backupService.RestoreFromBackupAsync(BackupSeleccionado.FilePath);
 
                 if (success)
                 {
-                    System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Backup restaurado exitosamente");
                     _dialogService.Info("Base de datos restaurada exitosamente.\nLa aplicación se reiniciará.");
                     Application.Current.Shutdown();
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("RestoreBackupAsync - Error al restaurar backup");
                     _dialogService.Error("Error al restaurar el backup.");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"RestoreBackupAsync - Excepción: {ex.Message}");
                 _dialogService.Error($"Error al restaurar backup: {ex.Message}");
             }
             finally
@@ -144,16 +135,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [RelayCommand]
         private async Task DeleteBackupAsync()
         {
-            System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - Comando ejecutado");
 
             if (BackupSeleccionado == null)
             {
-                System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - No hay backup seleccionado");
                 _dialogService.Alerta("Por favor selecciona un backup para eliminar.");
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"DeleteBackupAsync - Backup seleccionado: {BackupSeleccionado.FileName}");
 
             var confirmacion = _dialogService.Confirmar(
                 $"¿Estás seguro de que quieres eliminar este backup?\n\n" +
@@ -162,30 +150,25 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             if (!confirmacion)
             {
-                System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - Usuario canceló la eliminación");
                 return;
             }
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"DeleteBackupAsync - Eliminando backup: {BackupSeleccionado.FilePath}");
                 var success = await _backupService.DeleteBackupAsync(BackupSeleccionado.FilePath);
 
                 if (success)
                 {
-                    System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - Backup eliminado exitosamente");
                     _dialogService.Info("Backup eliminado exitosamente.");
                     await LoadBackupsAsync();
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("DeleteBackupAsync - Error al eliminar backup");
                     _dialogService.Error("Error al eliminar el backup.");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"DeleteBackupAsync - Excepción: {ex.Message}");
                 _dialogService.Error($"Error al eliminar backup: {ex.Message}");
             }
         }
@@ -245,7 +228,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al actualizar información de base de datos: {ex.Message}");
             }
         }
 

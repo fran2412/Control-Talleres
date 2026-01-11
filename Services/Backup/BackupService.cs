@@ -57,16 +57,9 @@ namespace ControlTalleresMVP.Services.Backup
 
                     if (backupSize < MINIMUM_BACKUP_SIZE)
                     {
-                        System.Diagnostics.Debug.WriteLine($"⚠️ Backup demasiado pequeño ({backupSize} bytes). Reiniciando aplicación para aplicar WAL.");
-
-                        // Eliminar backup inválido
                         File.Delete(backupPath);
-
-                        // Reiniciar la aplicación para forzar aplicación del WAL
                         RestartApplication();
                     }
-
-                    System.Diagnostics.Debug.WriteLine($"Backup creado exitosamente: {backupPath} ({backupSize} bytes)");
                     return backupPath;
                 }
                 else
@@ -74,9 +67,8 @@ namespace ControlTalleresMVP.Services.Backup
                     throw new InvalidOperationException("No se pudo crear el backup");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al crear backup: {ex.Message}");
                 throw;
             }
         }
@@ -97,17 +89,13 @@ namespace ControlTalleresMVP.Services.Backup
 
                 if (todayBackup != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Ya existe un backup automático del día {today}. No se creará uno nuevo.");
                     return todayBackup.FilePath;
                 }
 
-                // Crear backup automático solo si no existe uno del día actual
-                System.Diagnostics.Debug.WriteLine($"Creando backup automático del día {today}");
                 return await CreateBackupAsync(backupName, ct);
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al crear backup automático: {ex.Message}");
                 throw;
             }
         }
@@ -118,7 +106,6 @@ namespace ControlTalleresMVP.Services.Backup
             {
                 if (string.IsNullOrWhiteSpace(backupPath) || !File.Exists(backupPath))
                 {
-                    System.Diagnostics.Debug.WriteLine("Archivo de backup no válido o no existe");
                     return false;
                 }
 
@@ -130,20 +117,15 @@ namespace ControlTalleresMVP.Services.Backup
 
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine($"Iniciando restauración desde: {backupPath}");
-
-                    // 1) Cerrar conexiones y pools para soltar el archivo
                     await _context.Database.CloseConnectionAsync();
                     _context.ChangeTracker.Clear();
 
-                    // Limpiar pools de SQLite
                     try
                     {
                         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error al limpiar pools SQLite: {ex.Message}");
                     }
 
                     // 2) Eliminar archivos auxiliares si existen
@@ -154,32 +136,26 @@ namespace ControlTalleresMVP.Services.Backup
                     // 3) Respaldo de seguridad para rollback (sin optimización para evitar conflictos)
                     var fechaRestore = DateTime.Now.ToString("dd-MM-yyyy_HH");
                     preRestore = await CreateBackupAsync($"Copia_Seguridad_Pre_Restauracion_{fechaRestore}", false, ct);
-                    System.Diagnostics.Debug.WriteLine($"Backup de seguridad creado: {preRestore}");
 
                     // 4) Copiar el backup a un archivo temporal en el MISMO directorio (misma unidad)
                     await Task.Run(() => File.Copy(backupPath, tempPath, true), ct);
-                    System.Diagnostics.Debug.WriteLine($"Backup copiado a archivo temporal: {tempPath}");
 
                     // 5) Reemplazo atómico del archivo activo
                     if (File.Exists(dbPath))
                     {
                         // Reemplaza el destino con el temp (operación atómica en el mismo volumen)
                         File.Replace(tempPath, dbPath, null);
-                        System.Diagnostics.Debug.WriteLine("Archivo reemplazado atómicamente");
                     }
                     else
                     {
                         // Si por alguna razón no existe aún la BD, mueve el temp
                         File.Move(tempPath, dbPath);
-                        System.Diagnostics.Debug.WriteLine("Archivo temporal movido a posición final");
                     }
 
                     // 6) Verificar integridad de la BD restaurada con conexión FRESCA
                     var isIntegrityOk = await VerifyDatabaseIntegrityAsync(ct);
                     if (!isIntegrityOk)
                     {
-                        System.Diagnostics.Debug.WriteLine("Integridad falló, ejecutando rollback...");
-
                         // Rollback: volver al respaldo pre_restore (también de forma atómica)
                         var rollbackTmp = Path.Combine(dbDir, $"{Path.GetFileNameWithoutExtension(dbPath)}.__rollback_tmp{Path.GetExtension(dbPath)}");
                         await Task.Run(() => File.Copy(preRestore!, rollbackTmp, true), ct);
@@ -193,14 +169,10 @@ namespace ControlTalleresMVP.Services.Backup
                             File.Move(rollbackTmp, dbPath);
                         }
 
-                        System.Diagnostics.Debug.WriteLine("Rollback completado - estado anterior restaurado");
                         return false;
                     }
 
-                    System.Diagnostics.Debug.WriteLine($"Base de datos restaurada exitosamente desde: {backupPath}");
 
-                    // Reiniciar la aplicación después de la restauración exitosa
-                    System.Diagnostics.Debug.WriteLine("🔄 Reiniciando aplicación después de restauración exitosa...");
                     RestartApplication();
 
                     return true;
@@ -211,8 +183,6 @@ namespace ControlTalleresMVP.Services.Backup
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error durante la restauración: {ex.Message}");
-
                     // Limpieza del temporal si quedó colgado
                     TryDeleteIfExists(tempPath);
                     return false;
@@ -220,7 +190,6 @@ namespace ControlTalleresMVP.Services.Backup
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al restaurar backup: {ex.Message}");
                 return false;
             }
         }
@@ -235,12 +204,10 @@ namespace ControlTalleresMVP.Services.Backup
                 if (File.Exists(path))
                 {
                     File.Delete(path);
-                    System.Diagnostics.Debug.WriteLine($"Archivo auxiliar eliminado: {path}");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"No se pudo eliminar archivo {path}: {ex.Message}");
             }
         }
 
@@ -254,7 +221,6 @@ namespace ControlTalleresMVP.Services.Backup
                 // Verificar que la base de datos existe y es accesible
                 if (!File.Exists(AppPaths.DbPath))
                 {
-                    System.Diagnostics.Debug.WriteLine("Archivo de base de datos no existe");
                     return false;
                 }
 
@@ -262,18 +228,15 @@ namespace ControlTalleresMVP.Services.Backup
                 var canConnect = await _context.Database.CanConnectAsync(ct);
                 if (!canConnect)
                 {
-                    System.Diagnostics.Debug.WriteLine("No se puede conectar a la base de datos para verificar integridad");
                     return false;
                 }
 
                 // Verificar que se pueden ejecutar consultas básicas
                 var count = await _context.Alumnos.CountAsync(ct);
-                System.Diagnostics.Debug.WriteLine($"Verificación de integridad exitosa - {count} alumnos encontrados");
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al verificar integridad: {ex.Message}");
                 return false;
             }
         }
@@ -307,9 +270,8 @@ namespace ControlTalleresMVP.Services.Backup
                 // Ordenar por fecha de creación (más recientes primero) para el DataGrid
                 return backups.OrderByDescending(b => b.CreatedDate).ToList();
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener lista de backups: {ex.Message}");
                 return new List<BackupInfo>();
             }
         }
@@ -321,14 +283,12 @@ namespace ControlTalleresMVP.Services.Backup
                 if (File.Exists(backupPath))
                 {
                     await Task.Run(() => File.Delete(backupPath));
-                    System.Diagnostics.Debug.WriteLine($"Backup eliminado: {backupPath}");
                     return true;
                 }
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al eliminar backup: {ex.Message}");
                 return false;
             }
         }
@@ -351,12 +311,10 @@ namespace ControlTalleresMVP.Services.Backup
                     }
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Se eliminaron {deletedCount} backups antiguos");
                 return deletedCount;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al limpiar backups antiguos: {ex.Message}");
                 return 0;
             }
         }
@@ -382,9 +340,8 @@ namespace ControlTalleresMVP.Services.Backup
                 var count = await _context.Alumnos.CountAsync();
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al verificar integridad: {ex.Message}");
                 return false;
             }
         }
@@ -400,9 +357,8 @@ namespace ControlTalleresMVP.Services.Backup
                 }
                 return 0;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener tamaño de base de datos: {ex.Message}");
                 return 0;
             }
         }
@@ -445,17 +401,13 @@ namespace ControlTalleresMVP.Services.Backup
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("🔄 Aplicando cambios del WAL al archivo principal...");
 
                 // Forzar checkpoint del WAL para incluir todos los cambios pendientes
                 await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(FULL)", ct);
 
-                System.Diagnostics.Debug.WriteLine("✅ Cambios del WAL aplicados al archivo principal");
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"⚠️ Error al aplicar cambios del WAL: {ex.Message}");
-                // No lanzar excepción, continuar con el backup
             }
         }
 
@@ -466,8 +418,6 @@ namespace ControlTalleresMVP.Services.Backup
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("🔄 Iniciando reinicio de la aplicación...");
-
                 // Obtener la ruta del ejecutable actual
                 var currentExecutable = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 var executablePath = currentExecutable.Replace(".dll", ".exe");
@@ -477,8 +427,6 @@ namespace ControlTalleresMVP.Services.Backup
                 {
                     executablePath = currentExecutable;
                 }
-
-                System.Diagnostics.Debug.WriteLine($"Ejecutando: {executablePath}");
 
                 // Iniciar una nueva instancia de la aplicación
                 var startInfo = new System.Diagnostics.ProcessStartInfo
@@ -491,12 +439,10 @@ namespace ControlTalleresMVP.Services.Backup
                 System.Diagnostics.Process.Start(startInfo);
 
                 // Cerrar la aplicación actual
-                System.Diagnostics.Debug.WriteLine("✅ Nueva instancia iniciada, cerrando aplicación actual...");
                 Environment.Exit(0);
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error al reiniciar la aplicación: {ex.Message}");
                 // Si falla el reinicio, cerrar normalmente
                 Environment.Exit(1);
             }

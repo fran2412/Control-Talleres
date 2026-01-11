@@ -317,13 +317,13 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 .Where(i => !i.Eliminado && i.GeneracionId == genActualId && i.Estado != EstadoInscripcion.Cancelada)
                 .Select(i => new InscripcionDTO
                 {
-                    Id          = i.InscripcionId,
-                    Nombre      = i.Alumno.Nombre,  // ← string plano
-                    Taller      = i.Taller.Nombre,  // ← string plano
-                    Costo       = i.Costo,
+                    Id = i.InscripcionId,
+                    Nombre = i.Alumno.Nombre,  // ← string plano
+                    Taller = i.Taller.Nombre,  // ← string plano
+                    Costo = i.Costo,
                     SaldoActual = i.SaldoActual,
-                    Estado      = i.Estado,
-                    CreadoEn    = i.Fecha
+                    Estado = i.Estado,
+                    CreadoEn = i.Fecha
                 })
                 .OrderByDescending(i => i.CreadoEn)
                 .ToListAsync(ct);
@@ -354,11 +354,9 @@ namespace ControlTalleresMVP.Services.Inscripciones
             var genActualId = generacionId ?? _generacionService.ObtenerGeneracionActual()?.GeneracionId;
             if (genActualId == null)
             {
-                System.Diagnostics.Debug.WriteLine("No hay generación actual");
                 return new List<InscripcionRegistroDTO>();
             }
 
-            System.Diagnostics.Debug.WriteLine($"Buscando inscripciones para generación {genActualId}");
 
             // Query base con joins necesarios
             var q = from i in _escuelaContext.Inscripciones.AsNoTracking()
@@ -455,7 +453,6 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 r.SaldoActual = Math.Round(r.SaldoActual, 2, MidpointRounding.AwayFromZero);
             }
 
-            System.Diagnostics.Debug.WriteLine($"Encontrados {lista.Count} registros de inscripciones");
             return lista;
         }
 

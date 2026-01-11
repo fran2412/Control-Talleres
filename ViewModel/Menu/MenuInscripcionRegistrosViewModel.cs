@@ -93,7 +93,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             IAlumnoPickerService alumnoPicker,
             IDialogService dialogService)
         {
-            System.Diagnostics.Debug.WriteLine("Inicializando MenuInscripcionRegistrosViewModel");
             _inscripcionService = inscripcionService;
             _alumnoPicker = alumnoPicker;
             _dialogService = dialogService;
@@ -105,7 +104,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             RegistrosInscripcionesView.Filter = FiltroRegistrosPredicate;
             RegistrosInscripcionesView.CurrentChanged += (_, __) => RecalcularTotales();
 
-            System.Diagnostics.Debug.WriteLine("CollectionView inicializado");
 
             // Suscríbete a los cambios de inscripciones
             WeakReferenceMessenger.Default.Register<InscripcionesActualizadasMessage>(this, async (_, m) =>
@@ -135,8 +133,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
                 RecalcularTotales();
 
-                // Debug: verificar cuántos registros se cargaron
-                System.Diagnostics.Debug.WriteLine($"Cargados {datos.Count} registros de inscripciones");
             }
             catch (Exception ex)
             {
@@ -166,8 +162,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             if (o is not InscripcionRegistroDTO dto) return false;
 
-            // Temporalmente simplificar el filtro para debug
-            System.Diagnostics.Debug.WriteLine($"Filtrando registro: {dto.AlumnoNombre} - {dto.TallerNombre}");
 
             if (!string.IsNullOrWhiteSpace(FiltroRegistrosInscripciones))
             {

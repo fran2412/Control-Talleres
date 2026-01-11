@@ -28,19 +28,7 @@ namespace ControlTalleresMVP.UI.Component.Backup
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is DataGrid dataGrid)
-            {
-                var selectedBackup = dataGrid.SelectedItem as BackupInfo;
-                System.Diagnostics.Debug.WriteLine($"DataGrid_SelectionChanged - Backup seleccionado: {(selectedBackup?.FileName ?? "NINGUNO")}");
-                
-                if (selectedBackup != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"  - Archivo: {selectedBackup.FileName}");
-                    System.Diagnostics.Debug.WriteLine($"  - Fecha: {selectedBackup.CreatedDate}");
-                    System.Diagnostics.Debug.WriteLine($"  - Tamaño: {selectedBackup.SizeFormatted}");
-                    System.Diagnostics.Debug.WriteLine($"  - Válido: {selectedBackup.IsValid}");
-                }
-            }
+
         }
     }
 }

@@ -76,8 +76,9 @@ namespace ControlTalleresMVP
 
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
-        
-            using (var scope = ServiceProvider.CreateScope()){
+
+            using (var scope = ServiceProvider.CreateScope())
+            {
                 var serviceProviderScope = scope.ServiceProvider;
                 var escuelaContext = serviceProviderScope.GetRequiredService<EscuelaContext>();
 
@@ -87,11 +88,9 @@ namespace ControlTalleresMVP
                     try
                     {
                         await backupService.CreateAutomaticBackupAsync();
-                        System.Diagnostics.Debug.WriteLine("Backup automático creado al iniciar la aplicación");
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error al crear backup automático: {ex.Message}");
                     }
                 });
 

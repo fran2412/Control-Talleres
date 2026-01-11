@@ -29,8 +29,6 @@ namespace ControlTalleresMVP.Services.Inscripciones
             var desdeFiltro = desde?.Date ?? DateTime.MinValue;
             var hastaFiltroCompleto = hastaFiltro.Date.AddDays(1).AddTicks(-1); // Hasta el final del día
 
-            // Log de depuración para entender los filtros aplicados
-            System.Diagnostics.Debug.WriteLine($"Filtros aplicados - TallerId: {tallerId}, PromotorId: {promotorId}, GeneracionId: {generacionId}, Desde: {desdeFiltro}, Hasta: {hastaFiltroCompleto}");
 
             var query = from i in _escuelaContext.Inscripciones.AsNoTracking()
                         where (incluirTalleresEliminados || !i.Eliminado)
@@ -82,7 +80,6 @@ namespace ControlTalleresMVP.Services.Inscripciones
                 .OrderBy(x => x.AlumnoEliminado) // Alumnos activos primero (false), eliminados al final (true)
                 .ThenByDescending(x => x.FechaInscripcion) // Dentro de cada grupo, por fecha descendente
                 .ToArrayAsync(ct);
-            System.Diagnostics.Debug.WriteLine($"Total de inscripciones encontradas: {resultados.Length}");
             return resultados;
         }
 

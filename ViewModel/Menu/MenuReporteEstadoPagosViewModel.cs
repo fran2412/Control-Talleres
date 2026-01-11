@@ -89,7 +89,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             catch (Exception ex)
             {
                 MensajeEstado = $"Error al cargar datos: {ex.Message}";
-                System.Diagnostics.Debug.WriteLine($"Error en CargarDatosAsync: {ex}");
             }
             finally
             {

@@ -101,11 +101,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     });
                 }
                 catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    // Log error
-                    System.Diagnostics.Debug.WriteLine($"Error en carga: {ex.Message}");
-                }
             }, token);
         }
 
@@ -182,26 +177,20 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         private async Task CancelarClaseAsync(int claseId)
         {
-            System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Comando ejecutado para claseId: {claseId}");
 
             if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta clase?"))
             {
-                System.Diagnostics.Debug.WriteLine("CancelarClaseAsync - Usuario canceló la operación");
                 return;
             }
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Cancelando clase {claseId}");
                 await _claseService.CancelarAsync(claseId);
-                System.Diagnostics.Debug.WriteLine("CancelarClaseAsync - Clase cancelada, recargando registros");
                 await CargarRegistrosClasesAsync();
                 _dialogService.Info("Clase cancelada correctamente.");
-                System.Diagnostics.Debug.WriteLine("CancelarClaseAsync - Proceso completado exitosamente");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"CancelarClaseAsync - Error: {ex.Message}");
                 _dialogService.Error("No se pudo cancelar la clase.\n" + ex.Message);
             }
         }
