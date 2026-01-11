@@ -293,6 +293,7 @@
         <DataGrid Grid.Row="4" ItemsSource="{Binding EstadosPago}" 
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                   GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                  Style="{StaticResource DataGridRegistros}"
                   AlternatingRowBackground="#F8F9FA" RowHeaderWidth="0"
                   MaxHeight="310"
                   Margin="0,0,0,15">

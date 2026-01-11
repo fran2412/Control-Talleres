@@ -401,6 +401,7 @@
               AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
               GridLinesVisibility="Horizontal" HeadersVisibility="Column"
               MaxHeight="310"
+              Style="{StaticResource DataGridRegistros}"
               AlternatingRowBackground="#F8F9FA" RowHeaderWidth="0"
               Margin="0,0,0,15">
 
