@@ -5,6 +5,9 @@
         public int GeneracionId { get; set; }
         public string Nombre { get; set; } = null!;
 
+        public int SedeId { get; set; }
+        public virtual Sede Sede { get; set; } = null!;
+
         public DateTime FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
 

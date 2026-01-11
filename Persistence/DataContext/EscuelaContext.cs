@@ -226,6 +226,13 @@ namespace ControlTalleresMVP.Persistence.DataContext
                     .HasDefaultValue(false);
 
                 entity.Property(e => e.EliminadoEn).HasColumnName("eliminado_en");
+
+                entity.Property(e => e.SedeId).HasColumnName("id_sede").HasDefaultValue(1);
+
+                entity.HasOne(e => e.Sede)
+                      .WithMany(s => s.Generaciones)
+                      .HasForeignKey(e => e.SedeId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ====================
@@ -270,7 +277,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .HasColumnName("cancelada_en");
                 entity.Property(i => i.MotivoCancelacion)
                       .HasColumnName("motivo_cancelacion");
-                
+
                 entity.Property(i => i.Eliminado)
                       .HasColumnName("eliminado")
                       .HasDefaultValue(false);
@@ -316,6 +323,13 @@ namespace ControlTalleresMVP.Persistence.DataContext
                 entity.Property(c => c.Clave).HasColumnName("clave");
                 entity.Property(c => c.Valor).HasColumnName("valor");
                 entity.Property(c => c.Descripcion).HasColumnName("descripcion");
+
+                entity.Property(c => c.SedeId).HasColumnName("id_sede").HasDefaultValue(1);
+
+                entity.HasOne(c => c.Sede)
+                      .WithMany(s => s.Configuraciones)
+                      .HasForeignKey(c => c.SedeId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ====================
@@ -347,7 +361,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
 
                 entity.Property(c => c.Estado)
                       .HasColumnName("estado")
-                      .HasConversion<string>(); 
+                      .HasConversion<string>();
 
                 entity.Property(c => c.CreadoEn)
                       .HasColumnName("creado_en")
@@ -380,7 +394,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .WithMany(i => i.Cargos)
                       .HasForeignKey(c => c.InscripcionId)
                       .OnDelete(DeleteBehavior.Restrict);
-                
+
                 entity.HasOne(c => c.Clase)
                       .WithMany()
                       .HasForeignKey(c => c.ClaseId)

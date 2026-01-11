@@ -16,5 +16,8 @@
 
         // Relación inversa: una sede puede tener muchos talleres
         public ICollection<Taller> Talleres { get; set; } = new List<Taller>();
+
+        public ICollection<Generacion> Generaciones { get; set; } = new List<Generacion>();
+        public ICollection<Configuracion> Configuraciones { get; set; } = new List<Configuracion>();
     }
 }
