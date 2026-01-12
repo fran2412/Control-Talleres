@@ -1,4 +1,5 @@
-﻿using ControlTalleresMVP.Helpers.Dialogs;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ControlTalleresMVP.Helpers.Dialogs;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,9 +34,17 @@ namespace ControlTalleresMVP.UI.Windows
             }
             if (txtPassword.Password == "admin" && txtUsuario.Text == "admin")
             {
+                // Abrir ventana de selección de sede
+                var seleccionSedeWindow = App.ServiceProvider!.GetRequiredService<SeleccionSedeWindow>();
+                var resultado = seleccionSedeWindow.ShowDialog();
 
-                new MenuWindow().Show();
-                Close();
+                if (resultado == true)
+                {
+                    // La sede fue seleccionada, abrir menú principal
+                    new MenuWindow().Show();
+                    Close();
+                }
+                // Si se canceló, permanecer en la ventana de login
             }
             else
             {

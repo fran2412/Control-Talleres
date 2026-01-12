@@ -1,0 +1,54 @@
+<Window x:Class="ControlTalleresMVP.UI.Windows.SeleccionSedeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Title="Seleccionar Sede" Height="350" Width="450">
+
+    <Grid Background="{StaticResource BrushFondo}">
+        <Rectangle HorizontalAlignment="Center" Height="280" 
+                   VerticalAlignment="Center" Width="380" 
+                   RadiusX="20" RadiusY="20" Fill="White"/>
+        
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="320">
+            <!-- Título -->
+            <TextBlock Text="Seleccionar Sede" 
+                       FontFamily="Inter" FontSize="22" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" 
+                       Foreground="#333333" Margin="0,0,0,10"/>
+            
+            <!-- Subtítulo -->
+            <TextBlock Text="Seleccione la sede en la que trabajará" 
+                       FontFamily="Inter" FontSize="13"
+                       HorizontalAlignment="Center" 
+                       Foreground="#666666" Margin="0,0,0,30"/>
+            
+            <!-- ComboBox de sedes -->
+            <TextBlock Text="Sede" 
+                       FontFamily="Inter" FontSize="13" FontWeight="Medium"
+                       Foreground="#333333" Margin="0,0,0,8"/>
+            
+            <ComboBox x:Name="cmbSedes"
+                      ItemsSource="{Binding Sedes}"
+                      SelectedItem="{Binding SedeSeleccionada}"
+                      DisplayMemberPath="Nombre"
+                      Height="40"
+                      FontSize="14"
+                      VerticalContentAlignment="Center"
+                      Padding="10,0"/>
+
+            <!-- Botón Continuar -->
+            <Button x:Name="btnContinuar"
+                    Content="Continuar"
+                    Style="{StaticResource FeaturedButton}"
+                    Height="45" 
+                    Margin="0,35,0,0"
+                    Command="{Binding ConfirmarCommand}"
+                    Click="BtnContinuar_Click"
+                    IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

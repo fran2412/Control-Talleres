@@ -16,6 +16,8 @@ using ControlTalleresMVP.Services.Sedes;
 using ControlTalleresMVP.Services.Talleres;
 using ControlTalleresMVP.Services.Backup;
 using ControlTalleresMVP.Services.Exportacion;
+using ControlTalleresMVP.Services.Sesion;
+using ControlTalleresMVP.ViewModel.Sesion;
 using ControlTalleresMVP.UI.Windows;
 using ControlTalleresMVP.ViewModel.Menu;
 using ControlTalleresMVP.ViewModel.Navigation;
@@ -106,6 +108,7 @@ namespace ControlTalleresMVP
             //Ventanas
             services.AddSingleton<MainWindow>();
             services.AddSingleton<MenuWindow>();
+            services.AddTransient<SeleccionSedeWindow>();
 
             //ViewModels
             services.AddTransient<MenuInicioViewModel>();
@@ -125,6 +128,7 @@ namespace ControlTalleresMVP
             services.AddTransient<MenuReporteEstadoPagosViewModel>();
             services.AddTransient<MenuReporteInscripcionesViewModel>();
             services.AddTransient<ShellViewModel>();
+            services.AddTransient<SeleccionSedeViewModel>();
 
             //Services
             services.AddScoped<INavigatorService, NavigatorService>();
@@ -143,6 +147,7 @@ namespace ControlTalleresMVP
             services.AddTransient<IAlumnoPickerService, AlumnoPickerService>();
             services.AddScoped<IBackupService, BackupService>();
             services.AddTransient<IExportacionService, ExportacionService>();
+            services.AddSingleton<ISesionService, SesionService>();
 
             //Validators
             services.AddScoped<IAlumnoValidator, AlumnoValidator>();
