@@ -9,7 +9,7 @@ using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Promotores;
-using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Sesion;
 using ControlTalleresMVP.Services.Talleres;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -28,27 +28,26 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         [ObservableProperty] private string campoTextoNombre = "";
         [ObservableProperty] private string campoTextTelefono = "";
-        [ObservableProperty] private int? sedeSeleccionadaId;
+
         [ObservableProperty] private int? promotorSeleccionadoId;
         [ObservableProperty] private bool inscribirEnTaller;
         [ObservableProperty] private bool esBecado;
         [ObservableProperty] private decimal descuentoPorClase;
 
         private readonly IPromotorService _promotorService;
-        private readonly ISedeService _sedeService;
+        private readonly ISesionService _sesionService;
         private readonly IConfiguracionService _configuracionService;
         private readonly ITallerService _tallerService;
 
-        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISedeService sedeService, ITallerService tallerService, IConfiguracionService configuracionService)
+        public MenuAlumnosViewModel(IAlumnoService itemService, IDialogService dialogService, IPromotorService promotorService, ISesionService sesionService, ITallerService tallerService, IConfiguracionService configuracionService)
             : base(itemService, dialogService)
         {
             _configuracionService = configuracionService;
             _promotorService = promotorService;
-            _sedeService = sedeService;
+            _sesionService = sesionService;
             _tallerService = tallerService;
 
             OpcionesPromotor = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
-            OpcionesSede = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
 
             TalleresDisponibles = new ObservableCollection<TallerInscripcionDTO>();
 
@@ -69,7 +68,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public decimal SaldoPendienteTotal =>
             TalleresDisponibles?.Where(t => t.EstaSeleccionado).Sum(t => t.SaldoPendiente) ?? 0;
 
-        public ObservableCollection<Sede> OpcionesSede { get; set; }
+
 
         public ObservableCollection<Promotor> OpcionesPromotor { get; }
 
@@ -115,7 +114,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 {
                     Nombre = CampoTextoNombre.Trim(),
                     Telefono = CampoTextTelefono?.Trim(),
-                    SedeId = SedeSeleccionadaId,
+                    SedeId = _sesionService.ObtenerIdSede(),
                     PromotorId = PromotorSeleccionadoId,
                     DescuentoPorClase = DescuentoPorClase,
                     EsBecado = EsBecado
@@ -240,7 +239,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             CampoTextoNombre = "";
             CampoTextTelefono = "";
-            SedeSeleccionadaId = null;
             PromotorSeleccionadoId = null;
             EsBecado = false;
             DescuentoPorClase = 0m;

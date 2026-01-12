@@ -3,11 +3,11 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Alumnos;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Promotores;
-using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Sesion;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,7 +22,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         private readonly IAlumnoService _alumnoService;
         private readonly IDialogService _dialogService;
         private readonly IPromotorService _promotorService;
-        private readonly ISedeService _sedeService;
+        private readonly ISesionService _sesionService;
         private readonly IConfiguracionService _configuracionService;
         private readonly Alumno _alumnoOriginal;
         private readonly decimal _maxDescuentoPorClase;
@@ -43,7 +43,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             _alumnoService = App.ServiceProvider!.GetRequiredService<IAlumnoService>();
             _dialogService = App.ServiceProvider!.GetRequiredService<IDialogService>();
             _promotorService = App.ServiceProvider!.GetRequiredService<IPromotorService>();
-            _sedeService = App.ServiceProvider!.GetRequiredService<ISedeService>();
+            _sesionService = App.ServiceProvider!.GetRequiredService<ISesionService>();
             _configuracionService = App.ServiceProvider!.GetRequiredService<IConfiguracionService>();
             _alumnoOriginal = alumno;
 
@@ -66,8 +66,6 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             NombreTextBox.Text = _alumnoOriginal.Nombre ?? "";
             TelefonoTextBox.Text = _alumnoOriginal.Telefono ?? "";
-            SedeComboBox.ItemsSource = new ObservableCollection<Sede>(_sedeService.ObtenerTodos());
-            SedeComboBox.SelectedValue = _alumnoOriginal.Sede?.SedeId;
             PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.PromotorId;
             EsBecadoCheckBox.IsChecked = _alumnoOriginal.EsBecado;
@@ -118,7 +116,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 AlumnoId = _alumnoOriginal.AlumnoId,
                 Nombre = NombreTextBox.Text.Trim(),
                 Telefono = string.IsNullOrWhiteSpace(TelefonoTextBox.Text) ? null : TelefonoTextBox.Text.Trim(),
-                SedeId = SedeComboBox.SelectedValue as int?,
+                SedeId = _sesionService.ObtenerIdSede(),
                 PromotorId = PromotorComboBox.SelectedValue as int?,
                 EsBecado = EsBecadoCheckBox.IsChecked ?? false,
                 DescuentoPorClase = ObtenerDescuentoPorClase(),

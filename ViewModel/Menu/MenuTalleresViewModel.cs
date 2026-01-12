@@ -4,7 +4,7 @@ using ControlTalleresMVP.Abstractions;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
-using ControlTalleresMVP.Services.Sedes;
+using ControlTalleresMVP.Services.Sesion;
 using ControlTalleresMVP.Services.Talleres;
 using System.Collections.ObjectModel;
 
@@ -35,48 +35,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty]
         private DateTime? fechaFin;
 
-        // Propiedades para manejar sedes
-        [ObservableProperty]
-        private ObservableCollection<Sede> sedesDisponibles = new();
+        private readonly ISesionService _sesionService;
 
-        [ObservableProperty]
-        private Sede? sedeSeleccionada;
-
-        private readonly ISedeService _sedeService;
-
-        public MenuTalleresViewModel(ITallerService itemService, ISedeService sedeService, IDialogService dialogService)
+        public MenuTalleresViewModel(ITallerService itemService, ISesionService sesionService, IDialogService dialogService)
             : base(itemService, dialogService)
         {
-            _sedeService = sedeService;
+            _sesionService = sesionService;
             itemService.InicializarRegistros();
             InicializarVista();
-            CargarSedesDisponibles();
         }
 
-        private void CargarSedesDisponibles()
-        {
-            try
-            {
-                var sedes = _sedeService.ObtenerTodos();
-                SedesDisponibles.Clear();
-                foreach (var sede in sedes)
-                {
-                    SedesDisponibles.Add(sede);
-                }
 
-                // Seleccionar la primera sede por defecto
-                if (SedesDisponibles.Any())
-                {
-                    SedeSeleccionada = SedesDisponibles.First();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Manejar error de carga de sedes
-                System.Windows.MessageBox.Show($"Error al cargar sedes: {ex.Message}", "Error",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
-        }
 
         [RelayCommand]
         protected override async Task RegistrarItemAsync()
@@ -87,11 +56,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return;
             }
 
-            if (SedeSeleccionada == null)
-            {
-                _dialogService.Alerta("Debe seleccionar una sede para el taller");
-                return;
-            }
+
 
             if (HorarioFin <= HorarioInicio)
             {
@@ -121,7 +86,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     DiaSemana = DiaSemanaSeleccionado,
                     FechaInicio = FechaInicio,
                     FechaFin = FechaFin,
-                    SedeId = SedeSeleccionada.SedeId
+                    SedeId = _sesionService.ObtenerIdSede()
                 });
 
                 LimpiarCampos();
@@ -147,7 +112,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             DiaSemanaSeleccionado = DayOfWeek.Monday; // ← NUEVO (reset)
             FechaInicio = DateTime.Today;
             FechaFin = null;
-            SedeSeleccionada = SedesDisponibles.FirstOrDefault(); // Resetear a la primera sede
         }
 
         public override bool Filtro(object o)
