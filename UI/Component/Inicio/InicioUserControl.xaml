@@ -43,7 +43,7 @@
                     
                     <!-- Título y subtítulo -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="¡Bienvenido al Sistema!" 
+                        <TextBlock Text="{Binding TextoBienvenida}" 
                                    FontFamily="Inter 28pt 28pt ExtraBold"
                                    FontSize="28"
                                    Foreground="#2C3E50"
