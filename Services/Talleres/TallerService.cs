@@ -1,6 +1,7 @@
 ﻿using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
+using ControlTalleresMVP.Services.Sesion;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -12,9 +13,11 @@ namespace ControlTalleresMVP.Services.Talleres
         public ObservableCollection<TallerDTO> RegistrosTalleres { get; set; } = new();
 
         private readonly EscuelaContext _context;
-        public TallerService(EscuelaContext context)
+        private readonly ISesionService _sesionService;
+        public TallerService(EscuelaContext context, ISesionService sesionService)
         {
             _context = context;
+            _sesionService = sesionService;
         }
 
         public async Task<Taller> GuardarAsync(Taller taller, CancellationToken ct = default)
@@ -293,9 +296,10 @@ namespace ControlTalleresMVP.Services.Talleres
 
         public List<TallerInscripcionDTO> ObtenerTalleresParaInscripcion(decimal costoInscripcion)
         {
+            var sedeId = _sesionService.ObtenerIdSede();
             return _context.Talleres
                 .AsNoTracking()
-                .Where(t => !t.Eliminado)
+                .Where(t => !t.Eliminado && t.SedeId == sedeId)
                 .Select(t => new TallerInscripcionDTO
                 {
                     TallerId = t.TallerId,

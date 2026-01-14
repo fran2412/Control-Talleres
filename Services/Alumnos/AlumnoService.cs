@@ -5,6 +5,7 @@ using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Cargos;
 using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
+using ControlTalleresMVP.Services.Sesion;
 using ControlTalleresMVP.Validators;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
@@ -21,7 +22,8 @@ namespace ControlTalleresMVP.Services.Alumnos
         private readonly IInscripcionService _inscripcionService;
         private readonly IDialogService _dialogService;
         private readonly IAlumnoValidator _alumnoValidator;
-        public AlumnoService(EscuelaContext context, IDialogService dialogService, ICargosService cargosService, IInscripcionService inscripcionService, IGeneracionService generacionService, IAlumnoValidator alumnoValidator)
+        private readonly ISesionService _sesionService;
+        public AlumnoService(EscuelaContext context, IDialogService dialogService, ICargosService cargosService, IInscripcionService inscripcionService, IGeneracionService generacionService, IAlumnoValidator alumnoValidator, ISesionService sesionService)
         {
             _context = context;
             _cargosService = cargosService;
@@ -29,6 +31,7 @@ namespace ControlTalleresMVP.Services.Alumnos
             _dialogService = dialogService;
             _generacionService = generacionService;
             _alumnoValidator = alumnoValidator;
+            _sesionService = sesionService;
         }
 
         public async Task<Alumno> GuardarAsync(Alumno alumno, CancellationToken ct = default)
@@ -117,10 +120,11 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         public async Task<List<AlumnoDTO>> ObtenerAlumnosDto(CancellationToken ct = default)
         {
+            var sedeId = _sesionService.ObtenerIdSede();
 
             var alumnos = await _context.Alumnos
                 .AsNoTracking()
-                .Where(a => !a.Eliminado)
+                .Where(a => !a.Eliminado && a.SedeId == sedeId)
                 .Select(u => new
                 {
                     u.AlumnoId,
