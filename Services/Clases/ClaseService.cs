@@ -6,6 +6,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
+using ControlTalleresMVP.Services.Sesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControlTalleresMVP.Services.Clases
@@ -25,13 +26,15 @@ namespace ControlTalleresMVP.Services.Clases
         private readonly IConfiguracionService _configuracionService;
         private readonly IDialogService _dialogService;
         private readonly IGeneracionService _generacionService;
+        private readonly ISesionService _sesionService;
 
-        public ClaseService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IDialogService dialogService, IGeneracionService generacionService)
+        public ClaseService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IDialogService dialogService, IGeneracionService generacionService, ISesionService sesionService)
         {
             _escuelaContext = escuelaContext;
             _configuracionService = configuracionService;
             _dialogService = dialogService;
             _generacionService = generacionService;
+            _sesionService = sesionService;
         }
 
         // ====================
@@ -258,6 +261,8 @@ namespace ControlTalleresMVP.Services.Clases
     DateTime? hasta = null,
     CancellationToken ct = default)
         {
+            var sedeId = _sesionService.ObtenerIdSede();
+
             var q = from ca in _escuelaContext.Cargos.AsNoTracking()
                     where ca.ClaseId != null
                           && !ca.Eliminado
@@ -266,6 +271,7 @@ namespace ControlTalleresMVP.Services.Clases
                     join cl in _escuelaContext.Clases.AsNoTracking() on ca.ClaseId equals cl.ClaseId
                     where (!tallerId.HasValue || cl.TallerId == tallerId.Value)
                     join ta in _escuelaContext.Talleres.AsNoTracking() on cl.TallerId equals ta.TallerId
+                    where ta.SedeId == sedeId
                     join al in _escuelaContext.Alumnos.AsNoTracking() on ca.AlumnoId equals al.AlumnoId
                     join pa in _escuelaContext.PagoAplicaciones.AsNoTracking()
                             .Include(p => p.Pago) // para fecha y método
@@ -386,10 +392,13 @@ namespace ControlTalleresMVP.Services.Clases
             if (alumnoId <= 0 || ids.Length == 0) return Array.Empty<ClasePagoEstadoDTO>();
 
             var day = fecha.Date;
+            var sedeId = _sesionService.ObtenerIdSede();
 
             var resumenDia = await (
                 from clases in _escuelaContext.Clases.AsNoTracking()
                 where clases.Fecha == day
+                join taller in _escuelaContext.Talleres.AsNoTracking() on clases.TallerId equals taller.TallerId
+                where taller.SedeId == sedeId
                 join cargos in _escuelaContext.Cargos.AsNoTracking()
                     on clases.ClaseId equals cargos.ClaseId into caGroup
                 from cargos in caGroup
@@ -476,9 +485,10 @@ namespace ControlTalleresMVP.Services.Clases
             var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
 
             // Obtener talleres con sus fechas de inicio y fin (incluyendo eliminados)
+            var sedeId = _sesionService.ObtenerIdSede();
             var talleresQuery = _escuelaContext.Talleres
                 .AsNoTracking()
-                .Where(t => tallerId == null || t.TallerId == tallerId)
+                .Where(t => t.SedeId == sedeId && (tallerId == null || t.TallerId == tallerId))
                 .Select(t => new
                 {
                     t.TallerId,
