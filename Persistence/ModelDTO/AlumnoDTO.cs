@@ -15,7 +15,7 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [ScaffoldColumn(false)]
         public Sede? Sede { get; set; }
 
-        [Display(Name = "Sede")]
+        [ScaffoldColumn(false)]
         public string? SedeNombre => Sede?.Nombre;
 
         [ScaffoldColumn(false)]

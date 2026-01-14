@@ -182,14 +182,16 @@ namespace ControlTalleresMVP.Services.Alumnos
 
         public List<Alumno> ObtenerTodos(CancellationToken ct = default)
         {
+            var sedeId = _sesionService.ObtenerIdSede();
             return _context.Alumnos
                 .AsNoTracking()
-                .Where(a => !a.Eliminado)
+                .Where(a => !a.Eliminado && a.SedeId == sedeId)
                 .ToList();
         }
 
         public async Task<List<Alumno>> ObtenerAlumnosConDeudasPendientesAsync(CancellationToken ct = default)
         {
+            var sedeId = _sesionService.ObtenerIdSede();
             var generacion = _generacionService.ObtenerGeneracionActual();
             if (generacion == null) return new List<Alumno>();
 
@@ -202,7 +204,7 @@ namespace ControlTalleresMVP.Services.Alumnos
                                || c.Inscripcion!.GeneracionId == generacion.GeneracionId))
                 .Select(c => c.Alumno)
                 .Distinct()
-                .Where(a => !a.Eliminado)
+                .Where(a => !a.Eliminado && a.SedeId == sedeId)
                 .Include(a => a.Sede)
                 .Include(a => a.Promotor)
                 .OrderBy(a => a.Nombre)
