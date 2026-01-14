@@ -158,7 +158,9 @@ namespace ControlTalleresMVP.Services.Talleres
 
         public async Task<List<TallerDTO>> ObtenerTalleresParaGridAsync(bool incluirEliminados, CancellationToken ct = default)
         {
-            var query = _context.Talleres.AsNoTracking();
+            var sedeId = _sesionService.ObtenerIdSede();
+            var query = _context.Talleres.AsNoTracking()
+                .Where(t => t.SedeId == sedeId);
 
             if (!incluirEliminados)
             {
@@ -221,9 +223,10 @@ namespace ControlTalleresMVP.Services.Talleres
 
         public List<Taller> ObtenerTodos(CancellationToken ct = default)
         {
+            var sedeId = _sesionService.ObtenerIdSede();
             return _context.Talleres
                 .AsNoTracking()
-                .Where(p => !p.Eliminado)
+                .Where(p => !p.Eliminado && p.SedeId == sedeId)
                 .ToList();
         }
 

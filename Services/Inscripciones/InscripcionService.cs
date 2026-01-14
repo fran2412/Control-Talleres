@@ -6,6 +6,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Configuracion;
 using ControlTalleresMVP.Services.Generaciones;
+using ControlTalleresMVP.Services.Sesion;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 
@@ -17,16 +18,18 @@ namespace ControlTalleresMVP.Services.Inscripciones
         private readonly IConfiguracionService _configuracionService;
         private readonly IGeneracionService _generacionService;
         private readonly IDialogService _dialogService;
+        private readonly ISesionService _sesionService;
 
         public ObservableCollection<InscripcionDTO> RegistrosInscripciones { get; set; } = new();
         public ObservableCollection<InscripcionRegistroDTO> RegistrosInscripcionesCompletos { get; set; } = new();
 
-        public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IGeneracionService generacionService, IDialogService dialogService)
+        public InscripcionService(EscuelaContext escuelaContext, IConfiguracionService configuracionService, IGeneracionService generacionService, IDialogService dialogService, ISesionService sesionService)
         {
             _escuelaContext = escuelaContext;
             _configuracionService = configuracionService;
             _generacionService = generacionService;
             _dialogService = dialogService;
+            _sesionService = sesionService;
         }
 
         public async Task<bool> ExisteActivaAsync(int alumnoId, int tallerId, int generacionId, CancellationToken ct = default)
@@ -312,9 +315,11 @@ namespace ControlTalleresMVP.Services.Inscripciones
             var genActualId = _generacionService.ObtenerGeneracionActual()?.GeneracionId
                 ?? throw new InvalidOperationException("No hay generación actual.");
 
+            var sedeId = _sesionService.ObtenerIdSede();
+
             var datos = await _escuelaContext.Inscripciones
                 .AsNoTracking()
-                .Where(i => !i.Eliminado && i.GeneracionId == genActualId && i.Estado != EstadoInscripcion.Cancelada)
+                .Where(i => !i.Eliminado && i.GeneracionId == genActualId && i.Estado != EstadoInscripcion.Cancelada && i.Taller.SedeId == sedeId)
                 .Select(i => new InscripcionDTO
                 {
                     Id = i.InscripcionId,
@@ -359,6 +364,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
 
             // Query base con joins necesarios
+            var sedeId = _sesionService.ObtenerIdSede();
             var q = from i in _escuelaContext.Inscripciones.AsNoTracking()
                     where !i.Eliminado
                        && i.GeneracionId == genActualId
@@ -367,6 +373,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
                        && (!desde.HasValue || i.Fecha >= desde.Value.Date)
                        && (!hasta.HasValue || i.Fecha <= hasta.Value.Date)
                     join ta in _escuelaContext.Talleres.AsNoTracking() on i.TallerId equals ta.TallerId
+                    where ta.SedeId == sedeId
                     join al in _escuelaContext.Alumnos.AsNoTracking() on i.AlumnoId equals al.AlumnoId
                     join ge in _escuelaContext.Generaciones.AsNoTracking() on i.GeneracionId equals ge.GeneracionId
                     join ca in _escuelaContext.Cargos.AsNoTracking() on i.InscripcionId equals ca.InscripcionId into cargos
