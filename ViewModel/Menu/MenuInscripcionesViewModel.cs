@@ -153,7 +153,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 var talleres = await _tallerService.ObtenerTalleresParaGridAsync();
 
                 // Costo base desde configuración (si todos comparten costo)
-                var costoBase = _configuracionService.GetValor<int>("costo_inscripcion", 600);
+                var costoBase = _configuracionService.GetValorSede<int>("costo_inscripcion", 600);
 
                 foreach (var t in talleres)
                 {

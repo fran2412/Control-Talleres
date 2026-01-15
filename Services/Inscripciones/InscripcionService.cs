@@ -69,7 +69,7 @@ namespace ControlTalleresMVP.Services.Inscripciones
             if (generacion.FechaFin.HasValue && fechaInscripcion > generacion.FechaFin.Value)
                 throw new InvalidOperationException($"La fecha de inscripción no puede ser posterior al fin de la generación ({generacion.FechaFin.Value:dd/MM/yyyy}).");
 
-            var costo = _configuracionService.GetValor<int>("costo_inscripcion", 600);
+            var costo = _configuracionService.GetValorSede<int>("costo_inscripcion", 600);
 
             if (abonoInicial < 0 || abonoInicial > costo) throw new InvalidOperationException("Abono inicial inválido.");
 

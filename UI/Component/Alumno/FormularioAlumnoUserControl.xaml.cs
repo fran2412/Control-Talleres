@@ -25,7 +25,7 @@ namespace ControlTalleresMVP.UI.Component.Alumno
             InitializeComponent();
 
             var configService = App.ServiceProvider!.GetRequiredService<IConfiguracionService>();
-            var costoClase = Math.Max(1, configService.GetValor<int>("costo_clase", 150));
+            var costoClase = Math.Max(1, configService.GetValorSede<int>("costo_clase", 150));
             _maxDescuentoPorClase = Math.Max(0, costoClase - 1);
 
             Loaded += (_, __) => AjustarControlDescuento();

@@ -91,7 +91,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             if (!ConfirmarActualizacionCosto(nombreCampo: "costo de inscripción", nuevoValor: valor)) return;
 
-            bool resultadoActualizarValor = _configuracionService.SetValor("costo_inscripcion", valor.ToString());
+            bool resultadoActualizarValor = _configuracionService.SetValorSede("costo_inscripcion", valor.ToString());
 
             if (!resultadoActualizarValor)
             {
@@ -120,7 +120,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
             if (!ConfirmarActualizacionCosto(nombreCampo: "costo por clase", nuevoValor: valor)) return;
 
-            bool resultadoActualizarValor = _configuracionService.SetValor("costo_clase", valor.ToString());
+            bool resultadoActualizarValor = _configuracionService.SetValorSede("costo_clase", valor.ToString());
 
             if (!resultadoActualizarValor)
             {
@@ -145,13 +145,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         private void InicializarCostoPorInscripcion()
         {
-            CostoInscripcionAlmacenado = _configuracionService.GetValor<int>(clave: "costo_inscripcion", valorPorDefecto: CostoDefaultInscripcion);
+            CostoInscripcionAlmacenado = _configuracionService.GetValorSede<int>(clave: "costo_inscripcion", valorPorDefecto: CostoDefaultInscripcion);
             CostoInscripcion = CostoInscripcionAlmacenado.ToString();
         }
 
         private void InicializarCostoPorClase()
         {
-            CostoPorClaseAlmacenado = _configuracionService.GetValor<int>(clave: "costo_clase", valorPorDefecto: CostoDefaultClase);
+            CostoPorClaseAlmacenado = _configuracionService.GetValorSede<int>(clave: "costo_clase", valorPorDefecto: CostoDefaultClase);
             CostoPorClase = CostoPorClaseAlmacenado.ToString();
         }
     }

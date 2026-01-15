@@ -47,7 +47,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             _configuracionService = App.ServiceProvider!.GetRequiredService<IConfiguracionService>();
             _alumnoOriginal = alumno;
 
-            var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+            var costoClase = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
             _maxDescuentoPorClase = Math.Max(0, costoClase - 1);
 
             ConfigurarValidaciones();

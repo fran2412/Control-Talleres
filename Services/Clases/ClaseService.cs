@@ -76,7 +76,7 @@ namespace ControlTalleresMVP.Services.Clases
                 throw new InvalidOperationException($"La fecha indicada ({fechaClase:dd/MM/yyyy}) es posterior a la fecha fin del taller ({tallerInfo.FechaFin:dd/MM/yyyy}).");
             }
 
-            var costoConfigurado = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+            var costoConfigurado = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
             var costoBase = Math.Round((decimal)costoConfigurado, 2, MidpointRounding.AwayFromZero);
             var descuentoAlumno = await ObtenerDescuentoPorClaseAsync(alumnoId, ct);
             var costoClaseConDescuento = CalcularCostoClaseConDescuento(costoBase, descuentoAlumno);
@@ -482,7 +482,7 @@ namespace ControlTalleresMVP.Services.Clases
             }
 
             // Obtener costo de clase desde configuración
-            var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+            var costoClase = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
 
             // Obtener talleres con sus fechas de inicio y fin (incluyendo eliminados)
             var sedeId = _sesionService.ObtenerIdSede();
@@ -874,7 +874,7 @@ namespace ControlTalleresMVP.Services.Clases
             try
             {
                 var hoy = DateTime.Today;
-                var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+                var costoClase = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
                 var resultados = new List<EstadoPagoAlumnoDTO>();
 
                 // Obtener TODAS las inscripciones sin filtros

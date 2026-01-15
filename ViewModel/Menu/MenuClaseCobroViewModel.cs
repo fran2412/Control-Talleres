@@ -43,7 +43,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _alumnoPicker = alumnoPicker;
 
             FechaDeHoy = DateTime.Now.ToString("dd/MM/yyyy");
-            var costoCfg = _configuracionService.GetValor<int>("costo_clase", 150);
+            var costoCfg = _configuracionService.GetValorSede<int>("costo_clase", 150);
             _costoClase = ClampCosto(Math.Round((decimal)costoCfg, 2, MidpointRounding.AwayFromZero));
         }
 

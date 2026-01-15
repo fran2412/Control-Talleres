@@ -268,7 +268,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 DesuscribirEventosTalleres();
                 TalleresDisponibles.Clear();
 
-                var costoDefault = _configuracionService.GetValor<int>("costo_inscripcion", 600);
+                var costoDefault = _configuracionService.GetValorSede<int>("costo_inscripcion", 600);
                 var talleres = _tallerService.ObtenerTalleresParaInscripcion(costoDefault);
 
                 foreach (var item in talleres)
@@ -333,7 +333,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return false;
             }
 
-            var costoClase = Math.Max(1, _configuracionService.GetValor<int>("costo_clase", 150));
+            var costoClase = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
             var maxDescuento = Math.Max(0, costoClase - 1);
 
             if (!EsBecado && DescuentoPorClase > maxDescuento)

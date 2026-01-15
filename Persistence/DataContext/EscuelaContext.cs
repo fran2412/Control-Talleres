@@ -27,6 +27,7 @@ namespace ControlTalleresMVP.Persistence.DataContext
         public DbSet<Clase> Clases { get; set; } = null!;
         public DbSet<Pago> Pagos { get; set; } = null!;
         public DbSet<PagoAplicacion> PagoAplicaciones { get; set; } = null!;
+        public DbSet<ConfiguracionSede> ConfiguracionesSede { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -330,6 +331,30 @@ namespace ControlTalleresMVP.Persistence.DataContext
                       .WithMany(s => s.Configuraciones)
                       .HasForeignKey(c => c.SedeId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================
+            // Entidad ConfiguracionSede
+            // ====================
+            modelBuilder.Entity<ConfiguracionSede>(entity =>
+            {
+                entity.ToTable("configuraciones_sede");
+
+                entity.HasKey(cs => cs.ConfiguracionSedeId);
+
+                entity.Property(cs => cs.ConfiguracionSedeId).HasColumnName("id_configuracion_sede");
+                entity.Property(cs => cs.SedeId).HasColumnName("id_sede");
+                entity.Property(cs => cs.Clave).HasColumnName("clave");
+                entity.Property(cs => cs.Valor).HasColumnName("valor");
+
+                entity.HasOne(cs => cs.Sede)
+                      .WithMany(s => s.ConfiguracionesSede)
+                      .HasForeignKey(cs => cs.SedeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Índice único para evitar duplicados de clave por sede
+                entity.HasIndex(cs => new { cs.SedeId, cs.Clave })
+                      .IsUnique();
             });
 
             // ====================
