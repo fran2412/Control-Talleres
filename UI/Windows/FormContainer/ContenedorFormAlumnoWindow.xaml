@@ -73,25 +73,13 @@ HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-1,-1,0,0" Foreground
                                           Style="{StaticResource MinimalComboBoxStyle}"/>
                             </StackPanel>
 
-                            <!-- Información de beca -->
-                            <StackPanel Margin="0,20,20,0">
-                                <TextBlock Text="Beca" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
-                                <CheckBox x:Name="EsBecadoCheckBox"
-                                          Style="{StaticResource ModernCheckBox}"
-                                          Content="Alumno becado"
-                                          Height="30"
-                                          VerticalAlignment="Center"
-                                          Checked="EsBecadoCheckBox_Checked"
-                                          Unchecked="EsBecadoCheckBox_Unchecked"/>
-                            </StackPanel>
-
                             <!-- Descuento por clase -->
                             <StackPanel Margin="0,20,20,0">
                                 <TextBlock Text="Descuento por clase" FontFamily="Inter 24pt 24pt Medium" FontSize="14" Margin="0,0,0,5"/>
                                 <Grid Width="260">
                                     <TextBox x:Name="DescuentoTextBox"
                                              Style="{StaticResource TextBoxMontoStyle}"
-                                             ToolTip="Monto que se descontará de cada clase"
+                                             ToolTip="Monto que se descontará de cada clase."
                                              FontSize="16"
                                              PreviewTextInput="DescuentoTextBox_PreviewTextInput"
                                              TextChanged="DescuentoTextBox_TextChanged"/>

@@ -31,7 +31,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         [ObservableProperty] private int? promotorSeleccionadoId;
         [ObservableProperty] private bool inscribirEnTaller;
-        [ObservableProperty] private bool esBecado;
         [ObservableProperty] private decimal descuentoPorClase;
 
         private readonly IPromotorService _promotorService;
@@ -73,6 +72,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
         public ObservableCollection<Promotor> OpcionesPromotor { get; }
 
         private bool _ocultarBecadosEnPicker;
+        private decimal _costoClaseActual;
+
         public bool OcultarBecadosEnPicker
         {
             get => _ocultarBecadosEnPicker;
@@ -80,6 +81,11 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 if (SetProperty(ref _ocultarBecadosEnPicker, value))
                 {
+                    // Actualizar el costo de clase cuando se activa el filtro
+                    if (value)
+                    {
+                        _costoClaseActual = _configuracionService.GetValorSede<int>("costo_clase", 150);
+                    }
                     RegistrosView?.Refresh();
                 }
             }
@@ -116,8 +122,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     Telefono = CampoTextTelefono?.Trim(),
                     SedeId = _sesionService.ObtenerIdSede(),
                     PromotorId = PromotorSeleccionadoId,
-                    DescuentoPorClase = DescuentoPorClase,
-                    EsBecado = EsBecado
+                    DescuentoPorClase = DescuentoPorClase
                 });
 
                 // Procesar inscripciones si está marcado
@@ -202,18 +207,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
             if (o is not AlumnoDTO a)
                 return false;
 
-            if (string.IsNullOrWhiteSpace(FiltroRegistros))
-            {
-                if (OcultarBecadosEnPicker && a.EsBecado)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            if (OcultarBecadosEnPicker && a.EsBecado)
+            // Ocultar alumnos "becados" (descuento >= costo de clase) cuando está activo el filtro
+            if (OcultarBecadosEnPicker && _costoClaseActual > 0 && a.DescuentoPorClase >= _costoClaseActual)
             {
                 return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(FiltroRegistros))
+            {
+                return true;
             }
 
             var nombreCompleto = a.Nombre ?? "";
@@ -240,7 +242,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             CampoTextoNombre = "";
             CampoTextTelefono = "";
             PromotorSeleccionadoId = null;
-            EsBecado = false;
             DescuentoPorClase = 0m;
 
             if (TalleresDisponibles != null)
@@ -334,11 +335,10 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
 
             var costoClase = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
-            var maxDescuento = Math.Max(0, costoClase - 1);
 
-            if (!EsBecado && DescuentoPorClase > maxDescuento)
+            if (DescuentoPorClase > costoClase)
             {
-                _dialogService.Alerta($"El descuento por clase debe ser menor o igual a {maxDescuento:C} (costo de la clase menos 1).");
+                _dialogService.Alerta($"El descuento por clase no puede ser mayor a {costoClase:C} (costo de la clase).");
                 return false;
             }
 
@@ -364,14 +364,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             foreach (var taller in TalleresDisponibles)
             {
                 taller.PropertyChanged -= OnTallerPropertyChanged!;
-            }
-        }
-
-        partial void OnEsBecadoChanged(bool value)
-        {
-            if (value)
-            {
-                DescuentoPorClase = 0m;
             }
         }
     }

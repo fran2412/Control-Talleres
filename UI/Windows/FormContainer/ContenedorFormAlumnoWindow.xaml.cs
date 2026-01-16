@@ -48,7 +48,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             _alumnoOriginal = alumno;
 
             var costoClase = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
-            _maxDescuentoPorClase = Math.Max(0, costoClase - 1);
+            _maxDescuentoPorClase = costoClase;
 
             ConfigurarValidaciones();
             CargarDatos();
@@ -68,10 +68,8 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             TelefonoTextBox.Text = _alumnoOriginal.Telefono ?? "";
             PromotorComboBox.ItemsSource = new ObservableCollection<Promotor>(_promotorService.ObtenerTodos());
             PromotorComboBox.SelectedValue = _alumnoOriginal.Promotor?.PromotorId;
-            EsBecadoCheckBox.IsChecked = _alumnoOriginal.EsBecado;
             var descuento = Math.Min(_alumnoOriginal.DescuentoPorClase, _maxDescuentoPorClase);
             DescuentoTextBox.Text = descuento.ToString("0.##", CultureInfo.InvariantCulture);
-            DescuentoTextBox.IsEnabled = !_alumnoOriginal.EsBecado;
             DescuentoVisual = descuento;
         }
 
@@ -118,7 +116,6 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 Telefono = string.IsNullOrWhiteSpace(TelefonoTextBox.Text) ? null : TelefonoTextBox.Text.Trim(),
                 SedeId = _sesionService.ObtenerIdSede(),
                 PromotorId = PromotorComboBox.SelectedValue as int?,
-                EsBecado = EsBecadoCheckBox.IsChecked ?? false,
                 DescuentoPorClase = ObtenerDescuentoPorClase(),
                 CreadoEn = _alumnoOriginal.CreadoEn
             };
@@ -126,14 +123,11 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
 
         private bool ValidarDescuento()
         {
-            if (EsBecadoCheckBox.IsChecked == true)
-                return true;
-
             var descuento = ObtenerDescuentoPorClase();
 
             if (descuento > _maxDescuentoPorClase)
             {
-                _dialogService.Alerta($"El descuento máximo permitido es {_maxDescuentoPorClase:C} (costo de la clase menos 1).");
+                _dialogService.Alerta($"El descuento máximo permitido es {_maxDescuentoPorClase:C} (costo de la clase).");
                 return false;
             }
 
@@ -142,9 +136,6 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
 
         private decimal ObtenerDescuentoPorClase()
         {
-            if (EsBecadoCheckBox.IsChecked == true)
-                return 0m;
-
             var texto = DescuentoTextBox.Text?.Replace(',', '.') ?? "0";
             if (!decimal.TryParse(texto, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var valor))
             {
@@ -154,29 +145,8 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             return Math.Min(valor, _maxDescuentoPorClase);
         }
 
-        private void EsBecadoCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            DescuentoTextBox.Text = "0";
-            DescuentoTextBox.IsEnabled = false;
-            DescuentoVisual = 0m;
-        }
-
-        private void EsBecadoCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            DescuentoTextBox.IsEnabled = true;
-            DescuentoTextBox.Focus();
-            DescuentoTextBox.CaretIndex = DescuentoTextBox.Text.Length;
-            ActualizarDescuentoVisualDesdeTexto();
-        }
-
         private void DescuentoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (EsBecadoCheckBox.IsChecked == true)
-            {
-                e.Handled = true;
-                return;
-            }
-
             if (sender is not TextBox textBox)
             {
                 e.Handled = true;

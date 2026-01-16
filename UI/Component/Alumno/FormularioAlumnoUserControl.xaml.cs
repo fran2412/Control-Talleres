@@ -26,7 +26,7 @@ namespace ControlTalleresMVP.UI.Component.Alumno
 
             var configService = App.ServiceProvider!.GetRequiredService<IConfiguracionService>();
             var costoClase = Math.Max(1, configService.GetValorSede<int>("costo_clase", 150));
-            _maxDescuentoPorClase = Math.Max(0, costoClase - 1);
+            _maxDescuentoPorClase = costoClase; // Permitir descuento hasta el costo de clase (100% becado)
 
             Loaded += (_, __) => AjustarControlDescuento();
         }
@@ -125,12 +125,6 @@ namespace ControlTalleresMVP.UI.Component.Alumno
 
         private void DescuentoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (EsAlumnoBecado())
-            {
-                e.Handled = true;
-                return;
-            }
-
             if (sender is not TextBox textBox)
             {
                 e.Handled = true;
@@ -153,7 +147,6 @@ namespace ControlTalleresMVP.UI.Component.Alumno
                 e.Handled = true;
                 return;
             }
-
         }
 
         private void DescuentoTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -193,11 +186,6 @@ namespace ControlTalleresMVP.UI.Component.Alumno
             }
 
             return textoActual.Insert(textBox.CaretIndex, input);
-        }
-
-        private bool EsAlumnoBecado()
-        {
-            return DataContext is MenuAlumnosViewModel vm && vm.EsBecado;
         }
     }
 }

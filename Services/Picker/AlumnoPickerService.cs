@@ -66,9 +66,19 @@ namespace ControlTalleresMVP.Services.Picker
 
             // Limpiar la colección actual y cargar solo alumnos con deudas
             registrosVM.Registros.Clear();
+
+            // Si excluirBecados es true, obtener el costo de clase para filtrar
+            decimal costoClase = 0;
+            if (excluirBecados)
+            {
+                var configService = _sp.GetRequiredService<ControlTalleresMVP.Services.Configuracion.IConfiguracionService>();
+                costoClase = configService.GetValorSede<int>("costo_clase", 150);
+            }
+
             foreach (var alumno in alumnosConDeudas)
             {
-                if (excluirBecados && alumno.EsBecado)
+                // Excluir alumnos con descuento >= costo de clase (100% becados)
+                if (excluirBecados && costoClase > 0 && alumno.DescuentoPorClase >= costoClase)
                 {
                     continue;
                 }
@@ -81,7 +91,6 @@ namespace ControlTalleresMVP.Services.Picker
                     Sede = alumno.Sede,
                     Promotor = alumno.Promotor,
                     CreadoEn = alumno.CreadoEn,
-                    EsBecado = alumno.EsBecado,
                     DescuentoPorClase = alumno.DescuentoPorClase
                 };
                 registrosVM.Registros.Add(alumnoDTO);

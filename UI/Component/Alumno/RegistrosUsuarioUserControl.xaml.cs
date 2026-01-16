@@ -33,7 +33,7 @@ namespace ControlTalleresMVP.UI.Component.Alumno
                 // engancha doble click (no cambia estilos)
                 if (AlumnosGrid != null)
                     AlumnosGrid.MouseDoubleClick += AlumnosGrid_MouseDoubleClick;
-                
+
                 // Si está en modo picker, dar foco al TextBox de búsqueda
                 if (IsPickerMode && BusquedaTextBox != null)
                 {
@@ -129,11 +129,10 @@ namespace ControlTalleresMVP.UI.Component.Alumno
         private static Persistence.Models.Alumno MapFromDto(AlumnoDTO alumnoDto) => new Persistence.Models.Alumno
         {
             AlumnoId = alumnoDto.Id,
-            Nombre   = alumnoDto.Nombre,
+            Nombre = alumnoDto.Nombre,
             Telefono = alumnoDto.Telefono,
-            Sede     = alumnoDto.Sede,
+            Sede = alumnoDto.Sede,
             Promotor = alumnoDto.Promotor,
-            EsBecado = alumnoDto.EsBecado,
             DescuentoPorClase = alumnoDto.DescuentoPorClase
         };
 
@@ -173,8 +172,8 @@ namespace ControlTalleresMVP.UI.Component.Alumno
         public bool IsPickerMode
         {
             get => (bool)GetValue(IsPickerModeProperty);
-            set 
-            { 
+            set
+            {
                 SetValue(IsPickerModeProperty, value);
                 // Si se activa el modo picker, dar foco al TextBox de búsqueda
                 if (value && BusquedaTextBox != null)

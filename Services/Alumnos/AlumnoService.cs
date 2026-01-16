@@ -93,7 +93,6 @@ namespace ControlTalleresMVP.Services.Alumnos
             existente.Telefono = alumno.Telefono;
             existente.SedeId = alumno.SedeId == 0 ? null : alumno.SedeId;
             existente.PromotorId = alumno.PromotorId == 0 ? null : alumno.PromotorId;
-            existente.EsBecado = alumno.EsBecado;
             existente.DescuentoPorClase = alumno.DescuentoPorClase;
             existente.ActualizadoEn = DateTime.Now;
 
@@ -110,7 +109,6 @@ namespace ControlTalleresMVP.Services.Alumnos
                     Sede = a.Sede,
                     Promotor = a.Promotor,
                     CreadoEn = a.CreadoEn,
-                    EsBecado = a.EsBecado,
                     DescuentoPorClase = a.DescuentoPorClase
                 })
                 .FirstAsync(ct);
@@ -133,7 +131,6 @@ namespace ControlTalleresMVP.Services.Alumnos
                     u.Sede,
                     u.Promotor,
                     u.CreadoEn,
-                    u.EsBecado,
                     u.DescuentoPorClase
                 })
                 .ToListAsync(ct);
@@ -146,7 +143,6 @@ namespace ControlTalleresMVP.Services.Alumnos
                 Sede = u.Sede,
                 Promotor = u.Promotor,
                 CreadoEn = u.CreadoEn,
-                EsBecado = u.EsBecado,
                 DescuentoPorClase = u.DescuentoPorClase
             }).ToList();
         }
@@ -161,7 +157,6 @@ namespace ControlTalleresMVP.Services.Alumnos
                 Promotor = alumno.Promotor,
                 Sede = alumno.Sede,
                 CreadoEn = alumno.CreadoEn,
-                EsBecado = alumno.EsBecado,
                 DescuentoPorClase = alumno.DescuentoPorClase
             };
         }
