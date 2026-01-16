@@ -39,9 +39,28 @@ namespace ControlTalleresMVP.UI.Component.Administracion
             // Evitar DI cuando el XAML Designer está renderizando
             if (!DesignerProperties.GetIsInDesignMode(this))
             {
-                    _dialogService     = App.ServiceProvider!.GetRequiredService<IDialogService>();
-                    _generacionService = App.ServiceProvider!.GetRequiredService<IGeneracionService>();
+                _dialogService = App.ServiceProvider!.GetRequiredService<IDialogService>();
+                _generacionService = App.ServiceProvider!.GetRequiredService<IGeneracionService>();
+
+                Loaded += RegistrosGeneracionUserControl_Loaded;
             }
+        }
+
+        private void RegistrosGeneracionUserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            ActualizarVisibilidadBotones();
+        }
+
+        private void ActualizarVisibilidadBotones()
+        {
+            if (_generacionService == null) return;
+
+            var tieneAbierta = _generacionService.TieneGeneracionAbierta();
+
+            // Si hay generación abierta: mostrar "Finalizar", ocultar "Iniciar nueva"
+            // Si no hay generación abierta: ocultar "Finalizar", mostrar "Iniciar nueva"
+            FinalizarGeneracionButton.Visibility = tieneAbierta ? Visibility.Visible : Visibility.Collapsed;
+            IniciarGeneracionButton.Visibility = tieneAbierta ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
@@ -101,13 +120,41 @@ namespace ControlTalleresMVP.UI.Component.Administracion
             }
         }
 
+        private async void FinalizarGeneracionButton_Click(object sender, RoutedEventArgs e)
+        {
+            string? input = _dialogService!.PedirTexto(
+                    "ATENCIÓN\n\n" +
+                    "Para FINALIZAR la generación actual debe escribir: CONFIRMAR\n\n" +
+                    "Este proceso:\n" +
+                    " - Asignará fecha de fin a la generación actual\n" +
+                    " - NO creará una nueva generación\n\n" +
+                    "Solo confirme si está completamente seguro de continuar.",
+                    "Confirmación crítica");
+
+            if (input != "CONFIRMAR")
+            {
+                _dialogService.Info("Operación cancelada. No escribió CONFIRMAR.");
+                return;
+            }
+
+            try
+            {
+                await _generacionService!.FinalizarGeneracionActual();
+                _dialogService.Info("La generación ha sido finalizada correctamente.");
+                ActualizarVisibilidadBotones();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.Error($"No fue posible finalizar la generación.\n{ex.Message}");
+            }
+        }
+
         private async void IniciarGeneracionButton_Click(object sender, RoutedEventArgs e)
         {
             string? input = _dialogService!.PedirTexto(
                     "ATENCIÓN\n\n" +
                     "Para iniciar una NUEVA GENERACIÓN debe escribir: CONFIRMAR\n\n" +
                     "Este proceso:\n" +
-                    " - Dará FIN al ciclo anterior\n" +
                     " - Creará un NUEVO ciclo\n\n" +
                     "Solo confirme si está completamente seguro de continuar.",
                     "Confirmación crítica");
@@ -122,6 +169,7 @@ namespace ControlTalleresMVP.UI.Component.Administracion
             {
                 await _generacionService!.NuevaGeneracion();
                 _dialogService.Info("Se inició la nueva generación correctamente.");
+                ActualizarVisibilidadBotones();
             }
             catch (Exception ex)
             {

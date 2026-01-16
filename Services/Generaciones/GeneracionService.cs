@@ -122,6 +122,37 @@ namespace ControlTalleresMVP.Services.Generaciones
                 .OrderByDescending(g => g.FechaInicio)
                 .FirstOrDefault();
         }
+
+        public bool TieneGeneracionAbierta()
+        {
+            var sedeId = _sesionService.ObtenerIdSede();
+
+            return _context.Generaciones
+                .Any(g => g.FechaFin == null && !g.Eliminado && g.SedeId == sedeId);
+        }
+
+        public async Task FinalizarGeneracionActual(CancellationToken ct = default)
+        {
+            var sedeId = _sesionService.ObtenerIdSede();
+
+            var generacionActual = await _context.Generaciones
+                .Where(g => g.FechaFin == null && !g.Eliminado && g.SedeId == sedeId)
+                .OrderByDescending(g => g.FechaInicio)
+                .FirstOrDefaultAsync(ct);
+
+            if (generacionActual == null)
+                throw new InvalidOperationException("No hay una generación abierta para finalizar.");
+
+            generacionActual.FechaFin = DateTime.Now;
+            await _context.SaveChangesAsync(ct);
+
+            // Actualizar el DTO en la colección observable
+            var dto = RegistrosGeneraciones.FirstOrDefault(g => g.Id == generacionActual.GeneracionId);
+            if (dto != null)
+            {
+                dto.FechaFin = generacionActual.FechaFin;
+            }
+        }
     }
 }
 

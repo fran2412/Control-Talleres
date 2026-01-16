@@ -48,9 +48,14 @@
                           MaxHeight="374">
                 </DataGrid>
 
-                <Button Style="{StaticResource FeaturedButton}" Content="Iniciar nueva generación" VerticalAlignment="Center"
-            Height="45" FontSize="16" Grid.Row="2" x:Name="IniciarGeneracionButton"
-            HorizontalAlignment="Right" Click="IniciarGeneracionButton_Click"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
+                    <Button Style="{StaticResource BotonNormal}" Content="Finalizar generación" VerticalAlignment="Center"
+                        Height="45" FontSize="16" x:Name="FinalizarGeneracionButton" Margin="0,0,10,0"
+                        Visibility="Collapsed" Click="FinalizarGeneracionButton_Click"/>
+                    <Button Style="{StaticResource FeaturedButton}" Content="Iniciar nueva generación" VerticalAlignment="Center"
+                        Height="45" FontSize="16" x:Name="IniciarGeneracionButton"
+                        Visibility="Collapsed" Click="IniciarGeneracionButton_Click"/>
+                </StackPanel>
             </Grid>
         </StackPanel>
     </Border>
