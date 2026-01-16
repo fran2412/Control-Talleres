@@ -1,6 +1,7 @@
 ﻿using ControlTalleresMVP.Persistence.DataContext;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
+using ControlTalleresMVP.Services.Sesion;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 
@@ -12,9 +13,12 @@ namespace ControlTalleresMVP.Services.Generaciones
         public ObservableCollection<GeneracionDTO> RegistrosGeneraciones { get; set; } = new();
 
         private readonly EscuelaContext _context;
-        public GeneracionService(EscuelaContext context)
+        private readonly ISesionService _sesionService;
+
+        public GeneracionService(EscuelaContext context, ISesionService sesionService)
         {
             _context = context;
+            _sesionService = sesionService;
         }
 
         public async Task InicializarRegistros(CancellationToken ct = default)
@@ -33,10 +37,11 @@ namespace ControlTalleresMVP.Services.Generaciones
 
         public async Task<List<GeneracionDTO>> ObtenerGeneracionesParaGridAsync(CancellationToken ct = default)
         {
+            var sedeId = _sesionService.ObtenerIdSede();
 
             var datos = await _context.Generaciones
                 .AsNoTracking()
-                .Where(a => !a.Eliminado)
+                .Where(a => !a.Eliminado && a.SedeId == sedeId)
                 .Select(u => new
                 {
                     u.GeneracionId,
@@ -58,13 +63,17 @@ namespace ControlTalleresMVP.Services.Generaciones
         public async Task NuevaGeneracion(CancellationToken ct = default)
         {
             var año = DateTime.Now.Year;
+            var sedeId = _sesionService.ObtenerIdSede();
 
+            // Contar generaciones del año para esta sede específica
             var count = await _context.Generaciones
-                .CountAsync(g => g.FechaInicio.Year == año, ct);
+                .CountAsync(g => g.FechaInicio.Year == año && g.SedeId == sedeId, ct);
 
             string nombre = $"GEN-{año}-{(count + 1):00}";
 
+            // Cerrar la última generación abierta de esta sede
             var ultimaGeneracion = await _context.Generaciones
+                .Where(g => g.SedeId == sedeId)
                 .OrderByDescending(g => g.FechaInicio)
                 .FirstOrDefaultAsync(ct);
 
@@ -84,6 +93,7 @@ namespace ControlTalleresMVP.Services.Generaciones
             var nuevaGeneracion = new Generacion
             {
                 Nombre = nombre,
+                SedeId = sedeId,
                 FechaInicio = DateTime.Now,
                 FechaFin = null,
                 CreadoEn = DateTime.Now
@@ -105,10 +115,13 @@ namespace ControlTalleresMVP.Services.Generaciones
 
         public Generacion? ObtenerGeneracionActual()
         {
+            var sedeId = _sesionService.ObtenerIdSede();
+
             return _context.Generaciones
-                .Where(g => g.FechaFin == null)
+                .Where(g => g.FechaFin == null && g.SedeId == sedeId)
                 .OrderByDescending(g => g.FechaInicio)
                 .FirstOrDefault();
         }
     }
 }
+
