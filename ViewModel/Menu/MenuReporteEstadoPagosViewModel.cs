@@ -201,8 +201,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 if (FechaDesde != DateTime.MinValue || FechaHasta != DateTime.MaxValue)
                 {
                     estadosFiltrados = estadosFiltrados.Where(e =>
-                        e.FechaInicio.Date >= FechaDesde.Date &&
-                        e.FechaInicio.Date <= FechaHasta.Date);
+                        e.FechaInicioGeneracion.Date >= FechaDesde.Date &&
+                        e.FechaInicioGeneracion.Date <= FechaHasta.Date);
                 }
 
                 // Ordenar por estado antes de asignar

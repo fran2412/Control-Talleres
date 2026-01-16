@@ -7,6 +7,7 @@ using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
 using ControlTalleresMVP.Services.Clases;
 using ControlTalleresMVP.Services.Configuracion;
+using ControlTalleresMVP.Services.Generaciones;
 using ControlTalleresMVP.Services.Inscripciones;
 using ControlTalleresMVP.Services.Picker;
 using System.Collections.ObjectModel;
@@ -26,6 +27,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         private readonly IDialogService _dialogService;
         private readonly IConfiguracionService _configuracionService;
         private readonly IAlumnoPickerService _alumnoPicker;
+        private readonly IGeneracionService _generacionService;
 
         private readonly decimal _costoClase;
 
@@ -34,13 +36,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
             IInscripcionService inscripcionService,
             IDialogService dialogService,
             IConfiguracionService configuracionService,
-            IAlumnoPickerService alumnoPicker)
+            IAlumnoPickerService alumnoPicker,
+            IGeneracionService generacionService)
         {
             _claseService = claseService;
             _inscripcionService = inscripcionService;
             _dialogService = dialogService;
             _configuracionService = configuracionService;
             _alumnoPicker = alumnoPicker;
+            _generacionService = generacionService;
 
             FechaDeHoy = DateTime.Now.ToString("dd/MM/yyyy");
             var costoCfg = _configuracionService.GetValorSede<int>("costo_clase", 150);
@@ -370,27 +374,31 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     AgregarClase(item, seleccionar: seleccionada);
                 }
 
-                // 3) PASADAS ESPERADAS SIN CARGO (desde inicio hasta hoy o fin si es antes)
+                // 3) PASADAS ESPERADAS SIN CARGO (desde inicio de generación hasta hoy o fin si es antes)
                 //    Estas sí se pueden pagar aun con pendientes.
                 {
-                    var inicio = TallerSeleccionado.FechaInicio.Date;
-                    var limite = TallerSeleccionado.FechaFin?.Date;
-                    var finCalculo = limite.HasValue && limite.Value < hoy ? limite.Value : hoy;
-
-                    var fechaBase = AjustarAlDia(inicio, TallerSeleccionado.DiaSemana);
-                    for (var f = fechaBase; f <= finCalculo; f = f.AddDays(7))
+                    var generacion = _generacionService.ObtenerGeneracionActual();
+                    if (generacion != null)
                     {
-                        if (agregadas.Contains(f)) continue;
-                        if (fechasConCargo.Contains(f)) continue; // ya existe cargo (pagado o no)
+                        var inicio = generacion.FechaInicio.Date;
+                        var limite = generacion.FechaFin?.Date;
+                        var finCalculo = limite.HasValue && limite.Value < hoy ? limite.Value : hoy;
 
-                        var item = new ClasePagoItem(
-                            f,
-                            costoClaseAlumno,
-                            esCargoExistente: false,
-                            estaHabilitada: true);
+                        var fechaBase = AjustarAlDia(inicio, TallerSeleccionado.DiaSemana);
+                        for (var f = fechaBase; f <= finCalculo; f = f.AddDays(7))
+                        {
+                            if (agregadas.Contains(f)) continue;
+                            if (fechasConCargo.Contains(f)) continue; // ya existe cargo (pagado o no)
 
-                        AgregarClase(item, seleccionar: true);
-                        agregadas.Add(f);
+                            var item = new ClasePagoItem(
+                                f,
+                                costoClaseAlumno,
+                                esCargoExistente: false,
+                                estaHabilitada: true);
+
+                            AgregarClase(item, seleccionar: true);
+                            agregadas.Add(f);
+                        }
                     }
                 }
 
@@ -461,13 +469,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 }
                 else
                 {
-                    inicioBase = TallerSeleccionado.FechaInicio.Date;
+                    var generacion = _generacionService.ObtenerGeneracionActual();
+                    inicioBase = generacion?.FechaInicio.Date ?? DateTime.Today;
                 }
 
                 var objetivo = TallerSeleccionado.DiaSemana;
                 var fecha = AjustarAlDia(inicioBase, objetivo);
                 var hoy = DateTime.Today;
-                var fin = TallerSeleccionado.FechaFin?.Date;
+                var generacionActual = _generacionService.ObtenerGeneracionActual();
+                var fin = generacionActual?.FechaFin?.Date;
 
                 var fechas = new List<DateTime>();
 
@@ -553,13 +563,19 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return false;
             }
 
-            var inicio = TallerSeleccionado.FechaInicio.Date;
+            var generacion = _generacionService.ObtenerGeneracionActual();
+            if (generacion == null)
+            {
+                return false;
+            }
+
+            var inicio = generacion.FechaInicio.Date;
             if (fecha.Date < inicio)
             {
                 return false;
             }
 
-            var fin = TallerSeleccionado.FechaFin?.Date;
+            var fin = generacion.FechaFin?.Date;
             if (fin.HasValue && fecha.Date > fin.Value)
             {
                 return false;

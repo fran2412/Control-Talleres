@@ -48,14 +48,18 @@ namespace ControlTalleresMVP.Services.Clases
     Guid? grupoOperacionId = null,
     CancellationToken ct = default)
         {
-            // 0) Resolver datos del taller y validar la fecha indicada
+            // 0) Resolver datos del taller y obtener la generación actual
             var tallerInfo = await _escuelaContext.Talleres
                 .Where(t => t.TallerId == tallerId && !t.Eliminado)
-                .Select(t => new { t.DiaSemana, t.FechaInicio, t.FechaFin, t.Nombre })
+                .Select(t => new { t.DiaSemana, t.Nombre })
                 .FirstOrDefaultAsync(ct);
 
             if (tallerInfo is null)
                 throw new InvalidOperationException("Taller no encontrado o eliminado.");
+
+            var generacionActual = _generacionService.ObtenerGeneracionActual();
+            if (generacionActual == null)
+                throw new InvalidOperationException("No hay una generación activa. Debe iniciar una generación antes de registrar clases.");
 
             var fechaClase = fecha.Date;
 
@@ -66,14 +70,14 @@ namespace ControlTalleresMVP.Services.Clases
                     $"La fecha de la clase ({fechaClase:dd/MM/yyyy}) no coincide con el día de la semana del taller ({ConvertirDiaSemanaASpanol(tallerInfo.DiaSemana)}).");
             }
 
-            // Validar que la fecha esté dentro del rango del taller
-            if (fechaClase < tallerInfo.FechaInicio.Date)
+            // Validar que la fecha esté dentro del rango de la generación
+            if (fechaClase < generacionActual.FechaInicio.Date)
             {
-                throw new InvalidOperationException($"La fecha indicada ({fechaClase:dd/MM/yyyy}) es anterior al inicio del taller ({tallerInfo.FechaInicio:dd/MM/yyyy}).");
+                throw new InvalidOperationException($"La fecha indicada ({fechaClase:dd/MM/yyyy}) es anterior al inicio de la generación ({generacionActual.FechaInicio:dd/MM/yyyy}).");
             }
-            if (tallerInfo.FechaFin.HasValue && fechaClase > tallerInfo.FechaFin.Value.Date)
+            if (generacionActual.FechaFin.HasValue && fechaClase > generacionActual.FechaFin.Value.Date)
             {
-                throw new InvalidOperationException($"La fecha indicada ({fechaClase:dd/MM/yyyy}) es posterior a la fecha fin del taller ({tallerInfo.FechaFin:dd/MM/yyyy}).");
+                throw new InvalidOperationException($"La fecha indicada ({fechaClase:dd/MM/yyyy}) es posterior al fin de la generación ({generacionActual.FechaFin:dd/MM/yyyy}).");
             }
 
             var costoConfigurado = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
@@ -484,7 +488,7 @@ namespace ControlTalleresMVP.Services.Clases
             // Obtener costo de clase desde configuración
             var costoClase = Math.Max(1, _configuracionService.GetValorSede<int>("costo_clase", 150));
 
-            // Obtener talleres con sus fechas de inicio y fin (incluyendo eliminados)
+            // Obtener talleres (incluyendo eliminados)
             var sedeId = _sesionService.ObtenerIdSede();
             var talleresQuery = _escuelaContext.Talleres
                 .AsNoTracking()
@@ -493,8 +497,6 @@ namespace ControlTalleresMVP.Services.Clases
                 {
                     t.TallerId,
                     t.Nombre,
-                    t.FechaInicio,
-                    t.FechaFin,
                     t.DiaSemana,
                     t.Eliminado
                 });
@@ -503,22 +505,25 @@ namespace ControlTalleresMVP.Services.Clases
 
             var resultados = new List<EstadoPagoAlumnoDTO>();
 
+            // Usar fechas de la generación para calcular clases
+            var fechaInicioGeneracion = generacion.FechaInicio;
+            var fechaFinGeneracion = generacion.FechaFin?.Date ?? hoy.AddMonths(6); // Si no tiene fecha fin, asumir 6 meses
+
             foreach (var taller in talleres)
             {
-                // Calcular fechas de clases - usar fecha fin del taller o una fecha futura razonable
-                var fechaFin = taller.FechaFin?.Date ?? hoy.AddMonths(6); // Si no tiene fecha fin, asumir 6 meses
-                var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
+                // Calcular fechas de clases usando fechas de generación
+                var fechaLimite = fechaFinGeneracion < hoy ? fechaFinGeneracion : hoy;
 
-                // Generar fechas de clases desde FechaInicio hasta fechaLimite
-                var fechasClases = GenerarFechasClases(taller.FechaInicio, fechaLimite, taller.DiaSemana);
+                // Generar fechas de clases desde inicio de generación hasta fechaLimite
+                var fechasClases = GenerarFechasClases(fechaInicioGeneracion, fechaLimite, taller.DiaSemana);
 
                 // Si no hay fechas de clases generadas, crear al menos una fecha para mostrar el taller
                 if (fechasClases.Count == 0)
                 {
-                    // Si el taller no ha comenzado, usar la fecha de inicio
-                    if (taller.FechaInicio > hoy)
+                    // Si la generación no ha comenzado, usar la fecha de inicio
+                    if (fechaInicioGeneracion > hoy)
                     {
-                        fechasClases = new List<DateTime> { taller.FechaInicio };
+                        fechasClases = new List<DateTime> { fechaInicioGeneracion };
                     }
                     else
                     {
@@ -559,8 +564,8 @@ namespace ControlTalleresMVP.Services.Clases
                         NombreTaller = taller.Eliminado ? $"{taller.Nombre} (Eliminado)" : taller.Nombre,
                         SedeId = 0,
                         NombreSede = "N/A",
-                        FechaInicio = taller.FechaInicio,
-                        FechaFin = taller.FechaFin,
+                        FechaInicioGeneracion = fechaInicioGeneracion,
+                        FechaFinGeneracion = generacion.FechaFin,
                         ClasesTotales = fechasClases.Count,
                         ClasesPagadas = 0,
                         ClasesPendientes = 0,
@@ -753,8 +758,8 @@ namespace ControlTalleresMVP.Services.Clases
                         estadoPago = "❌ Sin pagos";
                     }
 
-                    // Si el taller tiene fecha fin y ya terminó, ajustar el estado (solo si no está eliminado)
-                    if (!taller.Eliminado && taller.FechaFin.HasValue && hoy > taller.FechaFin.Value)
+                    // Si la generación tiene fecha fin y ya terminó, ajustar el estado (solo si no está eliminado)
+                    if (!taller.Eliminado && generacion.FechaFin.HasValue && hoy > generacion.FechaFin.Value)
                     {
                         if (todasLasClasesPagadas && !pagoExcedido)
                         {
@@ -778,8 +783,8 @@ namespace ControlTalleresMVP.Services.Clases
                         NombreTaller = taller.Eliminado ? $"{taller.Nombre} (Eliminado)" : taller.Nombre,
                         SedeId = alumno.SedeId ?? 0,
                         NombreSede = alumno.NombreSede ?? "Sin sede",
-                        FechaInicio = taller.FechaInicio,
-                        FechaFin = taller.FechaFin,
+                        FechaInicioGeneracion = fechaInicioGeneracion,
+                        FechaFinGeneracion = generacion.FechaFin,
                         ClasesTotales = clasesTotales,
                         ClasesPagadas = clasesPagadasCount,
                         ClasesPendientes = clasesPendientesCount,
@@ -896,14 +901,14 @@ namespace ControlTalleresMVP.Services.Clases
                 // Procesar cada inscripción
                 foreach (var inscripcion in inscripciones)
                 {
-                    // Calcular fechas de clases solo hasta hoy (no futuras)
-                    var fechaInicio = inscripcion.Taller.FechaInicio;
-                    var fechaFin = inscripcion.Taller.FechaFin ?? hoy.AddMonths(6);
+                    // Calcular fechas de clases usando las fechas de la generación
+                    var fechaInicio = inscripcion.Generacion.FechaInicio;
+                    var fechaFin = inscripcion.Generacion.FechaFin ?? hoy.AddMonths(6);
 
-                    // Usar la fecha más temprana entre la fecha fin del taller y hoy
+                    // Usar la fecha más temprana entre la fecha fin de la generación y hoy
                     var fechaLimite = fechaFin < hoy ? fechaFin : hoy;
 
-                    // Solo generar fechas si el taller ya comenzó
+                    // Solo generar fechas si la generación ya comenzó
                     var fechasClases = new List<DateTime>();
                     if (fechaInicio <= hoy)
                     {
@@ -1086,8 +1091,8 @@ namespace ControlTalleresMVP.Services.Clases
                         estadoPago = "❌ Sin pagos";
                     }
 
-                    // Si el taller tiene fecha fin y ya terminó, ajustar el estado (solo si no está eliminado)
-                    if (!inscripcion.Taller.Eliminado && inscripcion.Taller.FechaFin.HasValue && hoy > inscripcion.Taller.FechaFin.Value)
+                    // Si la generación tiene fecha fin y ya terminó, ajustar el estado (solo si no está eliminado)
+                    if (!inscripcion.Taller.Eliminado && inscripcion.Generacion.FechaFin.HasValue && hoy > inscripcion.Generacion.FechaFin.Value)
                     {
                         if (todasLasClasesPagadas && !pagoExcedido)
                         {
@@ -1111,8 +1116,8 @@ namespace ControlTalleresMVP.Services.Clases
                         NombreTaller = inscripcion.Taller.Eliminado ? $"{inscripcion.Taller.Nombre} (Eliminado)" : inscripcion.Taller.Nombre,
                         SedeId = inscripcion.Alumno.SedeId ?? 0,
                         NombreSede = inscripcion.Alumno.Sede?.Nombre ?? "Sin sede",
-                        FechaInicio = fechaInicio,
-                        FechaFin = inscripcion.Taller.FechaFin,
+                        FechaInicioGeneracion = fechaInicio,
+                        FechaFinGeneracion = inscripcion.Generacion.FechaFin,
                         ClasesTotales = clasesTotales,
                         ClasesPagadas = clasesPagadasCount,
                         ClasesPendientes = clasesPendientesCount,

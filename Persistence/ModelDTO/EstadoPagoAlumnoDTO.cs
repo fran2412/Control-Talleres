@@ -8,8 +8,8 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         public string NombreTaller { get; set; } = string.Empty;
         public int SedeId { get; set; }
         public string NombreSede { get; set; } = string.Empty;
-        public DateTime FechaInicio { get; set; }
-        public DateTime? FechaFin { get; set; }
+        public DateTime FechaInicioGeneracion { get; set; }
+        public DateTime? FechaFinGeneracion { get; set; }
         public int ClasesTotales { get; set; }
         public int ClasesPagadas { get; set; }
         public int ClasesPendientes { get; set; }

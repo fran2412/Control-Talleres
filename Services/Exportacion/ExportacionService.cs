@@ -74,8 +74,8 @@ namespace ControlTalleresMVP.Services.Exportacion
             {
                 csv.WriteField(item.NombreAlumno);
                 csv.WriteField(item.NombreTaller);
-                csv.WriteField(item.FechaInicio.ToString("dd/MM/yyyy"));
-                csv.WriteField(item.FechaFin?.ToString("dd/MM/yyyy") ?? "N/A");
+                csv.WriteField(item.FechaInicioGeneracion.ToString("dd/MM/yyyy"));
+                csv.WriteField(item.FechaFinGeneracion?.ToString("dd/MM/yyyy") ?? "N/A");
                 csv.WriteField(item.ClasesPagadas);
                 csv.WriteField(item.ClasesTotales);
                 csv.WriteField(item.MontoPagado.ToString("C2"));
@@ -110,8 +110,8 @@ namespace ControlTalleresMVP.Services.Exportacion
             csv.WriteField("Saldo Actual");
             csv.WriteField("Estado");
             csv.WriteField("Día Semana");
-            csv.WriteField("Fecha Inicio Taller");
-            csv.WriteField("Fecha Fin Taller");
+            csv.WriteField("Fecha Inicio Generación");
+            csv.WriteField("Fecha Fin Generación");
             csv.WriteField("Días Transcurridos");
             csv.WriteField("Días Restantes");
             csv.WriteField("Progreso %");
@@ -130,8 +130,8 @@ namespace ControlTalleresMVP.Services.Exportacion
                 csv.WriteField(item.SaldoActual.ToString("C2"));
                 csv.WriteField(item.Estado);
                 csv.WriteField(item.DiaSemana);
-                csv.WriteField(item.FechaInicioTaller.ToString("dd/MM/yyyy"));
-                csv.WriteField(item.FechaFinTaller?.ToString("dd/MM/yyyy") ?? "N/A");
+                csv.WriteField(item.FechaInicioGeneracion.ToString("dd/MM/yyyy"));
+                csv.WriteField(item.FechaFinGeneracion?.ToString("dd/MM/yyyy") ?? "N/A");
                 csv.WriteField(item.DiasTranscurridos);
                 csv.WriteField(item.DiasRestantes?.ToString() ?? "N/A");
                 csv.WriteField($"{item.ProgresoPorcentaje:F1}%");
@@ -162,8 +162,8 @@ namespace ControlTalleresMVP.Services.Exportacion
             {
                 worksheet.Cell(row, 1).Value = item.NombreAlumno;
                 worksheet.Cell(row, 2).Value = item.NombreTaller;
-                worksheet.Cell(row, 3).Value = item.FechaInicio.ToString("dd/MM/yyyy");
-                worksheet.Cell(row, 4).Value = item.FechaFin?.ToString("dd/MM/yyyy") ?? "N/A";
+                worksheet.Cell(row, 3).Value = item.FechaInicioGeneracion.ToString("dd/MM/yyyy");
+                worksheet.Cell(row, 4).Value = item.FechaFinGeneracion?.ToString("dd/MM/yyyy") ?? "N/A";
                 worksheet.Cell(row, 5).Value = item.ClasesPagadas;
                 worksheet.Cell(row, 6).Value = item.ClasesTotales;
                 worksheet.Cell(row, 7).Value = item.MontoPagado;
@@ -186,8 +186,8 @@ namespace ControlTalleresMVP.Services.Exportacion
 
             // Escribir encabezados
             var headers = new[] { "Alumno", "Taller", "Sede", "Promotor", "Generación", "Fecha Inscripción",
-                                "Costo", "Saldo Actual", "Estado", "Día Semana", "Fecha Inicio Taller",
-                                "Fecha Fin Taller", "Días Transcurridos", "Días Restantes", "Progreso %" };
+                                "Costo", "Saldo Actual", "Estado", "Día Semana", "Fecha Inicio Generación",
+                                "Fecha Fin Generación", "Días Transcurridos", "Días Restantes", "Progreso %" };
 
             for (int i = 0; i < headers.Length; i++)
             {
@@ -209,8 +209,8 @@ namespace ControlTalleresMVP.Services.Exportacion
                 worksheet.Cell(row, 8).Value = item.SaldoActual;
                 worksheet.Cell(row, 9).Value = item.Estado;
                 worksheet.Cell(row, 10).Value = item.DiaSemana;
-                worksheet.Cell(row, 11).Value = item.FechaInicioTaller.ToString("dd/MM/yyyy");
-                worksheet.Cell(row, 12).Value = item.FechaFinTaller?.ToString("dd/MM/yyyy") ?? "N/A";
+                worksheet.Cell(row, 11).Value = item.FechaInicioGeneracion.ToString("dd/MM/yyyy");
+                worksheet.Cell(row, 12).Value = item.FechaFinGeneracion?.ToString("dd/MM/yyyy") ?? "N/A";
                 worksheet.Cell(row, 13).Value = item.DiasTranscurridos;
                 worksheet.Cell(row, 14).Value = item.DiasRestantes?.ToString() ?? "N/A";
                 worksheet.Cell(row, 15).Value = $"{item.ProgresoPorcentaje:F1}%";

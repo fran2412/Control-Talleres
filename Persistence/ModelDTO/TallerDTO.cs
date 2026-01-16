@@ -22,14 +22,6 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         public TimeSpan HorarioFin { get; set; }
 
-        [Display(Name = "Fecha de inicio")]
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        public DateTime FechaInicio { get; set; }
-
-        [Display(Name = "Fecha de fin")]
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        public DateTime? FechaFin { get; set; }
-
         [Display(Name = "Sede")]
         public int SedeId { get; set; }
 

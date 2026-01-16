@@ -54,8 +54,6 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             HorarioInicioTextBox.Text = FormatearHora(_tallerOriginal.HorarioInicio);
             HorarioFinTextBox.Text = FormatearHora(_tallerOriginal.HorarioFin);
             DiaSemanaComboBox.SelectedItem = _tallerOriginal.DiaSemana;
-            FechaInicioDatePicker.SelectedDate = _tallerOriginal.FechaInicio;
-            FechaFinDatePicker.SelectedDate = _tallerOriginal.FechaFin;
         }
 
         private string FormatearHora(TimeSpan hora)
@@ -86,7 +84,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         private void ValidarYFormatearHora(TextBox textBox)
         {
             var texto = textBox.Text.Trim();
-            
+
             if (string.IsNullOrEmpty(texto))
             {
                 textBox.Text = "9:00";
@@ -95,7 +93,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
 
             // Limpiar el texto de espacios y caracteres extra
             texto = texto.Replace(" ", "").ToUpper();
-            
+
             // Intentar parsear directamente como TimeSpan
             if (TimeSpan.TryParse(texto, out var timeSpan))
             {
@@ -128,7 +126,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             // Patrones: "9:30AM", "9:30AM", "9AM", "9:30PM", "21:30PM"
             var patron = @"^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$";
             var match = System.Text.RegularExpressions.Regex.Match(texto, patron, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            
+
             if (!match.Success) return null;
 
             if (!int.TryParse(match.Groups[1].Value, out var hora)) return null;
@@ -188,8 +186,8 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             else if (texto.Contains(":"))
             {
                 var partes = texto.Split(':');
-                if (partes.Length == 2 && 
-                    int.TryParse(partes[0], out var hora) && 
+                if (partes.Length == 2 &&
+                    int.TryParse(partes[0], out var hora) &&
                     int.TryParse(partes[1], out var minuto))
                 {
                     if (hora >= 0 && hora <= 23 && minuto >= 0 && minuto <= 59)
@@ -204,40 +202,27 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
         {
             if (!BaseFormHelper.ValidarCampoObligatorio(NombreTextBox, "El nombre", _dialogService))
                 return false;
-            
+
             var horarioInicio = ParsearHora(HorarioInicioTextBox.Text);
             if (!horarioInicio.HasValue)
             {
                 _dialogService.Alerta("El horario de inicio no es válido (formato 24h). Ejemplos: 9, 9:30, 9AM, 14:30, 2:30PM");
                 return false;
             }
-            
+
             var horarioFin = ParsearHora(HorarioFinTextBox.Text);
             if (!horarioFin.HasValue)
             {
                 _dialogService.Alerta("El horario de fin no es válido (formato 24h). Ejemplos: 11, 11:30, 11AM, 15:30, 3:30PM");
                 return false;
             }
-            
+
             if (horarioFin.Value <= horarioInicio.Value)
             {
                 _dialogService.Alerta("El horario de fin debe ser posterior al horario de inicio");
                 return false;
             }
-            
-            if (FechaInicioDatePicker.SelectedDate == null)
-            {
-                _dialogService.Alerta("Debe seleccionar una fecha de inicio");
-                return false;
-            }
-            
-            if (FechaFinDatePicker.SelectedDate.HasValue && 
-                FechaFinDatePicker.SelectedDate.Value <= FechaInicioDatePicker.SelectedDate.Value)
-            {
-                _dialogService.Alerta("La fecha de fin debe ser posterior a la fecha de inicio");
-                return false;
-            }
-            
+
             return true;
         }
 
@@ -247,7 +232,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
 
             // Limpiar el texto
             texto = texto.Trim().Replace(" ", "").ToUpper();
-            
+
             // Intentar parsear directamente como TimeSpan
             if (TimeSpan.TryParse(texto, out var timeSpan))
                 return timeSpan;
@@ -255,7 +240,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             // Intentar parsear con formato AM/PM
             var patron = @"^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$";
             var match = System.Text.RegularExpressions.Regex.Match(texto, patron, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            
+
             if (match.Success)
             {
                 if (!int.TryParse(match.Groups[1].Value, out var hora)) return null;
@@ -298,8 +283,8 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             else if (texto.Contains(":"))
             {
                 var partes = texto.Split(':');
-                if (partes.Length == 2 && 
-                    int.TryParse(partes[0], out var hora) && 
+                if (partes.Length == 2 &&
+                    int.TryParse(partes[0], out var hora) &&
                     int.TryParse(partes[1], out var minuto) &&
                     hora >= 0 && hora <= 23 && minuto >= 0 && minuto <= 59)
                     return new TimeSpan(hora, minuto, 0);
@@ -343,8 +328,6 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
                 HorarioInicio = ParsearHora(HorarioInicioTextBox.Text) ?? TimeSpan.Zero,
                 HorarioFin = ParsearHora(HorarioFinTextBox.Text) ?? TimeSpan.Zero,
                 DiaSemana = (DayOfWeek)DiaSemanaComboBox.SelectedItem,
-                FechaInicio = FechaInicioDatePicker.SelectedDate ?? DateTime.Today,
-                FechaFin = FechaFinDatePicker.SelectedDate,
                 CreadoEn = _tallerOriginal.CreadoEn
             };
         }

@@ -45,13 +45,13 @@ namespace ControlTalleresMVP.Persistence.ModelDTO
         [Display(Name = "Día de la Semana")]
         public string DiaSemana { get; set; } = "";
 
-        [Display(Name = "Fecha Inicio Taller")]
+        [Display(Name = "Fecha Inicio Generación")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        public DateTime FechaInicioTaller { get; set; }
+        public DateTime FechaInicioGeneracion { get; set; }
 
-        [Display(Name = "Fecha Fin Taller")]
+        [Display(Name = "Fecha Fin Generación")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        public DateTime? FechaFinTaller { get; set; }
+        public DateTime? FechaFinGeneracion { get; set; }
 
         [Display(Name = "Generación")]
         public string NombreGeneracion { get; set; } = "";

@@ -59,11 +59,11 @@ namespace ControlTalleresMVP.Services.Inscripciones
                             EstadoPago = CalcularEstadoPago(i.Costo, i.SaldoActual),
                             MontoPagado = i.Costo - i.SaldoActual,
                             DiaSemana = t.DiaSemana.ToString(),
-                            FechaInicioTaller = t.FechaInicio,
-                            FechaFinTaller = t.FechaFin,
+                            FechaInicioGeneracion = g.FechaInicio,
+                            FechaFinGeneracion = g.FechaFin,
                             NombreGeneracion = g.Nombre,
                             DiasTranscurridos = (DateTime.Today - i.Fecha).Days,
-                            DiasRestantes = t.FechaFin.HasValue ? (t.FechaFin.Value - DateTime.Today).Days : null,
+                            DiasRestantes = g.FechaFin.HasValue ? (g.FechaFin.Value - DateTime.Today).Days : null,
                             ProgresoPorcentaje = CalcularProgresoPago(i.Costo, i.SaldoActual)
                         };
 

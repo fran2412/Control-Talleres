@@ -40,8 +40,6 @@ namespace ControlTalleresMVP.UI.Component.Taller
                     HorarioFin = tallerDto.HorarioFin,
                     Nombre = tallerDto.Nombre,
                     DiaSemana = ConvertirStringADiaSemana(tallerDto.DiaSemana),
-                    FechaInicio = tallerDto.FechaInicio,
-                    FechaFin = tallerDto.FechaFin,
                 };
 
                 new ContenedorFormTallerWindow(taller).ShowDialog();

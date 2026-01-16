@@ -121,13 +121,10 @@ namespace ControlTalleresMVP.Services.Talleres
                 throw new InvalidOperationException("El horario de fin debe ser posterior al horario de inicio");
             }
 
-            // Solo actualizas campos que quieres
             tallerExistente.Nombre = taller.Nombre;
             tallerExistente.HorarioInicio = taller.HorarioInicio;
             tallerExistente.HorarioFin = taller.HorarioFin;
             tallerExistente.DiaSemana = taller.DiaSemana;
-            tallerExistente.FechaInicio = taller.FechaInicio;
-            tallerExistente.FechaFin = taller.FechaFin;
             tallerExistente.SedeId = taller.SedeId;
             tallerExistente.ActualizadoEn = DateTime.Now;
 
@@ -176,8 +173,6 @@ namespace ControlTalleresMVP.Services.Talleres
                     u.HorarioFin,
                     u.DiaSemana,
                     u.Nombre,
-                    u.FechaInicio,
-                    u.FechaFin,
                     u.SedeId,
                     SedeNombre = u.Sede.Nombre,
                     u.CreadoEn,
@@ -195,8 +190,6 @@ namespace ControlTalleresMVP.Services.Talleres
                 HorarioInicio = u.HorarioInicio,
                 HorarioFin = u.HorarioFin,
                 DiaSemana = ConvertirDiaSemanaASpanol(u.DiaSemana),
-                FechaInicio = u.FechaInicio,
-                FechaFin = u.FechaFin,
                 SedeId = u.SedeId,
                 NombreSede = u.SedeNombre,
                 CreadoEn = u.CreadoEn,
@@ -262,8 +255,6 @@ namespace ControlTalleresMVP.Services.Talleres
                 HorarioInicio = taller.HorarioInicio,
                 HorarioFin = taller.HorarioFin,
                 DiaSemana = ConvertirDiaSemanaASpanol(taller.DiaSemana),
-                FechaInicio = taller.FechaInicio,
-                FechaFin = taller.FechaFin,
                 SedeId = taller.SedeId,
                 NombreSede = taller.Sede?.Nombre ?? string.Empty,
                 CreadoEn = taller.CreadoEn,
@@ -278,8 +269,6 @@ namespace ControlTalleresMVP.Services.Talleres
             destino.HorarioInicio = origen.HorarioInicio;
             destino.HorarioFin = origen.HorarioFin;
             destino.DiaSemana = ConvertirDiaSemanaASpanol(origen.DiaSemana);
-            destino.FechaInicio = origen.FechaInicio;
-            destino.FechaFin = origen.FechaFin;
             destino.SedeId = origen.SedeId;
             destino.NombreSede = origen.Sede?.Nombre ?? string.Empty;
             destino.Eliminado = origen.Eliminado;

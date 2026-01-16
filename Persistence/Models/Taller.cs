@@ -7,8 +7,6 @@
         public TimeSpan HorarioInicio { get; set; }
         public TimeSpan HorarioFin { get; set; }
         public DayOfWeek DiaSemana { get; set; }
-        public DateTime FechaInicio { get; set; }
-        public DateTime? FechaFin { get; set; }
         public int SedeId { get; set; }
         public DateTime CreadoEn { get; set; }
         public DateTime ActualizadoEn { get; set; }

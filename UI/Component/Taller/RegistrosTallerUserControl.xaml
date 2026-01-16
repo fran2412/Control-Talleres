@@ -76,8 +76,6 @@
                         <DataGridTextColumn Header="Día de clase" Binding="{Binding DiaSemana, Converter={StaticResource DiaSemanaToTextoConverter}}" Width="120"/>
                         <DataGridTextColumn Header="Horario de inicio" Binding="{Binding HorarioInicio, Converter={StaticResource TimeSpanConverter}}" Width="120"/>
                         <DataGridTextColumn Header="Horario de fin" Binding="{Binding HorarioFin, Converter={StaticResource TimeSpanConverter}}" Width="120"/>
-                        <DataGridTextColumn Header="Fecha de inicio" Binding="{Binding FechaInicio, StringFormat=dd/MM/yyyy}" Width="120"/>
-                        <DataGridTextColumn Header="Fecha de fin" Binding="{Binding FechaFin, Converter={StaticResource NullableDateTimeConverter}}" Width="120"/>
                         <DataGridTextColumn Header="Fecha de alta" Binding="{Binding CreadoEn, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                     </DataGrid.Columns>
                 </DataGrid>

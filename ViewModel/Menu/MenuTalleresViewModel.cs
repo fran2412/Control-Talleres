@@ -29,12 +29,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty]
         private DayOfWeek diaSemanaSeleccionado = DayOfWeek.Monday;
 
-        [ObservableProperty]
-        private DateTime fechaInicio = DateTime.Today;
-
-        [ObservableProperty]
-        private DateTime? fechaFin;
-
         private readonly ISesionService _sesionService;
 
         public MenuTalleresViewModel(ITallerService itemService, ISesionService sesionService, IDialogService dialogService)
@@ -56,17 +50,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
                 return;
             }
 
-
-
             if (HorarioFin <= HorarioInicio)
             {
                 _dialogService.Alerta("El horario de fin debe ser posterior al horario de inicio");
-                return;
-            }
-
-            if (FechaFin.HasValue && FechaFin.Value < FechaInicio)
-            {
-                _dialogService.Alerta("La fecha de fin no puede ser anterior a la fecha de inicio");
                 return;
             }
 
@@ -84,8 +70,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     HorarioInicio = HorarioInicio,
                     HorarioFin = HorarioFin,
                     DiaSemana = DiaSemanaSeleccionado,
-                    FechaInicio = FechaInicio,
-                    FechaFin = FechaFin,
                     SedeId = _sesionService.ObtenerIdSede()
                 });
 
@@ -109,9 +93,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
             CampoTextoNombre = "";
             HorarioInicio = new TimeSpan(9, 0, 0);
             HorarioFin = new TimeSpan(11, 0, 0);
-            DiaSemanaSeleccionado = DayOfWeek.Monday; // ← NUEVO (reset)
-            FechaInicio = DateTime.Today;
-            FechaFin = null;
+            DiaSemanaSeleccionado = DayOfWeek.Monday;
         }
 
         public override bool Filtro(object o)
