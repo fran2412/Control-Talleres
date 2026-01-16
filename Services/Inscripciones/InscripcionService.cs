@@ -338,9 +338,14 @@ namespace ControlTalleresMVP.Services.Inscripciones
 
         public async Task<Inscripcion[]> ObtenerInscripcionesAlumnoAsync(int alumnoId, CancellationToken ct = default)
         {
+            var generacionActual = _generacionService.ObtenerGeneracionActual();
+            if (generacionActual == null)
+                return Array.Empty<Inscripcion>();
+
             return await _escuelaContext.Inscripciones
-                .Include(i => i.Taller) // 🔹 Importante para que ya venga cargado
+                .Include(i => i.Taller)
                 .Where(i => i.AlumnoId == alumnoId
+                         && i.GeneracionId == generacionActual.GeneracionId
                          && !i.Eliminado
                          && i.Estado != EstadoInscripcion.Cancelada)
                 .ToArrayAsync(ct);
