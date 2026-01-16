@@ -3,6 +3,7 @@ using ControlTalleresMVP.ViewModel.Navigation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Input;
+using System.Linq;
 using System.Windows.Threading;
 
 namespace ControlTalleresMVP.UI.Windows
@@ -61,6 +62,17 @@ namespace ControlTalleresMVP.UI.Windows
             try
             {
                 _timerInactividad?.Stop();
+
+                // Cerrar todas las ventanas secundarias antes de volver al login
+                var ventanasACerrar = Application.Current.Windows
+                    .Cast<Window>()
+                    .Where(w => w != this && w is not MainWindow)
+                    .ToList();
+
+                foreach (var ventana in ventanasACerrar)
+                {
+                    ventana.Close();
+                }
 
                 var ventanaLogin = App.ServiceProvider!.GetRequiredService<MainWindow>();
 
