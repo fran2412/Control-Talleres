@@ -91,7 +91,6 @@ namespace ControlTalleresMVP.Services.Alumnos
 
             existente.Nombre = (alumno.Nombre ?? "").Trim();
             existente.Telefono = alumno.Telefono;
-            existente.SedeId = alumno.SedeId == 0 ? null : alumno.SedeId;
             existente.PromotorId = alumno.PromotorId == 0 ? null : alumno.PromotorId;
             existente.DescuentoPorClase = alumno.DescuentoPorClase;
             existente.ActualizadoEn = DateTime.Now;

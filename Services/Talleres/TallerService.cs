@@ -125,7 +125,6 @@ namespace ControlTalleresMVP.Services.Talleres
             tallerExistente.HorarioInicio = taller.HorarioInicio;
             tallerExistente.HorarioFin = taller.HorarioFin;
             tallerExistente.DiaSemana = taller.DiaSemana;
-            tallerExistente.SedeId = taller.SedeId;
             tallerExistente.ActualizadoEn = DateTime.Now;
 
             try
@@ -138,7 +137,11 @@ namespace ControlTalleresMVP.Services.Talleres
                 var registro = RegistrosTalleres.FirstOrDefault(r => r.Id == tallerExistente.TallerId);
                 if (registro != null)
                 {
-                    ActualizarDto(registro, tallerExistente);
+                    var index = RegistrosTalleres.IndexOf(registro);
+                    if (index >= 0)
+                    {
+                        RegistrosTalleres[index] = CrearDtoDesdeTaller(tallerExistente);
+                    }
                 }
             }
             catch (Exception ex)
@@ -261,18 +264,6 @@ namespace ControlTalleresMVP.Services.Talleres
                 Eliminado = taller.Eliminado,
                 EliminadoEn = taller.EliminadoEn
             };
-        }
-
-        private static void ActualizarDto(TallerDTO destino, Taller origen)
-        {
-            destino.Nombre = origen.Nombre;
-            destino.HorarioInicio = origen.HorarioInicio;
-            destino.HorarioFin = origen.HorarioFin;
-            destino.DiaSemana = ConvertirDiaSemanaASpanol(origen.DiaSemana);
-            destino.SedeId = origen.SedeId;
-            destino.NombreSede = origen.Sede?.Nombre ?? string.Empty;
-            destino.Eliminado = origen.Eliminado;
-            destino.EliminadoEn = origen.EliminadoEn;
         }
 
         private void InsertarOrdenado(TallerDTO nuevo)
