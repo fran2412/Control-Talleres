@@ -95,7 +95,7 @@ namespace ControlTalleresMVP.UI.Windows.FormContainer
             return cantidad switch
             {
                 < 3 => MostrarErrorNombre("El nombre debe contener al menos un nombre y dos apellidos (3 palabras).", textBox, dialogService),
-                > 4 => MostrarErrorNombre("El nombre no puede tener más de dos nombres y dos apellidos (4 palabras).", textBox, dialogService),
+                > 6 => MostrarErrorNombre("El nombre no puede tener más de 6 palabras.", textBox, dialogService),
                 _ => true
             };
         }

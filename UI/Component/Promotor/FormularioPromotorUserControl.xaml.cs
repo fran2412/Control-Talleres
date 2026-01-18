@@ -55,10 +55,10 @@ namespace ControlTalleresMVP.UI.Component.Promotor
                 return;
             }
 
-            if (palabras.Length > 4)
+            if (palabras.Length > 6)
             {
                 MessageBox.Show(
-                    "El nombre no puede tener más de dos nombres y dos apellidos (4 palabras).",
+                    "El nombre no puede tener más de 6 palabras.",
                     "Validación",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning
