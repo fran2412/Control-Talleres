@@ -24,10 +24,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private int? alumnoSeleccionadoId;
         [ObservableProperty] private string? alumnoNombre;
 
-        [ObservableProperty] private DateTime? fechaDesdeRegistros;
-        [ObservableProperty] private DateTime? fechaHastaRegistros;
-        [ObservableProperty] private DateTime? fechaFiltroDia = DateTime.Today;
-        [ObservableProperty] private bool filtrarPorDiaEspecifico;
+        [ObservableProperty] private DateTime fechaFiltro = DateTime.Today;
 
         private string _filtroRegistrosClases = string.Empty;
         public string FiltroRegistrosClases
@@ -41,57 +38,27 @@ namespace ControlTalleresMVP.ViewModel.Menu
         [ObservableProperty] private decimal totalSaldoClases;
         [ObservableProperty] private decimal totalIngresoReal;
 
-        // Título dinámico para la columna y el total
-        public string TituloIngreso => FiltrarPorDiaEspecifico ? "Ingreso del día" : "Ingreso del periodo";
+        public string TituloIngreso => "Ingreso del día";
 
         private CancellationTokenSource? _ctsCarga;
 
-        partial void OnFechaDesdeRegistrosChanged(DateTime? value)
+        partial void OnFechaFiltroChanged(DateTime value)
         {
-            // Evitar disparar la carga si estamos en medio de una sincronización por día específico
-            if (FiltrarPorDiaEspecifico && FechaFiltroDia.HasValue && value != FechaFiltroDia.Value) return;
-
-            NormalizarRangoFechas();
+            // Notify ResumenAsistenciaDia about the date change
+            WeakReferenceMessenger.Default.Send(new FechaClasesSeleccionadaCambiadaMessage(value));
             SolicitarCarga();
-        }
-
-        partial void OnFechaHastaRegistrosChanged(DateTime? value)
-        {
-            if (FiltrarPorDiaEspecifico && FechaFiltroDia.HasValue && value != FechaFiltroDia.Value) return;
-
-            NormalizarRangoFechas();
-            SolicitarCarga();
-        }
-
-        partial void OnFechaFiltroDiaChanged(DateTime? value)
-        {
-            if (FiltrarPorDiaEspecifico)
-                SincronizarRangoConDia();
-        }
-
-        partial void OnFiltrarPorDiaEspecificoChanged(bool value)
-        {
-            OnPropertyChanged(nameof(PuedeEditarRangoFechas));
-            OnPropertyChanged(nameof(PuedeEditarDia));
-            OnPropertyChanged(nameof(TituloIngreso)); // Notificar cambio de título
-
-            if (value)
-                SincronizarRangoConDia();
         }
 
         private void SolicitarCarga()
         {
-            // Cancelar carga anterior si existe
             _ctsCarga?.Cancel();
             _ctsCarga = new CancellationTokenSource();
             var token = _ctsCarga.Token;
 
-            // Ejecutar carga segura
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    // Pequeño delay para "debounce" si hay cambios rápidos
                     await Task.Delay(100, token);
                     if (token.IsCancellationRequested) return;
 
@@ -104,20 +71,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }, token);
         }
 
-        private void NormalizarRangoFechas()
-        {
-            // Solo normalizar si NO estamos en modo día específico (para evitar loops raros)
-            if (FiltrarPorDiaEspecifico) return;
-
-            if (FechaDesdeRegistros.HasValue && FechaHastaRegistros.HasValue &&
-                FechaDesdeRegistros.Value.Date > FechaHastaRegistros.Value.Date)
-            {
-                var tmp = FechaDesdeRegistros;
-                FechaDesdeRegistros = FechaHastaRegistros;
-                FechaHastaRegistros = tmp;
-            }
-        }
-
         public MenuClaseRegistrosViewModel(
             IClaseService claseService,
             IAlumnoPickerService alumnoPicker,
@@ -127,17 +80,13 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _alumnoPicker = alumnoPicker;
             _dialogService = dialogService;
 
-            // Inicializar comando
             CancelarClaseAsyncCommand = new AsyncRelayCommand<int>(CancelarClaseAsync);
-
-            FechaHastaRegistros = DateTime.Today.AddDays(7);
-            FechaDesdeRegistros = DateTime.Today.AddMonths(-1);
 
             RegistrosClasesView = CollectionViewSource.GetDefaultView(RegistrosClases);
             RegistrosClasesView.Filter = FiltroRegistrosPredicate;
             RegistrosClasesView.CurrentChanged += (_, __) => RecalcularTotales();
 
-            // Suscríbete a los cambios de cobro
+            // Listen for class payment updates
             WeakReferenceMessenger.Default.Register<ClasesActualizadasMessage>(this, async (_, m) =>
             {
                 if (alumnoSeleccionadoId is null || alumnoSeleccionadoId == m.AlumnoId)
@@ -152,11 +101,12 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             try
             {
+                var fecha = FechaFiltro.Date;
                 var datos = await _claseService.ObtenerClasesFinancierasAsync(
                     alumnoId: AlumnoSeleccionadoId,
                     tallerId: null,
-                    desde: FechaDesdeRegistros,
-                    hasta: FechaHastaRegistros,
+                    desde: fecha,
+                    hasta: fecha,
                     ct: ct);
 
                 RegistrosClases.Clear();
@@ -172,12 +122,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public IAsyncRelayCommand<int> CancelarClaseAsyncCommand { get; }
 
-        public bool PuedeEditarRangoFechas => !FiltrarPorDiaEspecifico;
-        public bool PuedeEditarDia => FiltrarPorDiaEspecifico;
-
         private async Task CancelarClaseAsync(int claseId)
         {
-
             if (!_dialogService.Confirmar("¿Seguro que deseas cancelar esta clase?"))
             {
                 return;
@@ -195,32 +141,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
             }
         }
 
-        private void SincronizarRangoConDia()
-        {
-            if (!FechaFiltroDia.HasValue) return;
-
-            var fecha = FechaFiltroDia.Value.Date;
-            bool cambiado = false;
-
-            if (FechaDesdeRegistros != fecha)
-            {
-                // Actualizamos el campo backing field directamente para evitar disparadores en cadena si es posible,
-                // o simplemente controlamos la lógica en el setter. 
-                // Aquí usaremos SetProperty normal pero el debounce/cancelación manejará la carga.
-                FechaDesdeRegistros = fecha;
-                cambiado = true;
-            }
-
-            if (FechaHastaRegistros != fecha)
-            {
-                FechaHastaRegistros = fecha;
-                cambiado = true;
-            }
-
-            // Si no hubo cambios (ya estaba en la fecha), forzamos recarga por si acaso el usuario re-seleccionó
-            if (!cambiado) SolicitarCarga();
-        }
-
         private bool FiltroRegistrosPredicate(object o)
         {
             if (o is not ClaseFinancieraDTO dto) return false;
@@ -233,10 +153,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     || dto.EstadoTexto.Contains(f, StringComparison.OrdinalIgnoreCase)))
                     return false;
             }
-
-            // El filtrado por fecha ya se realiza en el servicio (Servidor)
-            // con la lógica de "Clase en fecha" O "Pago en fecha".
-            // No filtramos aquí para no ocultar resultados válidos.
 
             if (AlumnoSeleccionadoId.HasValue && dto.AlumnoId != AlumnoSeleccionadoId.Value) return false;
 

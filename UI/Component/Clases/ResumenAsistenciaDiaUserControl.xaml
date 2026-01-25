@@ -21,13 +21,11 @@
 
                 <!-- Encabezado -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
-                    <TextBlock Text="Resumen del día" 
+                    <TextBlock Text="Resumen del día - " 
                                FontSize="18" FontFamily="Inter 28pt 28pt ExtraBold"
                                Foreground="#3E3E3E" VerticalAlignment="Center"/>
-                    <DatePicker SelectedDate="{Binding FechaResumen, Mode=TwoWay}"
-                                Margin="12,0,12,0" VerticalAlignment="Center" Width="150"/>
                     <TextBlock Text="{Binding FechaTexto}" 
-                               FontSize="16" FontFamily="Inter 28pt 28pt SemiBold"
+                               FontSize="18" FontFamily="Inter 28pt 28pt SemiBold"
                                Foreground="#6B7280" VerticalAlignment="Center"/>
                 </StackPanel>
 

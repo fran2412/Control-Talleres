@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using ControlTalleresMVP.Messages;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Services.Clases;
 using System.Collections.ObjectModel;
@@ -14,6 +16,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
         {
             _claseService = claseService;
             FechaResumen = DateTime.Today;
+
+            // Listen for date changes from RegistrosClasesUserControl
+            WeakReferenceMessenger.Default.Register<FechaClasesSeleccionadaCambiadaMessage>(this, (_, m) =>
+            {
+                if (FechaResumen.Date != m.Fecha.Date)
+                {
+                    FechaResumen = m.Fecha.Date;
+                }
+            });
+
             _ = CargarResumenAsync();
         }
 
