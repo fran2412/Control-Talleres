@@ -1143,5 +1143,79 @@ namespace ControlTalleresMVP.Services.Clases
             }
         }
 
+        public async Task<List<ResumenAsistenciaTallerDTO>> ObtenerResumenAsistenciaDiaAsync(
+            DateTime fecha,
+            CancellationToken ct = default)
+        {
+            var sedeId = _sesionService.ObtenerIdSede();
+            var diaSemana = fecha.DayOfWeek;
+            var fechaDate = fecha.Date;
+
+            // Obtener generación actual
+            var generacionActual = await _escuelaContext.Generaciones
+                .AsNoTracking()
+                .Where(g => g.SedeId == sedeId
+                            && !g.Eliminado
+                            && g.FechaInicio <= fechaDate
+                            && (g.FechaFin == null || g.FechaFin >= fechaDate))
+                .FirstOrDefaultAsync(ct);
+
+            if (generacionActual == null)
+            {
+                return new List<ResumenAsistenciaTallerDTO>();
+            }
+
+            // Obtener talleres que tienen clase ese día de la semana
+            var talleres = await _escuelaContext.Talleres
+                .AsNoTracking()
+                .Where(t => t.SedeId == sedeId
+                            && !t.Eliminado
+                            && t.DiaSemana == diaSemana)
+                .Select(t => new
+                {
+                    t.TallerId,
+                    t.Nombre,
+                    t.DiaSemana
+                })
+                .ToListAsync(ct);
+
+            var resultado = new List<ResumenAsistenciaTallerDTO>();
+
+            foreach (var taller in talleres)
+            {
+                // Contar alumnos inscritos activos en este taller para la generación actual
+                var alumnosInscritos = await _escuelaContext.Inscripciones
+                    .AsNoTracking()
+                    .CountAsync(i => i.TallerId == taller.TallerId
+                                     && i.GeneracionId == generacionActual.GeneracionId
+                                     && !i.Eliminado
+                                     && i.Estado != EstadoInscripcion.Cancelada, ct);
+
+                // Contar alumnos que tienen cargo de clase para esta fecha específica
+                // (esto indica que "asistieron" porque se les cobró la clase)
+                var alumnosAsistentes = await _escuelaContext.Cargos
+                    .AsNoTracking()
+                    .Where(c => c.ClaseId != null
+                                && c.Clase!.TallerId == taller.TallerId
+                                && c.Clase.Fecha.Date == fechaDate
+                                && !c.Eliminado
+                                && c.Estado != EstadoCargo.Anulado)
+                    .Select(c => c.AlumnoId)
+                    .Distinct()
+                    .CountAsync(ct);
+
+                resultado.Add(new ResumenAsistenciaTallerDTO
+                {
+                    TallerId = taller.TallerId,
+                    TallerNombre = taller.Nombre,
+                    DiaSemana = ConvertirDiaSemanaASpanol(taller.DiaSemana),
+                    AlumnosInscritos = alumnosInscritos,
+                    AlumnosAsistentes = alumnosAsistentes
+                });
+            }
+
+            return resultado.OrderBy(r => r.TallerNombre).ToList();
+        }
+
     }
 }

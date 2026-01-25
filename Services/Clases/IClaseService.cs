@@ -36,5 +36,9 @@ namespace ControlTalleresMVP.Services.Clases
             int? alumnoId = null,
             int? generacionId = null,
             CancellationToken ct = default);
+
+        Task<List<ResumenAsistenciaTallerDTO>> ObtenerResumenAsistenciaDiaAsync(
+            DateTime fecha,
+            CancellationToken ct = default);
     }
 }

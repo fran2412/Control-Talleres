@@ -8,11 +8,16 @@ namespace ControlTalleresMVP.ViewModel.Menu
 
         public MenuClaseCobroViewModel MenuClaseCobroVM { get; }
         public MenuClaseRegistrosViewModel MenuClaseRegistrosVM { get; }
+        public ResumenAsistenciaDiaViewModel ResumenAsistenciaVM { get; }
 
-        public MenuClaseUserControl(MenuClaseCobroViewModel cobro, MenuClaseRegistrosViewModel registro)
+        public MenuClaseUserControl(
+            MenuClaseCobroViewModel cobro,
+            MenuClaseRegistrosViewModel registro,
+            ResumenAsistenciaDiaViewModel resumenAsistencia)
         {
             MenuClaseCobroVM = cobro;
             MenuClaseRegistrosVM = registro;
+            ResumenAsistenciaVM = resumenAsistencia;
         }
     }
 }
