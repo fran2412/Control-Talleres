@@ -323,9 +323,6 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     })
                     .ToList();
 
-                bool hayPendientes = clasesConSaldo.Any(c => c.SaldoPendiente > 0m && c.Fecha <= hoy);
-                bool permitirFuturas = !hayPendientes;
-
                 var agregadas = new HashSet<DateTime>();
 
                 // 1) PENDIENTES VENCIDAS O DE HOY (con cargo y saldo, fecha <= hoy) -> habilitadas y seleccionadas
@@ -348,9 +345,7 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     AgregarClase(item, seleccionar: true);
                 }
 
-                // 2) FUTURAS CON SALDO (fecha > hoy)
-                //    Si hay pendientes: NO se pueden ingresar (deshabilitadas y no seleccionadas).
-                //    Si no hay pendientes: habilitadas y seleccionadas.
+                // 2) FUTURAS CON SALDO (fecha > hoy) -> habilitadas pero no seleccionadas por defecto
                 foreach (var clase in clasesConSaldo.Where(c => c.Fecha > hoy))
                 {
                     var fecha = clase.Fecha;
@@ -362,8 +357,8 @@ namespace ControlTalleresMVP.ViewModel.Menu
                         continue;
                     }
 
-                    var habilitada = permitirFuturas;      // false si hay pendientes
-                    var seleccionada = permitirFuturas;    // false si hay pendientes
+                    var habilitada = true;
+                    var seleccionada = false;  // No seleccionadas por defecto
 
                     var item = new ClasePagoItem(
                         fecha,
@@ -402,17 +397,15 @@ namespace ControlTalleresMVP.ViewModel.Menu
                     }
                 }
 
-                // 4) FUTURAS ESPERADAS SIN CARGO
-                //    Si hay pendientes: NO se pueden ingresar (deshabilitadas, no seleccionadas).
-                //    Si no hay pendientes: habilitadas y seleccionadas.
+                // 4) FUTURAS ESPERADAS SIN CARGO -> habilitadas pero no seleccionadas por defecto
                 var futurasEsperadas = await GenerarClasesFuturasAsync();
                 foreach (var fecha in futurasEsperadas)
                 {
                     if (agregadas.Contains(fecha)) continue;
                     if (fechasConCargo.Contains(fecha)) continue;
 
-                    var habilitada = permitirFuturas;      // false si hay pendientes
-                    var seleccionada = permitirFuturas;    // false si hay pendientes
+                    var habilitada = true;
+                    var seleccionada = false;  // No seleccionadas por defecto
 
                     var item = new ClasePagoItem(
                         fecha,
