@@ -74,7 +74,7 @@
                                                      Minimum="0" 
                                                      Maximum="{Binding AlumnosInscritos}"
                                                      Value="{Binding AlumnosAsistentes}"
-                                                     Background="#E5E7EB" Foreground="#10B981"
+                                                     Background="#E5E7EB" Foreground="#FF333333"
                                                      BorderThickness="0">
                                             <ProgressBar.Style>
                                                 <Style TargetType="ProgressBar">
