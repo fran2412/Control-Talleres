@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using ControlTalleresMVP.Messages;
 using ControlTalleresMVP.Helpers.Dialogs;
 using ControlTalleresMVP.Persistence.ModelDTO;
 using ControlTalleresMVP.Persistence.Models;
@@ -154,6 +156,9 @@ namespace ControlTalleresMVP.ViewModel.Menu
             {
                 var pagoId = await _pagoService.GuardarPagoAsync(captura);
                 _dialog.Info($"Pago #{pagoId} guardado correctamente.");
+
+                WeakReferenceMessenger.Default.Send(new ClasesActualizadasMessage(AlumnoId));
+
                 LimpiarDistribucion();
 
                 var cargos = await _cargosService.ObtenerCargosPendientesActualesAsync(AlumnoId);

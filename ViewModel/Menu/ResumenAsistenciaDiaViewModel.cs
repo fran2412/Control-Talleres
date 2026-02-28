@@ -17,13 +17,17 @@ namespace ControlTalleresMVP.ViewModel.Menu
             _claseService = claseService;
             FechaResumen = DateTime.Today;
 
-            // Listen for date changes from RegistrosClasesUserControl
             WeakReferenceMessenger.Default.Register<FechaClasesSeleccionadaCambiadaMessage>(this, (_, m) =>
             {
                 if (FechaResumen.Date != m.Fecha.Date)
                 {
                     FechaResumen = m.Fecha.Date;
                 }
+            });
+
+            WeakReferenceMessenger.Default.Register<ClasesActualizadasMessage>(this, (_, m) =>
+            {
+                _ = CargarResumenAsync();
             });
 
             _ = CargarResumenAsync();
