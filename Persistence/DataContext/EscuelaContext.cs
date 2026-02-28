@@ -319,12 +319,9 @@ namespace ControlTalleresMVP.Persistence.DataContext
                 entity.Property(c => c.Valor).HasColumnName("valor");
                 entity.Property(c => c.Descripcion).HasColumnName("descripcion");
 
-                entity.Property(c => c.SedeId).HasColumnName("id_sede").HasDefaultValue(1);
 
-                entity.HasOne(c => c.Sede)
-                      .WithMany(s => s.Configuraciones)
-                      .HasForeignKey(c => c.SedeId)
-                      .OnDelete(DeleteBehavior.Restrict);
+
+
             });
 
             // ====================

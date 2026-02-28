@@ -6,7 +6,5 @@
         public string Valor { get; set; } = null!;
         public string? Descripcion { get; set; }
 
-        public int SedeId { get; set; }
-        public virtual Sede Sede { get; set; } = null!;
     }
 }

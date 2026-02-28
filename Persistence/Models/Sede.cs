@@ -18,7 +18,6 @@
         public ICollection<Taller> Talleres { get; set; } = new List<Taller>();
 
         public ICollection<Generacion> Generaciones { get; set; } = new List<Generacion>();
-        public ICollection<Configuracion> Configuraciones { get; set; } = new List<Configuracion>();
         public ICollection<ConfiguracionSede> ConfiguracionesSede { get; set; } = new List<ConfiguracionSede>();
     }
 }
